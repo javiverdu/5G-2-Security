@@ -1,69 +1,50 @@
-# Prerequisites
-*.d
+# ============================================
+# 5G-project-RTU - .gitignore
+# Project: Bash scripts + Docker + Python analysis
+# ============================================
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+# ---------- Captures & results (large/binary artifacts) ----------
+# Raw packet captures are big: keep them out of Git, document them in docs/
+*.pcap
+*.pcapng
+*.cap
+captures/
+results/raw/
 
-# Precompiled Headers
-*.gch
-*.pch
-
-# Linker files
-*.ilk
-
-# Debugger Files
-*.pdb
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-*.so.*
-
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-# Build directories
-build/
-Build/
-build-*/
-
-# CMake generated files
-CMakeFiles/
-CMakeCache.txt
-cmake_install.cmake
-Makefile
-install_manifest.txt
-compile_commands.json
-
-# Temporary files
-*.tmp
+# ---------- Logs & temporary files ----------
 *.log
+*.tmp
 *.bak
 *.swp
+*~
+.DS_Store
+Thumbs.db
 
-# vcpkg
-vcpkg_installed/
+# ---------- Python (analysis / plotting) ----------
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-# debug information files
-*.dwo
+# Virtual environments
+.venv/
+venv/
+env/
 
-# test output & cache
-Testing/
-.cache/
+# ---------- Editors / IDEs ----------
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ---------- OS / VM artifacts ----------
+*.vdi
+*.vmdk
+*.iso
+
+# ---------- Docker local overrides ----------
+docker-compose.override.yml
+.env
