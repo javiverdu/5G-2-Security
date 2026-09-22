@@ -1,0 +1,11 @@
+# docker network inspect datanet (summary)
+Name: datanet | Driver: bridge | Subnet: 10.0.4.0/24 | Gateway: 10.0.4.1
+
+# docker ps
+NAMES        IMAGE                         STATUS          PORTS
+iperf3-srv   networkstatic/iperf3:latest   Up 40 seconds   5201/tcp
+nginx-app    nginx:latest                  Up 40 seconds   80/tcp
+
+# container addresses
+nginx-app  -> 10.0.4.10
+iperf3-srv -> 10.0.4.20

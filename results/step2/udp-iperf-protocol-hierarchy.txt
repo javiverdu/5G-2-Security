@@ -1,0 +1,16 @@
+# Protocol hierarchy at P1 (ue:eth0) — scenario: udp-iperf
+
+
+===================================================================
+Protocol Hierarchy Statistics
+Filter: 
+
+frame                                    frames:463 bytes:646524
+  eth                                    frames:463 bytes:646524
+    ip                                   frames:463 bytes:646524
+      tcp                                frames:29 bytes:2752
+        iperf3                           frames:15 bytes:1812
+      udp                                frames:434 bytes:643772
+        iperf3                           frames:434 bytes:643772
+          data                           frames:432 bytes:643680
+===================================================================

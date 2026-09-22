@@ -1,0 +1,14 @@
+# Protocol hierarchy at P1 (ue:eth0) — scenario: tcp-iperf
+
+
+===================================================================
+Protocol Hierarchy Statistics
+Filter: 
+
+frame                                    frames:164 bytes:2633170
+  eth                                    frames:164 bytes:2633170
+    ip                                   frames:164 bytes:2633170
+      tcp                                frames:164 bytes:2633170
+        iperf3                           frames:81 bytes:2627660
+          data                           frames:65 bytes:2625730
+===================================================================

@@ -1,0 +1,17 @@
+[1;34m-----][0m Namespaces exist
+[1;32m[ OK ][0m namespace ue
+[1;32m[ OK ][0m namespace access
+[1;32m[ OK ][0m namespace core
+[1;34m-----][0m Link-layer reachability (hop by hop from ue)
+[1;32m[ OK ][0m ue -> access (10.0.1.1)
+[1;32m[ OK ][0m ue -> core (10.0.2.2)
+[1;32m[ OK ][0m ue -> host (10.0.3.2)
+[1;34m-----][0m Data Network reachability
+[1;32m[ OK ][0m ue -> nginx-app (10.0.4.10)
+[1;32m[ OK ][0m ue -> iperf3-srv (10.0.4.20)
+[1;34m-----][0m Application test: HTTP via nginx
+[1;32m[ OK ][0m curl http://10.0.4.10 -> HTTP 200
+[1;34m-----][0m Measurement endpoint: iperf3 TCP (2 s)
+[1;32m[ OK ][0m iperf3 TCP test completed
+
+[1;32m[ OK ][0m All checks passed — end-to-end path is operational.

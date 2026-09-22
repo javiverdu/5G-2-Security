@@ -1,0 +1,12 @@
+# Protocol hierarchy at P1 (ue:eth0) — scenario: icmp
+
+
+===================================================================
+Protocol Hierarchy Statistics
+Filter: 
+
+frame                                    frames:10 bytes:1420
+  eth                                    frames:10 bytes:1420
+    ip                                   frames:10 bytes:1420
+      icmp                               frames:10 bytes:1420
+===================================================================

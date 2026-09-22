@@ -1,0 +1,11 @@
+# ping report (ue -> 10.0.4.10, -c 5 -s 100)
+PING 10.0.4.10 (10.0.4.10) 100(128) bytes of data.
+108 bytes from 10.0.4.10: icmp_seq=1 ttl=61 time=0.067 ms
+108 bytes from 10.0.4.10: icmp_seq=2 ttl=61 time=0.070 ms
+108 bytes from 10.0.4.10: icmp_seq=3 ttl=61 time=0.072 ms
+108 bytes from 10.0.4.10: icmp_seq=4 ttl=61 time=0.073 ms
+108 bytes from 10.0.4.10: icmp_seq=5 ttl=61 time=0.081 ms
+
+--- 10.0.4.10 ping statistics ---
+5 packets transmitted, 5 received, 0% packet loss, time 4163ms
+rtt min/avg/max/mdev = 0.067/0.072/0.081/0.004 ms

@@ -20,6 +20,11 @@ results/raw/
 .DS_Store
 Thumbs.db
 
+# ---------- Office lock/temp files ----------
+.~lock.*#
+~$*.doc?
+~$*.xls?
+
 # ---------- Python (analysis / plotting) ----------
 __pycache__/
 *.py[cod]

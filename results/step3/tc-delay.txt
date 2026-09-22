@@ -1,0 +1,6 @@
+[impair] access: delay 50ms +/-10ms on eth0 eth1
+[impair] resulting qdisc state:
+--- access:eth0 ---
+qdisc netem 8002: root refcnt 3 limit 1000 delay 50ms  10ms seed 12345992286527383338
+--- access:eth1 ---
+qdisc netem 8003: root refcnt 3 limit 1000 delay 50ms  10ms seed 8668219187483692827

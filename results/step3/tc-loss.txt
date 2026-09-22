@@ -1,0 +1,6 @@
+[impair] access: 1% packet loss on eth0 eth1
+[impair] resulting qdisc state:
+--- access:eth0 ---
+qdisc netem 8004: root refcnt 3 limit 1000 loss 1% seed 9182346767967166109
+--- access:eth1 ---
+qdisc netem 8005: root refcnt 3 limit 1000 loss 1% seed 4874701967668117314

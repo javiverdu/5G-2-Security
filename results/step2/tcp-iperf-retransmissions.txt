@@ -1,0 +1,4 @@
+# TCP retransmissions observed at P1, P4 and P6 (iperf3 TCP)
+P1-ue            0
+P4-core-e1       0
+P6-iperf3-srv    0

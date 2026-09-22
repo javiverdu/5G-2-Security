@@ -1,0 +1,6 @@
+[impair] access: 20 Mbit/s limit on eth0 eth1
+[impair] resulting qdisc state:
+--- access:eth0 ---
+qdisc netem 8006: root refcnt 3 limit 1000 rate 20Mbit seed 10171342444495194387
+--- access:eth1 ---
+qdisc netem 8007: root refcnt 3 limit 1000 rate 20Mbit seed 4805911177695611191

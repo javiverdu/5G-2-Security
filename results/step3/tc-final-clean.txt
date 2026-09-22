@@ -1,0 +1,6 @@
+[impair] access: no impairment (baseline)
+[impair] resulting qdisc state:
+--- access:eth0 ---
+qdisc noqueue 0: root refcnt 2 
+--- access:eth1 ---
+qdisc noqueue 0: root refcnt 2 

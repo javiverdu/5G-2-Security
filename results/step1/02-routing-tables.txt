@@ -1,0 +1,24 @@
+# ip route (ue)
+default via 10.0.1.1 dev eth0 
+10.0.1.0/24 dev eth0 proto kernel scope link src 10.0.1.10 
+
+# ip route (access)
+10.0.1.0/24 dev eth0 proto kernel scope link src 10.0.1.1 
+10.0.2.0/24 dev eth1 proto kernel scope link src 10.0.2.1 
+10.0.3.0/24 via 10.0.2.2 dev eth1 
+10.0.4.0/24 via 10.0.2.2 dev eth1 
+
+# ip route (core)
+10.0.1.0/24 via 10.0.2.1 dev eth0 
+10.0.2.0/24 dev eth0 proto kernel scope link src 10.0.2.2 
+10.0.3.0/24 dev eth1 proto kernel scope link src 10.0.3.1 
+10.0.4.0/24 via 10.0.3.2 dev eth1 
+
+# ip route (host)
+default via 10.0.2.2 dev enp0s3 proto dhcp src 10.0.2.15 metric 101 
+10.0.1.0/24 via 10.0.3.1 dev veth-hn 
+10.0.2.0/24 dev enp0s3 proto kernel scope link src 10.0.2.15 metric 101 
+10.0.3.0/24 dev veth-hn proto kernel scope link src 10.0.3.2 
+10.0.4.0/24 dev br-85821ebb54dd proto kernel scope link src 10.0.4.1 
+172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 linkdown 
+192.168.56.0/24 dev enp0s8 proto kernel scope link src 192.168.56.104 metric 100 

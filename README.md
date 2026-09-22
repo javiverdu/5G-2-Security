@@ -14,6 +14,7 @@ The project follows the engineering workflow:
 ## Table of Contents
 
 - [Overview](#overview)
+- [Project Status & Traceability](#project-status--traceability)
 - [Reference Architecture](#reference-architecture)
 - [Technology Stack](#technology-stack)
 - [Repository Structure](#repository-structure)
@@ -44,6 +45,30 @@ The baseline implementation runs on a **single Linux virtual machine**:
 - The **Linux host** provides the integration boundary between the namespace-based network and the containerized services.
 
 This **Hybrid Linux + Docker** architecture preserves the original communication path while introducing a realistic software-deployment mechanism: Linux network infrastructure + containerized network/application functions — without hiding the underlying Linux networking concepts.
+
+## Project Status & Traceability
+
+Overall progress of the project steps and where the supporting evidence lives.
+
+| Step | Description | Status | Evidence |
+|---|---|---|---|
+| 0 | Repository scaffold, addressing plan, deploy/verify/teardown scripts | ✅ Done | `docs/addressing-plan.md`, `scripts/` |
+| 1 | Network deployment and end-to-end operation | ✅ Done | `docs/step1-network-deployment.md`, `results/step1/` |
+| 2 | Traffic observation and protocol behavior | ✅ Done | `docs/step2-traffic-observation.md`, `results/step2/`, `captures/step2/` |
+| 3 | Performance measurement and network degradation | ✅ Done | `docs/step3-performance-measurement.md`, `results/step3/` |
+
+### Activity log
+
+| Date | Activity | Outcome / Evidence |
+|---|---|---|
+| 2026-09-21 | Repository scaffold created (`docs/`, `scripts/`, `captures/`, `results/`) | Done |
+| 2026-09-21 | IP addressing & topology plan defined (10.0.1–10.0.4.0/24 scheme, per reference diagram) | `docs/addressing-plan.md` |
+| 2026-09-21 | Deploy / verify / teardown scripts written | `scripts/deploy/`, `scripts/teardown/` |
+| 2026-09-21 | Step 1: topology deployed on the lab VM (`192.168.56.104`); Docker 29 hardened defaults diagnosed and fixed (`allow-direct-routing` in daemon.json + DOCKER-USER accept rule); end-to-end path verified (HTTP 200, iperf3 ≈ 36 Gbit/s) | `docs/step1-network-deployment.md`, `results/step1/` |
+| 2026-09-22 | Step 2: multi-point captures (P1–P6) for ICMP, TCP/HTTP, iperf3 TCP and UDP; tshark dissection (protocol hierarchy, flags/seq/ack, follow-stream, conversations, retransmissions); AppArmor tshark confinement diagnosed and worked around (`aa-exec -p unconfined`) | `docs/step2-traffic-observation.md`, `results/step2/`, `captures/step2/` |
+| 2026-09-22 | Step 3: baseline + 3 degraded conditions (delay 50ms±10ms, loss 1%, rate 20 Mbit/s) with NetEm on both access egress interfaces; full metric set ×3; comparative table + plot; quantitative interpretation | `docs/step3-performance-measurement.md`, `results/step3/` |
+
+> Log rule: every working session appends a dated row with the activity performed and a link to the produced evidence.
 
 ## Reference Architecture
 
@@ -94,6 +119,7 @@ Planned layout (evolves as the project advances):
 ├── docs/                    # Reports, topology diagrams, analysis Road
 ├── scripts/                 # Deployment, measurement and teardown scripts
 │   ├── deploy/              # Namespace + veth + Docker topology setup
+│   ├── observe/             # Multi-point capture and tshark analysis (Step 2)
 │   ├── measure/             # Baseline and impairment measurement runs
 │   └── teardown/            # Cleanup of namespaces, links and containers
 ├── captures/                # Packet captures (.pcap / .pcapng)
@@ -124,13 +150,16 @@ sudo apt install -y iproute2 iputils-ping iperf3 tcpdump tshark curl python3 pyt
 git clone <repository-url>
 cd 5G-project-RTU
 
-# (Planned) Deploy the full topology
+# Deploy the full topology
 sudo ./scripts/deploy/setup.sh
 
-# (Planned) Verify end-to-end connectivity
+# Verify end-to-end connectivity
+sudo ./scripts/deploy/verify.sh
+
+# (Planned) Run baseline measurements
 ./scripts/measure/baseline.sh
 
-# (Planned) Remove all namespaces, links and containers
+# Remove all namespaces, links and containers
 sudo ./scripts/teardown/cleanup.sh
 ```
 
@@ -223,3 +252,7 @@ Establish a quantitative performance baseline and repeat the experiment under **
 ## Documentation and Evidence
 
 All diagrams, tables, raw outputs, captures, and plots are maintained in the `docs/`, `captures/`, and `results/` directories. The final report must connect quantitative results with packet-level and system-level evidence, following the **Deploy → Verify → Observe → Measure → Diagnose → Explain** workflow.
+
+The structure and traceability index of the final report — with the requirement
+coverage matrix, outline, figure/table list and key results — is in
+[`docs/final-report.md`](docs/final-report.md).

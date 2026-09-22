@@ -1,0 +1,14 @@
+# iperf3 TCP report (ue -> 10.0.4.20, -b 5M -t 4)
+Connecting to host 10.0.4.20, port 5201
+[  5] local 10.0.1.10 port 59042 connected to 10.0.4.20 port 5201
+[ ID] Interval           Transfer     Bitrate         Retr  Cwnd
+[  5]   0.00-1.00   sec   640 KBytes  5.23 Mbits/sec    0    219 KBytes       
+[  5]   1.00-2.00   sec   640 KBytes  5.24 Mbits/sec    0    215 KBytes       
+[  5]   2.00-3.00   sec   640 KBytes  5.24 Mbits/sec    0    215 KBytes       
+[  5]   3.00-4.00   sec   640 KBytes  5.24 Mbits/sec    0    233 KBytes       
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Retr
+[  5]   0.00-4.00   sec  2.50 MBytes  5.24 Mbits/sec    0            sender
+[  5]   0.00-4.00   sec  2.50 MBytes  5.24 Mbits/sec                  receiver
+
+iperf Done.

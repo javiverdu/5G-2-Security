@@ -1,0 +1,14 @@
+# Protocol hierarchy at P1 (ue:eth0) — scenario: tcp-http
+
+
+===================================================================
+Protocol Hierarchy Statistics
+Filter: 
+
+frame                                    frames:12 bytes:2015
+  eth                                    frames:12 bytes:2015
+    ip                                   frames:12 bytes:2015
+      tcp                                frames:12 bytes:2015
+        http                             frames:2 bytes:1101
+          data-text-lines                frames:1 bytes:962
+===================================================================

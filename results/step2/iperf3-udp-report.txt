@@ -1,0 +1,15 @@
+# iperf3 UDP report (ue -> 10.0.4.20, -u -b 1M -t 5)
+Connecting to host 10.0.4.20, port 5201
+[  5] local 10.0.1.10 port 60699 connected to 10.0.4.20 port 5201
+[ ID] Interval           Transfer     Bitrate         Total Datagrams
+[  5]   0.00-1.00   sec   123 KBytes  1.01 Mbits/sec  87  
+[  5]   1.00-2.00   sec   122 KBytes   997 Kbits/sec  86  
+[  5]   2.00-3.00   sec   123 KBytes  1.01 Mbits/sec  87  
+[  5]   3.00-4.00   sec   122 KBytes   997 Kbits/sec  86  
+[  5]   4.00-5.00   sec   122 KBytes   996 Kbits/sec  86  
+- - - - - - - - - - - - - - - - - - - - - - - - -
+[ ID] Interval           Transfer     Bitrate         Jitter    Lost/Total Datagrams
+[  5]   0.00-5.00   sec   611 KBytes  1.00 Mbits/sec  0.000 ms  0/432 (0%)  sender
+[  5]   0.00-5.00   sec   611 KBytes  1.00 Mbits/sec  0.020 ms  0/432 (0%)  receiver
+
+iperf Done.
