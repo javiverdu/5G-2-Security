@@ -1,40 +1,9 @@
-# Scenario A — IP Addressing & Topology Plan
+# Addressing & Routing Plan
 
-## Topology
+Canonical address and routing plan for Scenario A. The implemented topology
+(diagram with IP addresses) is in the [README](../README.md#architecture).
 
-```
-+----------------+  10.0.1.0/24  +------------------+  10.0.2.0/24  +-----------------+  10.0.3.0/24  +--------------------+
-| ue (netns)     |===============| access (netns)   |===============| core (netns)    |===============| Linux host         |
-| eth0           |  veth pair    | eth0        eth1 |  veth pair    | eth0       eth1 |  veth pair    | (Data Network      |
-| 10.0.1.10/24   |               | .1          .1   |               | .2         .1   |               |  boundary)         |
-| gw: 10.0.1.1   |               | ip_forward=1     |               | ip_forward=1    |               | veth-hn 10.0.3.2/24|
-+----------------+               +------------------+               +-----------------+               +---------+----------+
-                                                                                                                 |
-                                                                                                   docker bridge "datanet"
-                                                                                                     10.0.4.0/24 (gw 10.0.4.1)
-                                                                                                          +-------+--------+
-                                                                                                          |               |
-                                                                                                    nginx-app       iperf3-srv
-                                                                                                    10.0.4.10:80    10.0.4.20:5201
-```
-
-Logical chain: `UE / Client → Access Network → Core Network / Gateway → Data Network → Application Server`
-
-## Interface and addressing table
-
-| Namespace / node | Interface | Peer | IP address | Role |
-|---|---|---|---|---|
-| `ue` | `eth0` | `access:eth0` | `10.0.1.10/24` | UE/client endpoint |
-| `access` | `eth0` | `ue:eth0` | `10.0.1.1/24` | Access router (UE-facing) |
-| `access` | `eth1` | `core:eth0` | `10.0.2.1/24` | Access router (core-facing) |
-| `core` | `eth0` | `access:eth1` | `10.0.2.2/24` | Core/gateway (access-facing) |
-| `core` | `eth1` | `host:veth-hn` | `10.0.3.1/24` | Core/gateway (Data-Network-facing) |
-| host (root) | `veth-hn` | `core:eth1` | `10.0.3.2/24` | Data Network boundary |
-| host (root) | `br-*` (datanet) | — | `10.0.4.1/24` | Docker bridge gateway |
-| container | `nginx-app` | — | `10.0.4.10` | HTTP application server (port 80) |
-| container | `iperf3-srv` | — | `10.0.4.20` | Measurement endpoint (port 5201 TCP/UDP) |
-
-## Link / subnet relationships
+## Subnet relationships
 
 | Segment | Subnet | Connects |
 |---|---|---|
@@ -43,18 +12,39 @@ Logical chain: `UE / Client → Access Network → Core Network / Gateway → Da
 | Data Network link | `10.0.3.0/24` | `core` ↔ host |
 | Docker service network | `10.0.4.0/24` | host bridge ↔ containers |
 
+## Interfaces and IP addressing
+
+| Node | Interface | Peer | IP address | Role |
+|---|---|---|---|---|
+| `ue` | `eth0` | `access:eth0` | `10.0.1.10/24` | UE/client endpoint |
+| `access` | `eth0` | `ue:eth0` | `10.0.1.1/24` | Access router (UE-facing) |
+| `access` | `eth1` | `core:eth0` | `10.0.2.1/24` | Access router (core-facing) |
+| `core` | `eth0` | `access:eth1` | `10.0.2.2/24` | Core/gateway (access-facing) |
+| `core` | `eth1` | `host:veth-hn` | `10.0.3.1/24` | Core/gateway (Data-Network-facing) |
+| host | `veth-hn` | `core:eth1` | `10.0.3.2/24` | Data Network boundary |
+| host | `br-*` (datanet) | — | `10.0.4.1/24` | Docker bridge gateway |
+| container | `nginx-app` | — | `10.0.4.10` | HTTP server, port 80 |
+| container | `iperf3-srv` | — | `10.0.4.20` | Measurement endpoint, port 5201 TCP/UDP |
+
 ## Routing plan
 
-| Node | Route | Next hop |
-|---|---|---|
-| `ue` | `default` | `10.0.1.1` (access) |
-| `access` | `10.0.3.0/24` | `10.0.2.2` (core) |
-| `access` | `10.0.4.0/24` | `10.0.2.2` (core) |
-| `core` | `10.0.1.0/24` | `10.0.2.1` (access) — return path toward UE |
-| `core` | `10.0.4.0/24` | `10.0.3.2` (host) |
-| host | `10.0.1.0/24` | `10.0.3.1` (core) — return path toward UE |
-| containers | `default` | `10.0.4.1` (host bridge) |
+| Node | Route | Next hop | Purpose |
+|---|---|---|---|
+| `ue` | `default` | `10.0.1.1` | All traffic via the access router |
+| `access` | `10.0.3.0/24` | `10.0.2.2` | Toward the Data Network |
+| `access` | `10.0.4.0/24` | `10.0.2.2` | Toward the Docker service network |
+| `core` | `10.0.1.0/24` | `10.0.2.1` | Return path toward the UE |
+| `core` | `10.0.4.0/24` | `10.0.3.2` | Toward the Docker service network |
+| host | `10.0.1.0/24` | `10.0.3.1` | Return path toward the UE |
+| containers | `default` | `10.0.4.1` | Automatic via the Docker bridge gateway |
 
-IP forwarding is enabled in `access`, `core`, and the host. NAT between the
-namespace side and the Docker network is **disabled on purpose** (routed, not
-NATed) so that packet captures show real end-to-end addresses.
+IP forwarding is enabled in `access`, `core` and the host.
+
+## Notes
+
+- **No NAT** between the namespace side and the Docker network: the path is fully
+  routed so captures show real end-to-end addresses.
+- The VM's VirtualBox NAT interface (`enp0s3`) also uses `10.0.2.0/24`. This
+  overlaps with the access–core link but causes no conflict: namespaces have
+  isolated interfaces and routing tables, and the host never resolves
+  `10.0.2.0/24` into the namespace side.

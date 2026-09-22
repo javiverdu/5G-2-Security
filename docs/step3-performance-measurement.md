@@ -134,10 +134,10 @@ queueing delay; latency alone can cripple TCP goodput without any loss.
 - UDP throughput is sender-capped at 10 Mbit/s in every condition, so it is
   comparable across conditions; it does not probe the 20 Mbit/s ceiling.
 
-## 9. Evidence index (`results/step3/`)
+## 9. Raw evidence
 
-Per condition: `ping-run{1..3}.txt`, `http-run{1..3}.txt`, `tcp-run{1..3}.json`,
-`udp-run{1..3}.json`, `retrans.pcap`, `tcp-retrans-source.txt`.
-Aggregated: `summary.csv`, `comparison.csv`, `comparison-table.md`,
-`plots/comparison.png`, `plots/comparison.svg`, `tc-{baseline,delay,loss,rate}.txt`,
-`tc-final-clean.txt`.
+Per condition, `results/step3/<condition>/` holds the raw outputs
+(`ping-run*.txt`, `http-run*.txt`, `tcp-run*.json`, `udp-run*.json`,
+`retrans.pcap`, `tcp-retrans-source.txt`). Aggregated files:
+`summary.csv`, `comparison.csv`, `comparison-table.md`, `plots/comparison.{png,svg}`
+and the `tc-*.txt` impairment states.

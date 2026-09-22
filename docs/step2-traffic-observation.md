@@ -186,12 +186,8 @@ analysis step).
   delivered; in a degraded scenario (Step 3) the same method will show **where**
   it is dropped or delayed.
 
-## 9. Evidence index (`results/step2/`)
+## 9. Raw evidence
 
-`cross-point-packet-counts.txt`, `icmp-fields-P1-ue.txt`, `icmp-fields-P6-nginx-app.txt`,
-`icmp-protocol-hierarchy.txt`, `tcp-http-fields-P1.txt`, `tcp-http-follow-stream0.txt`,
-`tcp-http-protocol-hierarchy.txt`, `tcp-iperf-conversations.txt`,
-`tcp-iperf-handshake-teardown.txt`, `tcp-iperf-retransmissions.txt`,
-`tcp-iperf-protocol-hierarchy.txt`, `udp-iperf-conversations.txt`,
-`udp-iperf-datagrams-P1.txt`, `udp-iperf-protocol-hierarchy.txt`,
-`iperf3-tcp-report.txt`, `iperf3-udp-report.txt`, `ping-report.txt`.
+All dissection and report files referenced above are under
+[`results/step2/`](../results/step2/); the source `.pcap` files are under
+`captures/step2/` (git-ignored).
