@@ -1,0 +1,13 @@
+# Protocol hierarchy — control / N4-upf
+
+
+===================================================================
+Protocol Hierarchy Statistics
+Filter: 
+
+frame                                    frames:10 bytes:1441
+  eth                                    frames:10 bytes:1441
+    ip                                   frames:10 bytes:1441
+      udp                                frames:10 bytes:1441
+        pfcp                             frames:10 bytes:1441
+===================================================================

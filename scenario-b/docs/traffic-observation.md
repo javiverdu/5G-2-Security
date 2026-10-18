@@ -118,4 +118,35 @@ Evidence: `udp-iperf-conversations.txt`, `udp-iperf-datagrams-P1.txt`.
 `<label>-phs-<point>.txt`, `icmp-fields-P1-ue.txt`, `icmp-fields-P5-nginx.txt`,
 `tcp-http-fields-P1.txt`, `tcp-http-follow-stream0.txt`,
 `tcp-iperf-conversations.txt`, `tcp-iperf-retransmissions.txt`,
-`udp-iperf-conversations.txt`, `udp-iperf-datagrams-P1.txt`.
+`udp-iperf-conversations.txt`, `udp-iperf-datagrams-P1.txt`,
+`control-counts.txt`, `control-N2-summary.txt`, `control-N4-summary.txt`,
+`control-phs-N2-gnb.txt`, `control-phs-N2-amf.txt`, `control-phs-N4-upf.txt`.
+
+## 10. Attention traps — how this analysis avoids them
+
+The brief lists traps to avoid; here is how this work answers each with evidence,
+not with container state.
+
+| Trap | How we comply |
+|---|---|
+| "Container state is not packet evidence" (`docker compose ps` proves nothing) | The whole page is **packet captures**, not `ps`. N3 (GTP-U) and N6 (plain IP) are captured at P2/P3/P4/P5; **N2 and N4 are captured at packet level** with [`capture-control.sh`](../scripts/capture-control.sh) (`sctp port 38412`, `udp port 8805`) while the UE registers. |
+| "N4/PFCP is not application traffic" | N4 is captured separately as control signalling (PFCP), never mixed with the HTTP/iperf flow. |
+| "GTP-U wraps the inner IP packet" | §2 shows the same frame as `udp:gtp:ip:<proto>` on N3 and plain `ip:<proto>` on N6. |
+| "Docker IP is not the UE PDU-session IP" | The UE PDU IP is `10.45.0.2` on `uesimtun0` (the container's management IP is `172.22.0.24`); all captures use the former. |
+| "A successful ping is not sufficient" | Beyond ICMP we verify **HTTP 200**, TCP and UDP iperf3, registration and the GTP-U path. |
+| "N6 connectivity is not proof of 5G user-plane connectivity" | The traffic is generated **inside the UE netns** and `sb-nginx` logs the client as **`10.45.0.2`** — proof it crossed the 5G user plane, not just the Docker network. A container→nginx test would show a `10.20.6.x` source. |
+| "N3 and N6 do not look identical" | Expected and shown: the N3 capture is GTP-U encapsulated, N6 is decapsulated. |
+
+**Control-plane messages captured** (evidence that N2 and N4 work at packet level,
+taken with [`capture-control.sh`](../scripts/capture-control.sh) during registration):
+
+* **N2 (NGAP, gNB↔AMF)** — `InitialUEMessage / Registration request` →
+  `Authentication request / response` → `Security mode command` →
+  `InitialContextSetupRequest / Response` →
+  `PDUSessionResourceSetupRequest / Response` (22 frames).
+* **N4 (PFCP, SMF↔UPF)** — `PFCP Session Establishment Request / Response`,
+  `PFCP Session Modification Request / Response` (plus heartbeats, 10 frames).
+* Protocol hierarchies: N2 = `eth > ip > sctp > ngap`; N4 = `eth > ip > udp > pfcp`.
+
+Files: `control-N2-summary.txt`, `control-N4-summary.txt`, `control-counts.txt`,
+`control-phs-N2-*.txt`, `control-phs-N4-upf.txt`.

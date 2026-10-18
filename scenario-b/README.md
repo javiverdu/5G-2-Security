@@ -236,6 +236,7 @@ sudo ./scripts/capture.sh icmp
 sudo ./scripts/capture.sh tcp-http
 sudo ./scripts/capture.sh tcp-iperf
 sudo ./scripts/capture.sh udp-iperf
+sudo ./scripts/capture-control.sh  # N2 (NGAP) + N4 (PFCP) during registration
 sudo ./scripts/analyze.sh     # -> results/scenario-b/  (needs sudo: root-owned pcaps + AppArmor)
 ```
 

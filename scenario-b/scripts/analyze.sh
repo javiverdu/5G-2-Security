@@ -127,6 +127,28 @@ if [[ -f "$CAPS/udp-iperf/P1-ue.pcap" ]]; then
         > "$OUT/udp-iperf-datagrams-P1.txt" 2>&1
 fi
 
+# --- 8. Control plane: N2 (NGAP/SCTP 38412) and N4 (PFCP/UDP 8805) -----------
+# Produced by scripts/capture-control.sh (only present if that was run).
+CTRL="$CAPS/control"
+if [[ -d "$CTRL" ]]; then
+    for p in N2-gnb N2-amf N4-upf; do
+        f="$CTRL/$p.pcap"; [[ -f "$f" ]] || continue
+        { echo "# Protocol hierarchy — control / $p"; echo; TS -r "$f" -q -z io,phs; } \
+            > "$OUT/control-phs-$p.txt" 2>&1
+    done
+    [[ -f "$CTRL/N2-gnb.pcap" ]] && TS -r "$CTRL/N2-gnb.pcap" -Y sctp \
+        -T fields -e frame.number -e _ws.col.info > "$OUT/control-N2-summary.txt" 2>&1
+    [[ -f "$CTRL/N4-upf.pcap" ]] && TS -r "$CTRL/N4-upf.pcap" -Y pfcp \
+        -T fields -e frame.number -e _ws.col.info > "$OUT/control-N4-summary.txt" 2>&1
+    {
+        printf '%-10s %7s\n' capture frames
+        for p in N2-gnb N2-amf N4-upf; do
+            f="$CTRL/$p.pcap"; [[ -f "$f" ]] || continue
+            printf '%-10s %7s\n' "$p" "$(TS -r "$f" -T fields -e frame.number 2>/dev/null | grep -c .)"
+        done
+    } > "$OUT/control-counts.txt" 2>&1
+fi
+
 # strip tshark's cosmetic "running as root" warning
 sed -i '/Running as user .* and group .* This could be dangerous\./d' "$OUT"/*.txt 2>/dev/null || true
 [[ -n "${SUDO_USER:-}" ]] && chown -R "$SUDO_USER":"$SUDO_USER" "$OUT" 2>/dev/null || true

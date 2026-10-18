@@ -1,0 +1,22 @@
+1	HEARTBEAT 
+2	HEARTBEAT_ACK 
+3	HEARTBEAT 
+4	HEARTBEAT_ACK 
+5	HEARTBEAT 
+6	HEARTBEAT_ACK 
+7	InitialUEMessage, Registration request [RRCEstablishmentCause=mo-Signalling]
+8	SACK (Ack=0, Arwnd=106496) , DownlinkNASTransport, Authentication request
+9	SACK (Ack=0, Arwnd=106496) , UplinkNASTransport, Authentication response
+10	SACK (Ack=1, Arwnd=106496) , DownlinkNASTransport, Security mode command
+11	SACK (Ack=1, Arwnd=106496) , UplinkNASTransport
+12	SACK (Ack=2, Arwnd=106496) , UEContextReleaseCommand [Cause: Nas=normal-release]
+13	SACK (Ack=2, Arwnd=106496) , UEContextReleaseComplete
+14	SACK (Ack=3, Arwnd=106496) , InitialContextSetupRequest
+15	SACK (Ack=3, Arwnd=106496) , InitialContextSetupResponse
+16	SACK (Ack=4, Arwnd=106496) 
+17	UplinkNASTransport, UplinkNASTransport
+18	SACK (Ack=6, Arwnd=106496) , DownlinkNASTransport
+19	PDUSessionResourceSetupRequest
+20	SACK (Ack=5, Arwnd=106317) 
+21	PDUSessionResourceSetupResponse
+22	SACK (Ack=7, Arwnd=106496) 

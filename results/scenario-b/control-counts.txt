@@ -1,0 +1,4 @@
+capture     frames
+N2-gnb          22
+N2-amf          22
+N4-upf          10

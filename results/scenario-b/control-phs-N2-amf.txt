@@ -1,0 +1,15 @@
+# Protocol hierarchy — control / N2-amf
+
+
+===================================================================
+Protocol Hierarchy Statistics
+Filter: 
+
+frame                                    frames:22 bytes:2836
+  eth                                    frames:22 bytes:2836
+    ip                                   frames:22 bytes:2836
+      sctp                               frames:22 bytes:2836
+        ngap                             frames:13 bytes:2014
+          sctp                           frames:1 bytes:238
+            ngap                         frames:1 bytes:238
+===================================================================

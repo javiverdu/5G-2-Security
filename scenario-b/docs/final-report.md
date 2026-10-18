@@ -148,9 +148,9 @@ network faults — they were tooling/permissions issues the method exposed.
 ```
 scenario-b/docs/   README, addressing-plan, capture-points, traffic-observation,
                    performance-measurement, observability, step-log, final-report (this)
-scenario-b/scripts/ fetch-upstream, deploy, verify, enable-n6, capture, analyze,
-                    impair, measure, run-all, recount-retrans, metrics-check,
-                    plot, cleanup
+scenario-b/scripts/ fetch-upstream, deploy, verify, enable-n6, capture,
+                    capture-control, analyze, impair, measure, run-all,
+                    recount-retrans, metrics-check, grafana-import, plot, cleanup
 results/scenario-b/ summary.csv, comparison.{csv,md}, plots/, tc-*.txt,
                     <condition>/*, page-4 dissections
 captures/scenario-b/ P*.pcap (git-ignored)

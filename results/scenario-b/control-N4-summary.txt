@@ -1,0 +1,10 @@
+1	PFCP Heartbeat Request
+2	PFCP Heartbeat Response
+3	PFCP Heartbeat Request
+4	PFCP Heartbeat Response
+5	PFCP Session Deletion Request
+6	PFCP Session Deletion Response
+7	PFCP Session Establishment Request
+8	PFCP Session Establishment Response
+9	PFCP Session Modification Request
+10	PFCP Session Modification Response

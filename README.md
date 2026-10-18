@@ -1,12 +1,17 @@
 # 5G-project-RTU
 
-**Project 1: Network Deployment, Measurement, and Observability — Scenario A: Software-Based Telecommunications Network**
+**Project 1: Network Deployment, Measurement, and Observability — Scenario A (Linux network namespaces) and Scenario B (5G Standalone)**
 
-A university project that examines the deployment and operation of a software-based
-telecommunications network from the perspective of a network engineer. The goal is to
+A university project that examines the deployment and operation of software-based
+telecommunications networks from the perspective of a network engineer. The goal is to
 establish an operational end-to-end path, observe how traffic behaves across the
 system, quantify service performance under controlled conditions, and explain normal
 operation and degradation with packet-, system- and application-level evidence.
+
+- **Scenario A** — a hybrid Linux + Docker network (`UE → access → core → Data
+  Network`) built with `ip netns` and veth pairs; see [Architecture](#architecture--scenario-a).
+- **Scenario B** — a 5G Standalone network (`UE → gNB → UPF → N6 → application`)
+  built with Open5GS + UERANSIM; see [Scenario B](#scenario-b-5g-standalone).
 
 > **Workflow:** Deploy → Verify → Observe → Measure → Diagnose → Explain
 
@@ -14,7 +19,8 @@ operation and degradation with packet-, system- and application-level evidence.
 
 ## Contents
 
-- [Architecture](#architecture)
+- [Architecture (Scenario A)](#architecture--scenario-a)
+- [Scenario B (5G Standalone)](#scenario-b-5g-standalone)
 - [Technology Stack](#technology-stack)
 - [Repository Structure](#repository-structure)
 - [Prerequisites](#prerequisites)
@@ -24,7 +30,11 @@ operation and degradation with packet-, system- and application-level evidence.
 
 ---
 
-## Architecture
+## Architecture — Scenario A
+
+> Scenario B (5G Standalone) is described in
+> [Scenario B](#scenario-b-5g-standalone) below and in
+> [`scenario-b/README.md`](scenario-b/README.md).
 
 Scenario A is a **hybrid Linux + Docker** network running on a single Linux VM.
 Linux network namespaces implement the UE, the access router and the core/gateway;
@@ -66,6 +76,8 @@ host. Full addressing and routing tables are in
 
 ## Technology Stack
 
+### Scenario A (Linux + Docker)
+
 | Category | Technology | Purpose |
 |---|---|---|
 | Network isolation | Linux network namespaces (`ip netns`) | UE, access router, core/gateway |
@@ -79,25 +91,39 @@ host. Full addressing and routing tables are in
 | Routing & addressing | `iproute2` (`ip`) | Interfaces, routes, forwarding |
 | Plotting | Python 3 + `matplotlib` | Comparative tables and plots |
 
+### Scenario B (5G SA)
+
+| Category | Technology | Purpose |
+|---|---|---|
+| 5G core | Open5GS | AMF, SMF, UPF, NRF, AUSF, UDM, UDR, PCF, BSF, NSSF, SCP |
+| UE / gNB | UERANSIM | simulated 5G UE and gNodeB |
+| Orchestration | Docker Compose | single-VM 5G SA deployment |
+| Data Network (N6) | `nginx` + `networkstatic/iperf3` | application + throughput endpoint, routed without NAT |
+| Observability | Prometheus + Grafana | NF metrics on `:9091` and dashboards |
+
 ## Repository Structure
 
 ```
 5G-project-RTU/
 ├── README.md
-├── docs/                     # plans, step reports, screenshot plan + img/
-├── scenario-b/               # 5G SA (Open5GS + UERANSIM) plan & scaffold
+├── docs/                     # plans, step reports, capture/screenshots plans, final report, img/
+├── scenario-b/               # Scenario B: 5G SA (Open5GS + UERANSIM)
 │   ├── README.md
 │   ├── .env
-│   ├── docs/                 # addressing & interface plan
-│   ├── n6/                   # Data Network override (nginx, no NAT)
-│   └── scripts/              # fetch-upstream, deploy, verify, enable-n6, cleanup
-├── scripts/
+│   ├── docs/                 # addressing, capture-points, observation, performance,
+│   │                         # observability, step-log, final-report
+│   ├── grafana/              # Grafana provisioning (datasource + dashboard)
+│   ├── n6/                   # N6 Compose override (nginx + iperf3, no NAT)
+│   └── scripts/              # fetch-upstream, deploy, verify, enable-n6, capture,
+│                             # capture-control, analyze, impair, measure, run-all,
+│                             # recount-retrans, metrics-check, grafana-import, plot, cleanup
+├── scripts/                  # Scenario A
 │   ├── deploy/               # setup.sh, verify.sh, collect-step1-evidence.sh
 │   ├── observe/              # capture.sh, analyze.sh, gui-workspace.sh   (Step 2)
 │   ├── measure/              # impair.sh, measure.sh, run-all.sh, recount-retrans.sh, plot.py (Step 3)
 │   └── teardown/             # cleanup.sh
-├── captures/                 # raw .pcap files (git-ignored)
-└── results/                  # raw outputs, dissections, tables and plots
+├── captures/                 # raw .pcap files (git-ignored): step2/ (A), scenario-b/ (B)
+└── results/                  # step1..step3 (A), scenario-b (B)
 ```
 
 ## Prerequisites
@@ -128,14 +154,33 @@ python3 ./scripts/measure/plot.py    # comparative table + plots
 sudo ./scripts/teardown/cleanup.sh   # remove namespaces, links and containers
 ```
 
+## Scenario B (5G Standalone)
+
+Scenario B builds the reference 5G architecture on the same Ubuntu VM with Docker
+Compose: **UE (UERANSIM) → gNB → UPF → N6 → application**, with Open5GS as the
+core. The path is routed with **no NAT** on N6, so the UE session address
+(`10.45.0.x`) is visible end to end.
+
+- Plan & run order: [`scenario-b/README.md`](scenario-b/README.md) ·
+  addressing: [`scenario-b/docs/addressing-plan.md`](scenario-b/docs/addressing-plan.md)
+- Page 3 — deployment & end-to-end (7/7 checks): [`scenario-b/docs/final-report.md`](scenario-b/docs/final-report.md)
+- Page 4 — packet observation (GTP-U on N3 vs plain IP on N6): [`scenario-b/docs/traffic-observation.md`](scenario-b/docs/traffic-observation.md)
+- Page 5 — performance & degradation (NetEm): [`scenario-b/docs/performance-measurement.md`](scenario-b/docs/performance-measurement.md)
+- Page 6 — observability (Prometheus + Grafana): [`scenario-b/docs/observability.md`](scenario-b/docs/observability.md)
+- Runbook & troubleshooting: [`scenario-b/docs/step-log.md`](scenario-b/docs/step-log.md)
+
 ## Project Status & Activity Log
 
-| Step | Description | Status | Evidence |
-|---|---|---|---|
-| 0 | Repository scaffold, addressing plan, deploy/verify/teardown scripts | ✅ Done | `docs/addressing-plan.md`, `scripts/` |
-| 1 | Network deployment and end-to-end operation | ✅ Done | `docs/step1-network-deployment.md`, `results/step1/` |
-| 2 | Traffic observation and protocol behavior | ✅ Done | `docs/step2-traffic-observation.md`, `results/step2/`, `captures/step2/` |
-| 3 | Performance measurement and network degradation | ✅ Done | `docs/step3-performance-measurement.md`, `results/step3/` |
+| Scenario | Step / Page | Description | Status | Evidence |
+|---|---|---|---|---|
+| A | 0 | Repository scaffold, addressing plan, deploy/verify/teardown scripts | ✅ Done | `docs/addressing-plan.md`, `scripts/` |
+| A | 1 | Network deployment and end-to-end operation | ✅ Done | `docs/step1-network-deployment.md`, `results/step1/` |
+| A | 2 | Traffic observation and protocol behavior | ✅ Done | `docs/step2-traffic-observation.md`, `results/step2/`, `captures/step2/` |
+| A | 3 | Performance measurement and network degradation | ✅ Done | `docs/step3-performance-measurement.md`, `results/step3/` |
+| B | 3 | 5G SA deployment and end-to-end operation (7/7 checks) | ✅ Done | `scenario-b/docs/final-report.md` §4, `results/scenario-b/` |
+| B | 4 | Traffic observation — GTP-U envelope on N3 vs plain IP on N6 | ✅ Done | `scenario-b/docs/traffic-observation.md`, `captures/scenario-b/` |
+| B | 5 | Performance measurement and degradation (delay/loss/rate) | ✅ Done | `scenario-b/docs/performance-measurement.md`, `results/scenario-b/` |
+| B | 6 | Observability (Prometheus + Grafana) | ✅ Done | `scenario-b/docs/observability.md`, `docs/img/sb-p6-*` |
 
 | Date | Activity | Outcome |
 |---|---|---|
@@ -144,6 +189,9 @@ sudo ./scripts/teardown/cleanup.sh   # remove namespaces, links and containers
 | 2026-09-21 | **Step 1** — topology deployed on the lab VM; Docker 29 hardened forwarding diagnosed and fixed (`allow-direct-routing` + `DOCKER-USER`); path verified (HTTP 200, iperf3 ≈ 36 Gbit/s) | `docs/step1-network-deployment.md`, `results/step1/` |
 | 2026-09-22 | **Step 2** — six-point captures (ICMP/TCP/UDP/HTTP) and tshark dissection; AppArmor `tshark` confinement worked around with `aa-exec` | `docs/step2-traffic-observation.md`, `results/step2/`, `captures/step2/` |
 | 2026-09-22 | **Step 3** — baseline + delay/loss/rate conditions with NetEm; comparative table and plots | `docs/step3-performance-measurement.md`, `results/step3/` |
+| 2026-10-12 | **Scenario B page 3** — Open5GS + UERANSIM deployed; registration, PDU session and UE route; N6 (nginx + iperf3) routed without NAT; all 7 checks green | `scenario-b/`, `results/scenario-b/` |
+| 2026-10-13 | **Scenario B page 4** — five-point captures showing the GTP-U envelope on N3 vs the plain IP flow on N6; tshark analysis | `scenario-b/docs/traffic-observation.md`, `captures/scenario-b/` |
+| 2026-10-18 | **Scenario B pages 5–6** — NetEm conditions (delay/loss/rate), comparative table/plot; Grafana dashboard imported; screenshots | `scenario-b/docs/performance-measurement.md`, `observability.md`, `docs/img/sb-*` |
 
 ## Documentation
 
@@ -153,8 +201,10 @@ sudo ./scripts/teardown/cleanup.sh   # remove namespaces, links and containers
 | [`docs/step1-network-deployment.md`](docs/step1-network-deployment.md) | Deployment, end-to-end verification, path analysis, Docker diagnosis |
 | [`docs/step2-traffic-observation.md`](docs/step2-traffic-observation.md) | ICMP/TCP/UDP/HTTP packet-level observation across six capture points |
 | [`docs/step3-performance-measurement.md`](docs/step3-performance-measurement.md) | Baseline and degraded-condition performance study |
-| [`docs/final-report.md`](docs/final-report.md) | Final report skeleton, requirement coverage and evidence index |
+| [`docs/final-report.md`](docs/final-report.md) | Final report (Scenarios A & B), requirement coverage and evidence index |
 | [`docs/screenshots-plan.md`](docs/screenshots-plan.md) | Screenshot checklist for the final report (`docs/img/`) |
 | [`docs/capture-points.md`](docs/capture-points.md) | Scenario A packet-capture points |
-| [`scenario-b/docs/screenshots-plan.md`](scenario-b/docs/screenshots-plan.md) | Scenario B (5G SA) screenshot checklist |
 | [`scenario-b/README.md`](scenario-b/README.md) | Scenario B (5G SA) planning, roles, interfaces and run order |
+| [`scenario-b/docs/final-report.md`](scenario-b/docs/final-report.md) | Scenario B (5G SA) consolidated report (pages 3–6) |
+| [`scenario-b/docs/step-log.md`](scenario-b/docs/step-log.md) | Scenario B runbook & troubleshooting |
+| [`scenario-b/docs/screenshots-plan.md`](scenario-b/docs/screenshots-plan.md) | Scenario B (5G SA) screenshot checklist |

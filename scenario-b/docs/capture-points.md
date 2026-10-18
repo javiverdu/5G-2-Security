@@ -18,13 +18,14 @@ each container's netns via `nsenter`, because the container images do not includ
 > and the N6 interface by `10.20.6.x`; hard-coding `eth0`/`eth1` silently produced
 > an empty N3 capture when the order swapped.
 
-Optional control-plane points (registration analysis):
+Control-plane points, captured with `scripts/capture-control.sh` (these messages
+occur during registration, so that script restarts the UE to trigger them):
 
 | Point | Container | Filter | What it shows |
 |---|---|---|---|
-| N2 | `nr_gnb` / `amf` | `sctp port 38412` | NGAP registration (NG Setup, Initial UE Message) |
+| N2 | `nr_gnb`, `amf` | `sctp port 38412` | NGAP registration (NG Setup, Initial UE Message) |
 | N4 | `upf` | `udp port 8805` | PFCP session establishment from the SMF |
-| SBI | any NF | `tcp port 7777` | HTTP/2 service calls (NRF, AUSF, UDM, …) |
+| SBI (optional) | any NF | `tcp port 7777` | HTTP/2 service calls (NRF, AUSF, UDM, …) |
 
 ## The teaching point: the same packet looks different at N3 and N6
 
@@ -62,6 +63,7 @@ sudo ./scripts/capture.sh icmp
 sudo ./scripts/capture.sh tcp-http
 sudo ./scripts/capture.sh tcp-iperf
 sudo ./scripts/capture.sh udp-iperf
+sudo ./scripts/capture-control.sh # N2 + N4 (restarts the UE to trigger them)
 sudo ./scripts/analyze.sh          # -> results/scenario-b/  (needs sudo: root-owned pcaps + AppArmor)
 ```
 
