@@ -84,11 +84,17 @@ host. Full addressing and routing tables are in
 ```
 5G-project-RTU/
 ├── README.md
-├── docs/                     # plans and step reports
+├── docs/                     # plans, step reports, screenshot plan + img/
+├── scenario-b/               # 5G SA (Open5GS + UERANSIM) plan & scaffold
+│   ├── README.md
+│   ├── .env
+│   ├── docs/                 # addressing & interface plan
+│   ├── n6/                   # Data Network override (nginx, no NAT)
+│   └── scripts/              # fetch-upstream, deploy, verify, enable-n6, cleanup
 ├── scripts/
-│   ├── deploy/               # setup.sh, verify.sh
-│   ├── observe/              # capture.sh, analyze.sh   (Step 2)
-│   ├── measure/              # impair.sh, measure.sh, run-all.sh, plot.py (Step 3)
+│   ├── deploy/               # setup.sh, verify.sh, collect-step1-evidence.sh
+│   ├── observe/              # capture.sh, analyze.sh, gui-workspace.sh   (Step 2)
+│   ├── measure/              # impair.sh, measure.sh, run-all.sh, recount-retrans.sh, plot.py (Step 3)
 │   └── teardown/             # cleanup.sh
 ├── captures/                 # raw .pcap files (git-ignored)
 └── results/                  # raw outputs, dissections, tables and plots
@@ -103,7 +109,7 @@ host. Full addressing and routing tables are in
 
 ```bash
 sudo apt update
-sudo apt install -y iproute2 iputils-ping iperf3 tcpdump tshark curl python3 python3-pip
+sudo apt install -y iproute2 iputils-ping iperf3 tcpdump tshark curl python3 python3-pip python3-matplotlib
 # Docker Engine: https://docs.docker.com/engine/install/
 ```
 
@@ -114,6 +120,7 @@ git clone <repository-url> && cd 5G-project-RTU
 
 sudo ./scripts/deploy/setup.sh       # build namespaces, veths, routes, Docker services
 sudo ./scripts/deploy/verify.sh      # end-to-end checks (ICMP, HTTP, iperf3)
+sudo ./scripts/deploy/collect-step1-evidence.sh   # regenerate raw Step 1 evidence
 
 sudo ./scripts/measure/run-all.sh    # baseline + degraded measurement set
 python3 ./scripts/measure/plot.py    # comparative table + plots
@@ -147,3 +154,7 @@ sudo ./scripts/teardown/cleanup.sh   # remove namespaces, links and containers
 | [`docs/step2-traffic-observation.md`](docs/step2-traffic-observation.md) | ICMP/TCP/UDP/HTTP packet-level observation across six capture points |
 | [`docs/step3-performance-measurement.md`](docs/step3-performance-measurement.md) | Baseline and degraded-condition performance study |
 | [`docs/final-report.md`](docs/final-report.md) | Final report skeleton, requirement coverage and evidence index |
+| [`docs/screenshots-plan.md`](docs/screenshots-plan.md) | Screenshot checklist for the final report (`docs/img/`) |
+| [`docs/capture-points.md`](docs/capture-points.md) | Scenario A packet-capture points |
+| [`scenario-b/docs/screenshots-plan.md`](scenario-b/docs/screenshots-plan.md) | Scenario B (5G SA) screenshot checklist |
+| [`scenario-b/README.md`](scenario-b/README.md) | Scenario B (5G SA) planning, roles, interfaces and run order |

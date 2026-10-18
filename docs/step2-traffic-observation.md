@@ -53,6 +53,43 @@ Identical counts at all six points (both directions included) demonstrate that
 every packet was **generated, forwarded by both routers and the host, and
 delivered** — no drops or duplication at any stage.
 
+> **Counts are per filtered flow, not the whole capture.** The table counts frames
+> matching each scenario's flow filter (`icmp`, `tcp.port==80`, `tcp.port==5201`,
+> `udp.port==5201`). For `udp-iperf` this excludes iperf3's **TCP control
+> connection**: the capture holds **463** IP frames — 434 UDP on port 5201
+> (432 data + 2 control) plus 29 TCP control frames (see
+> [`udp-iperf-protocol-hierarchy.txt`](../results/step2/udp-iperf-protocol-hierarchy.txt)).
+> All 463 frames are present at all six points, so the "every packet traverses the
+> path" statement holds for the whole capture, not just the filtered flow.
+
+### 2.1 IP addresses stay end to end — only L2 and TTL change
+
+A frequent source of confusion: the source/destination **IP** addresses are the
+same at every observation point. `access`, `core` and the host are **routers**
+(Layer-3 forwarders), but the path is **routed, no NAT**, so no intermediate node
+rewrites the IP header. What changes hop by hop is the **Ethernet (Layer-2)
+framing** and the **TTL**:
+
+| Point | Interface | `eth.src → eth.dst` | `ip.src → ip.dst` | TTL |
+|---|---|---|---|---|
+| P1 | `ue:eth0` | ue → access | `10.0.1.10 → 10.0.4.10` | 64 |
+| P3 | `access:eth1` | access → core | *unchanged* | 63 |
+| P4 | `core:eth1` | core → host | *unchanged* | 62 |
+| P5 | `host:veth-hn` | core → host | *unchanged* | 62 |
+| bridge → P6 | `br-*` → `<container>` | bridge → container | *unchanged* | 61 |
+
+The echo **reply** mirrors this (`10.0.4.10 → 10.0.1.10`, TTL 64 at the container
+→ 61 at the UE). Consequences:
+
+- **IP src/dst are end-to-end and constant** — the container replies to the real
+  client address `10.0.1.10`; there is no address translation anywhere on the path.
+- **Eth src/dst change at every hop** (each router re-encapsulates the frame).
+- **TTL decrements once per routed hop** (64→63→62→61 = access, core, host), which
+  is the packet-level proof that the packet was *forwarded* at each stage.
+- The **host is the last L3 hop**: it holds a connected route to `10.0.4.0/24` on
+  the bridge `br-*` and delivers the frame to the container, which is the actual
+  endpoint and generates the reply.
+
 ## 3. A. ICMP — fields, size, TTL and RTT
 
 Evidence: [`icmp-fields-P1-ue.txt`](../results/step2/icmp-fields-P1-ue.txt), [`icmp-fields-P6-nginx-app.txt`](../results/step2/icmp-fields-P6-nginx-app.txt), [`icmp-protocol-hierarchy.txt`](../results/step2/icmp-protocol-hierarchy.txt)

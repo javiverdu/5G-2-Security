@@ -1,0 +1,6 @@
+# docker inspect nginx-app (network settings)
+{"datanet":{"IPAMConfig":{"IPv4Address":"10.0.4.10"},"Links":null,"Aliases":null,"DriverOpts":null,"GwPriority":0,"NetworkID":"85821ebb54dd2be810e0132a03c632953f5bbc9584c1a92e1e776a27ba5c63fd","EndpointID":"b6e768c80e3ec86a8afe0c6438e41956d3d11f13d5bfefe8eb533f21a1c47b65","Gateway":"10.0.4.1","IPAddress":"10.0.4.10","MacAddress":"02:79:f5:d0:54:13","IPPrefixLen":24,"IPv6Gateway":"","GlobalIPv6Address":"","GlobalIPv6PrefixLen":0,"DNSNames":["nginx-app","c7ae4375288d"]}}
+
+# docker inspect iperf3-srv (network settings)
+{"datanet":{"IPAMConfig":{"IPv4Address":"10.0.4.20"},"Links":null,"Aliases":null,"DriverOpts":null,"GwPriority":0,"NetworkID":"85821ebb54dd2be810e0132a03c632953f5bbc9584c1a92e1e776a27ba5c63fd","EndpointID":"8a4bb4bcd51c2525e720a455aed15c464e8725da5f742148efa53305e3b4a2ff","Gateway":"10.0.4.1","IPAddress":"10.0.4.20","MacAddress":"fa:68:fb:c1:77:32","IPPrefixLen":24,"IPv6Gateway":"","GlobalIPv6Address":"","GlobalIPv6PrefixLen":0,"DNSNames":["iperf3-srv","36523878b7bd"]}}
+

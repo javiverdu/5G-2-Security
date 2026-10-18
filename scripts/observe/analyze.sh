@@ -39,6 +39,9 @@ for s in icmp tcp-http tcp-iperf udp-iperf; do
 done
 
 # 2. Cross-point packet counts: generated -> forwarded -> delivered
+# NOTE: counts are per filtered flow (see FLOW), not total capture frames.
+# For udp-iperf this excludes iperf3's TCP control connection, so the file
+# reports 434 UDP frames while the capture holds 463 IP frames (434 + 29 TCP).
 {
     printf '%-11s %-16s %7s\n' scenario point packets
     for s in icmp tcp-http tcp-iperf udp-iperf; do
@@ -102,6 +105,6 @@ TS -r "$CAPS/udp-iperf/P1-ue.pcap" -Y udp -T fields -E header=y -E separator='|'
 # strip tshark's cosmetic "running as root" warning from the outputs
 sed -i '/Running as user .* and group .* This could be dangerous\./d' "$OUT"/*.txt 2>/dev/null || true
 
-chown -R x0riso:x0riso "$OUT" "$CAPS" 2>/dev/null || true
+[[ -n "${SUDO_USER:-}" ]] && chown -R "$SUDO_USER:$SUDO_USER" "$OUT" "$CAPS" 2>/dev/null || true
 echo "[analyze] results written to $OUT:"
 ls -1 "$OUT"

@@ -1,0 +1,22 @@
+# Protocol hierarchy — udp-iperf / P2-gnb
+
+
+===================================================================
+Protocol Hierarchy Statistics
+Filter: 
+
+frame                                    frames:496 bytes:669776
+  eth                                    frames:496 bytes:669776
+    ip                                   frames:496 bytes:669776
+      udp                                frames:496 bytes:669776
+        gtp                              frames:496 bytes:669776
+          ip                             frames:496 bytes:669776
+            tcp                          frames:30 bytes:4220
+              iperf3                     frames:18 bytes:2884
+                iperf3                   frames:2 bytes:228
+                  iperf3                 frames:2 bytes:228
+                    iperf3               frames:2 bytes:228
+            udp                          frames:466 bytes:665556
+              iperf3                     frames:466 bytes:665556
+                data                     frames:464 bytes:665376
+===================================================================

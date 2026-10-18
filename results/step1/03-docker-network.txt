@@ -1,11 +1,66 @@
-# docker network inspect datanet (summary)
-Name: datanet | Driver: bridge | Subnet: 10.0.4.0/24 | Gateway: 10.0.4.1
+# docker network inspect datanet
+[
+    {
+        "Name": "datanet",
+        "Id": "85821ebb54dd2be810e0132a03c632953f5bbc9584c1a92e1e776a27ba5c63fd",
+        "Created": "2026-09-21T22:08:01.549028393Z",
+        "Scope": "local",
+        "Driver": "bridge",
+        "EnableIPv4": true,
+        "EnableIPv6": false,
+        "IPAM": {
+            "Driver": "default",
+            "Options": {},
+            "Config": [
+                {
+                    "Subnet": "10.0.4.0/24",
+                    "Gateway": "10.0.4.1"
+                }
+            ]
+        },
+        "Internal": false,
+        "Attachable": false,
+        "Ingress": false,
+        "ConfigFrom": {
+            "Network": ""
+        },
+        "ConfigOnly": false,
+        "Options": {},
+        "Labels": {},
+        "Containers": {
+            "36523878b7bd281e3db91cba71edbe4904377cdf4e22578f8175f83f500536ab": {
+                "Name": "iperf3-srv",
+                "EndpointID": "8a4bb4bcd51c2525e720a455aed15c464e8725da5f742148efa53305e3b4a2ff",
+                "MacAddress": "fa:68:fb:c1:77:32",
+                "IPv4Address": "10.0.4.20/24",
+                "IPv6Address": ""
+            },
+            "c7ae4375288d9dc09665736eab0126830b9f6f4f0d1023aa4a7567c9e2af58c7": {
+                "Name": "nginx-app",
+                "EndpointID": "b6e768c80e3ec86a8afe0c6438e41956d3d11f13d5bfefe8eb533f21a1c47b65",
+                "MacAddress": "02:79:f5:d0:54:13",
+                "IPv4Address": "10.0.4.10/24",
+                "IPv6Address": ""
+            }
+        },
+        "Status": {
+            "IPAM": {
+                "Subnets": {
+                    "10.0.4.0/24": {
+                        "IPsInUse": 5,
+                        "DynamicIPsAvailable": 251
+                    }
+                }
+            }
+        }
+    }
+]
 
 # docker ps
-NAMES        IMAGE                         STATUS          PORTS
-iperf3-srv   networkstatic/iperf3:latest   Up 40 seconds   5201/tcp
-nginx-app    nginx:latest                  Up 40 seconds   80/tcp
+NAMES        IMAGE                         STATUS         PORTS
+iperf3-srv   networkstatic/iperf3:latest   Up 6 minutes   5201/tcp
+nginx-app    nginx:latest                  Up 6 minutes   80/tcp
 
 # container addresses
-nginx-app  -> 10.0.4.10
+nginx-app -> 10.0.4.10
 iperf3-srv -> 10.0.4.20

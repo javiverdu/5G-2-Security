@@ -22,3 +22,8 @@ default via 10.0.2.2 dev enp0s3 proto dhcp src 10.0.2.15 metric 101
 10.0.4.0/24 dev br-85821ebb54dd proto kernel scope link src 10.0.4.1 
 172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 linkdown 
 192.168.56.0/24 dev enp0s8 proto kernel scope link src 192.168.56.104 metric 100 
+
+# ip_forward flags
+access: 1
+core: 1
+host: 1

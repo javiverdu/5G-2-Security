@@ -1,0 +1,24 @@
+PING 10.20.6.20 (10.20.6.20) 56(84) bytes of data.
+64 bytes from 10.20.6.20: icmp_seq=1 ttl=63 time=0.729 ms
+64 bytes from 10.20.6.20: icmp_seq=2 ttl=63 time=0.635 ms
+64 bytes from 10.20.6.20: icmp_seq=4 ttl=63 time=1.27 ms
+64 bytes from 10.20.6.20: icmp_seq=5 ttl=63 time=0.663 ms
+64 bytes from 10.20.6.20: icmp_seq=6 ttl=63 time=0.975 ms
+64 bytes from 10.20.6.20: icmp_seq=7 ttl=63 time=1.22 ms
+64 bytes from 10.20.6.20: icmp_seq=8 ttl=63 time=1.18 ms
+64 bytes from 10.20.6.20: icmp_seq=9 ttl=63 time=0.949 ms
+64 bytes from 10.20.6.20: icmp_seq=10 ttl=63 time=0.539 ms
+64 bytes from 10.20.6.20: icmp_seq=11 ttl=63 time=0.538 ms
+64 bytes from 10.20.6.20: icmp_seq=12 ttl=63 time=0.716 ms
+64 bytes from 10.20.6.20: icmp_seq=13 ttl=63 time=0.684 ms
+64 bytes from 10.20.6.20: icmp_seq=14 ttl=63 time=0.553 ms
+64 bytes from 10.20.6.20: icmp_seq=15 ttl=63 time=0.748 ms
+64 bytes from 10.20.6.20: icmp_seq=16 ttl=63 time=0.619 ms
+64 bytes from 10.20.6.20: icmp_seq=17 ttl=63 time=0.604 ms
+64 bytes from 10.20.6.20: icmp_seq=18 ttl=63 time=0.804 ms
+64 bytes from 10.20.6.20: icmp_seq=19 ttl=63 time=0.546 ms
+64 bytes from 10.20.6.20: icmp_seq=20 ttl=63 time=0.476 ms
+
+--- 10.20.6.20 ping statistics ---
+20 packets transmitted, 19 received, 5% packet loss, time 4000ms
+rtt min/avg/max/mdev = 0.476/0.760/1.271/0.238 ms

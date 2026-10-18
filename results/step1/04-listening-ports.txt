@@ -1,11 +1,15 @@
 # listening sockets inside nginx-app (container netns)
-State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess                                                                            
-LISTEN 0      4096      127.0.0.11:41979      0.0.0.0:*    users:(("dockerd",pid=57256,fd=33))                                               
-LISTEN 0      511          0.0.0.0:80         0.0.0.0:*    users:(("nginx",pid=60909,fd=6),("nginx",pid=60908,fd=6),("nginx",pid=60855,fd=6))
-LISTEN 0      511             [::]:80            [::]:*    users:(("nginx",pid=60909,fd=7),("nginx",pid=60908,fd=7),("nginx",pid=60855,fd=7))
+State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess                                                                         
+LISTEN 0      511          0.0.0.0:80         0.0.0.0:*    users:(("nginx",pid=2578,fd=6),("nginx",pid=2577,fd=6),("nginx",pid=2449,fd=6))
+LISTEN 0      4096      127.0.0.11:46505      0.0.0.0:*    users:(("dockerd",pid=2051,fd=33))                                             
+LISTEN 0      511             [::]:80            [::]:*    users:(("nginx",pid=2578,fd=7),("nginx",pid=2577,fd=7),("nginx",pid=2449,fd=7))
+State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess                            
+UNCONN 0      0         127.0.0.11:36920      0.0.0.0:*    users:(("dockerd",pid=2051,fd=32))
 
 # listening sockets inside iperf3-srv (container netns)
-Netid State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess                             
-udp   UNCONN 0      0         127.0.0.11:48203      0.0.0.0:*    users:(("dockerd",pid=57256,fd=42))
-tcp   LISTEN 0      4096      127.0.0.11:36927      0.0.0.0:*    users:(("dockerd",pid=57256,fd=43))
-tcp   LISTEN 0      4096               *:5201             *:*    users:(("iperf3",pid=60957,fd=3))  
+State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess                            
+LISTEN 0      4096      127.0.0.11:37969      0.0.0.0:*    users:(("dockerd",pid=2051,fd=39))
+LISTEN 0      4096               *:5201             *:*    users:(("iperf3",pid=2448,fd=3))  
+State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess                            
+UNCONN 0      0         127.0.0.11:36709      0.0.0.0:*    users:(("dockerd",pid=2051,fd=38))
+

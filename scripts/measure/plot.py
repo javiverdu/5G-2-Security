@@ -21,12 +21,15 @@ SUMMARY = os.path.join(STEP3, "summary.csv")
 CONDITIONS = ["baseline", "delay", "loss", "rate"]
 METRICS = [
     "icmp_rtt_avg", "http_time_avg", "tcp_throughput",
-    "udp_throughput", "udp_loss", "udp_jitter", "tcp_retransmissions",
+    "udp_throughput", "udp_loss", "udp_jitter",
+    "tcp_retransmissions", "tcp_retransmissions_sender",
+    "http_connect_avg", "http_availability",
 ]
 UNITS = {
     "icmp_rtt_avg": "ms", "http_time_avg": "s", "tcp_throughput": "Mbit/s",
     "udp_throughput": "Mbit/s", "udp_loss": "%", "udp_jitter": "ms",
-    "tcp_retransmissions": "count",
+    "tcp_retransmissions": "count", "tcp_retransmissions_sender": "count",
+    "http_connect_avg": "s", "http_availability": "%",
 }
 SCALE = {"tcp_throughput": 1e-6, "udp_throughput": 1e-6}  # bit/s -> Mbit/s
 
@@ -51,26 +54,29 @@ def mean(xs):
 def main():
     values = load()
     conds = [c for c in CONDITIONS if c in values]
+    # Only emit metrics that actually have data, so optional/new metrics do not
+    # appear as spurious zeros in the generated table.
+    metrics = [m for m in METRICS if any(values[c][m] for c in conds)]
 
     # --- aggregated CSV
     os.makedirs(os.path.join(STEP3, "plots"), exist_ok=True)
     agg_csv = os.path.join(STEP3, "comparison.csv")
     with open(agg_csv, "w", newline="") as f:
         w = csv.writer(f)
-        w.writerow(["condition"] + METRICS)
+        w.writerow(["condition"] + metrics)
         for c in conds:
-            w.writerow([c] + [f"{mean(values[c][m]) * SCALE.get(m, 1):.4g}" for m in METRICS])
+            w.writerow([c] + [f"{mean(values[c][m]) * SCALE.get(m, 1):.4g}" for m in metrics])
 
     # --- markdown table
     md = os.path.join(STEP3, "comparison-table.md")
     with open(md, "w") as f:
         f.write("# Step 3 — Comparative results (mean of the repetitions)\n\n")
         f.write("| Condition | " + " | ".join(
-            f"{m} ({UNITS[m]})" for m in METRICS) + " |\n")
-        f.write("|" + "---|" * (len(METRICS) + 1) + "\n")
+            f"{m} ({UNITS[m]})" for m in metrics) + " |\n")
+        f.write("|" + "---|" * (len(metrics) + 1) + "\n")
         for c in conds:
             cells = []
-            for m in METRICS:
+            for m in metrics:
                 v = mean(values[c][m]) * SCALE.get(m, 1)
                 cells.append(f"{v:.3f}")
             f.write(f"| {c} | " + " | ".join(cells) + " |\n")

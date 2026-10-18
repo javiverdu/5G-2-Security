@@ -11,6 +11,9 @@
 captures/
 results/raw/
 
+# ---------- Scenario B (5G SA): pinned upstream clone ----------
+scenario-b/upstream/
+
 # ---------- Logs & temporary files ----------
 *.log
 *.tmp
@@ -44,6 +47,7 @@ env/
 .idea/
 *.sublime-project
 *.sublime-workspace
+*.kate-swp
 
 # ---------- OS / VM artifacts ----------
 *.vdi

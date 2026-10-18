@@ -1,5 +1,5 @@
-condition,icmp_rtt_avg,http_time_avg,tcp_throughput,udp_throughput,udp_loss,udp_jitter,tcp_retransmissions
-baseline,0.08133,0.0006,3.805e+04,10,0.02573,0.02642,0
-delay,103.9,0.2397,12.77,9.999,1.1,7.46,8
-loss,0.08567,0.01463,4434,10,1.865,0.0366,21
-rate,14.61,0.0017,18.96,10,0,0.1037,0
+condition,icmp_rtt_avg,http_time_avg,tcp_throughput,udp_throughput,udp_loss,udp_jitter,tcp_retransmissions,tcp_retransmissions_sender
+baseline,0.08133,0.0006,3.805e+04,10,0.02573,0.02642,0,0
+delay,157.8,0.2178,140.8,10,0.03858,6.316,3,2
+loss,0.08567,0.01463,4434,10,1.865,0.0366,21,137
+rate,14.61,0.0017,18.96,10,0,0.1037,0,0

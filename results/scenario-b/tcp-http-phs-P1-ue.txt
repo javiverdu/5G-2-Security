@@ -1,0 +1,14 @@
+# Protocol hierarchy — tcp-http / P1-ue
+
+
+===================================================================
+Protocol Hierarchy Statistics
+Filter: 
+
+frame                                    frames:13 bytes:1857
+  raw                                    frames:13 bytes:1857
+    ip                                   frames:13 bytes:1857
+      tcp                                frames:13 bytes:1857
+        http                             frames:2 bytes:1020
+          data-text-lines                frames:1 bytes:948
+===================================================================

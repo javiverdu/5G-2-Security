@@ -1,0 +1,19 @@
+# Protocol hierarchy — udp-iperf / P5-iperf3
+
+
+===================================================================
+Protocol Hierarchy Statistics
+Filter: 
+
+frame                                    frames:496 bytes:647952
+  eth                                    frames:496 bytes:647952
+    ip                                   frames:496 bytes:647952
+      tcp                                frames:30 bytes:2900
+        iperf3                           frames:18 bytes:2092
+          iperf3                         frames:2 bytes:140
+            iperf3                       frames:2 bytes:140
+              iperf3                     frames:2 bytes:140
+      udp                                frames:466 bytes:645052
+        iperf3                           frames:466 bytes:645052
+          data                           frames:464 bytes:644960
+===================================================================

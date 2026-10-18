@@ -1,0 +1,15 @@
+# frame.protocols of the first frame at each point (icmp + tcp-http)
+
+## icmp
+P1-ue          raw:ip:icmp:data
+P2-gnb         eth:ethertype:ip:udp:gtp:ip:icmp:data
+P3-upf         eth:ethertype:ip:udp:gtp:ip:icmp:data
+P4-upf         eth:ethertype:ip:icmp:data
+P5-nginx       eth:ethertype:ip:icmp:data
+
+## tcp-http
+P1-ue          raw:ip:tcp
+P2-gnb         eth:ethertype:ip:udp:gtp:ip:tcp
+P3-upf         eth:ethertype:ip:udp:gtp:ip:tcp
+P4-upf         eth:ethertype:ip:tcp
+P5-nginx       eth:ethertype:ip:tcp

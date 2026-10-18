@@ -1,0 +1,15 @@
+# Protocol hierarchy — icmp / P2-gnb
+
+
+===================================================================
+Protocol Hierarchy Statistics
+Filter: 
+
+frame                                    frames:10 bytes:1860
+  eth                                    frames:10 bytes:1860
+    ip                                   frames:10 bytes:1860
+      udp                                frames:10 bytes:1860
+        gtp                              frames:10 bytes:1860
+          ip                             frames:10 bytes:1860
+            icmp                         frames:10 bytes:1860
+===================================================================

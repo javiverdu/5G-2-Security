@@ -1,0 +1,6 @@
+[impair] baseline — no impairment
+[impair] resulting qdisc state:
+--- sb-nginx:eth0 ---
+qdisc noqueue 0: root refcnt 2 
+--- sb-iperf3:eth0 ---
+qdisc noqueue 0: root refcnt 2 

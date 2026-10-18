@@ -1,0 +1,17 @@
+# Protocol hierarchy — tcp-iperf / P4-upf
+
+
+===================================================================
+Protocol Hierarchy Statistics
+Filter: 
+
+frame                                    frames:2963 bytes:2817913
+  eth                                    frames:2963 bytes:2817913
+    ip                                   frames:2963 bytes:2817913
+      tcp                                frames:2963 bytes:2817913
+        iperf3                           frames:1979 bytes:2752937
+          data                           frames:1960 bytes:2750800
+          iperf3                         frames:2 bytes:140
+            iperf3                       frames:2 bytes:140
+              iperf3                     frames:2 bytes:140
+===================================================================

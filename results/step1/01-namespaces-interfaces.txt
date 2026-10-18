@@ -1,25 +1,25 @@
 # date
-lun 21 sept 2026 22:08:42 UTC
+dom 11 oct 2026 13:38:02 UTC
 
 # ip netns list
-core (id: 2)
-access (id: 1)
-ue (id: 0)
+core (id: 4)
+access (id: 3)
+ue (id: 2)
 
 # ip -brief addr (ue)
 lo               UNKNOWN        127.0.0.1/8 ::1/128 
-eth0@if64        UP             10.0.1.10/24 fe80::385a:ebff:fe64:fd44/64 
+eth0@if8         UP             10.0.1.10/24 fe80::1c90:69ff:feba:9b11/64 
 
 # ip -brief addr (access)
 lo               UNKNOWN        127.0.0.1/8 ::1/128 
-eth0@if65        UP             10.0.1.1/24 fe80::3053:eeff:fee7:85f2/64 
-eth1@if66        UP             10.0.2.1/24 fe80::c8df:5cff:fe6a:f378/64 
+eth0@if9         UP             10.0.1.1/24 fe80::3053:eeff:fee7:85f2/64 
+eth1@if10        UP             10.0.2.1/24 fe80::74f8:eff:feb2:d1a0/64 
 
 # ip -brief addr (core)
 lo               UNKNOWN        127.0.0.1/8 ::1/128 
-eth0@if67        UP             10.0.2.2/24 fe80::48a6:b1ff:fe9f:ced/64 
-eth1@if68        UP             10.0.3.1/24 fe80::143d:b2ff:fe24:5767/64 
+eth0@if11        UP             10.0.2.2/24 fe80::48a6:b1ff:fe9f:ced/64 
+eth1@if12        UP             10.0.3.1/24 fe80::143d:b2ff:fe24:5767/64 
 
 # host: Data Network boundary + docker bridge
-veth-hn@if69     UP             10.0.3.2/24 fe80::345c:33ff:fe51:eac9/64 
-br-85821ebb54dd  UP             10.0.4.1/24 fe80::5400:a8ff:fe2f:5530/64 
+veth-hn@if13     UP             10.0.3.2/24 fe80::345c:33ff:fe51:eac9/64 
+br-85821ebb54dd  UP             10.0.4.1/24 fe80::cc6c:b3ff:fef1:2108/64 

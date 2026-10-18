@@ -42,6 +42,10 @@ IP forwarding is enabled in `access`, `core` and the host.
 
 ## Notes
 
+- **Role mapping.** The reference `app` / Data Network role is realised by the host
+  root namespace plus the Docker `datanet` bridge and its containers, while the
+  three `ip netns` implement UE, access router and core/gateway. See
+  [step1 §1](step1-network-deployment.md#role-mapping--why-three-namespaces-plus-docker).
 - **No NAT** between the namespace side and the Docker network: the path is fully
   routed so captures show real end-to-end addresses.
 - The VM's VirtualBox NAT interface (`enp0s3`) also uses `10.0.2.0/24`. This

@@ -1,0 +1,60 @@
+# =============================================================================
+# Scenario B — milestone 6: Data Network (N6) + application, no NAT
+#
+# This is a Compose *override* on top of the upstream sa-deploy.yaml:
+#
+#   docker compose -f sa-deploy.yaml -f n6/docker-compose.n6.yaml up -d
+#
+# It:
+#   * adds a second network `dn` (10.20.6.0/24) and attaches the UPF to it
+#     at 10.20.6.2 (the UPF keeps its 172.22.0.x interface);
+#   * runs nginx at 10.20.6.20 on `dn`;
+#   * gives nginx a return route to the UE pool (10.45.0.0/16 via the UPF), so
+#     replies travel back through the 5G tunnel. This requires NET_ADMIN only
+#     inside the nginx container.
+#
+# The UPF masquerade is removed at runtime by scripts/enable-n6.sh; with NAT off,
+# nginx sees the real UE address (10.45.0.x) as required by the brief.
+# =============================================================================
+services:
+  upf:
+    networks:
+      default:
+        ipv4_address: ${UPF_IP}
+      dn:
+        ipv4_address: ${UPF_DN_IP}
+
+  nginx:
+    image: nginx:alpine
+    container_name: sb-nginx
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    networks:
+      dn:
+        ipv4_address: ${NGINX_IP}
+    command:
+      - sh
+      - -c
+      - |
+        ip route add 10.45.0.0/16 via ${UPF_DN_IP} 2>/dev/null || true
+        exec nginx -g 'daemon off;'
+
+  # Throughput endpoint. The networkstatic image has no `ip`, so its return
+  # route is added from the host with nsenter (see scripts/enable-n6.sh).
+  iperf3:
+    image: networkstatic/iperf3:latest
+    container_name: sb-iperf3
+    restart: unless-stopped
+    networks:
+      dn:
+        ipv4_address: ${IPERF_IP}
+    command: -s
+
+networks:
+  dn:
+    name: scenario-b-dn
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${DN_NETWORK}

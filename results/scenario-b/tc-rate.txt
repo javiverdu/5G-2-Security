@@ -1,0 +1,6 @@
+[impair] 20 Mbit/s limit
+[impair] resulting qdisc state:
+--- sb-nginx:eth0 ---
+qdisc netem 8005: root refcnt 3 limit 1000 rate 20Mbit seed 15826500715980973947
+--- sb-iperf3:eth0 ---
+qdisc netem 8006: root refcnt 3 limit 1000 rate 20Mbit seed 236375856867527349

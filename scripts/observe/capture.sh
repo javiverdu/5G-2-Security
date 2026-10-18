@@ -53,6 +53,6 @@ sleep 1
 kill -INT "${PIDS[@]}" 2>/dev/null || true
 wait "${PIDS[@]}" 2>/dev/null || true
 
-chown -R x0riso:x0riso "$ROOT/captures"
+[[ -n "${SUDO_USER:-}" ]] && chown -R "$SUDO_USER:$SUDO_USER" "$ROOT/captures" 2>/dev/null || true
 echo "[capture] files in $OUT:"
 ls -1 "$OUT"

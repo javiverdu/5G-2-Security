@@ -1,0 +1,12 @@
+# Protocol hierarchy — icmp / P1-ue
+
+
+===================================================================
+Protocol Hierarchy Statistics
+Filter: 
+
+frame                                    frames:10 bytes:1280
+  raw                                    frames:10 bytes:1280
+    ip                                   frames:10 bytes:1280
+      icmp                               frames:10 bytes:1280
+===================================================================

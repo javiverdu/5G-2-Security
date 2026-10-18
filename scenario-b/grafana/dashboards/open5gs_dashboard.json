@@ -1,0 +1,88 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Core NFs up (AMF / SMF / PCF / UPF)",
+      "datasource": { "type": "prometheus", "uid": "PA240B69645956401" },
+      "gridPos": { "h": 7, "w": 8, "x": 0, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": [ "lastNotNull" ], "fields": "", "values": false },
+        "textMode": "value_and_name"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "PA240B69645956401" },
+          "editorMode": "code",
+          "expr": "up{job=~\"amf|smf|pcf|upf\"}",
+          "legendFormat": "{{job}}",
+          "range": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Target health over time",
+      "datasource": { "type": "prometheus", "uid": "PA240B69645956401" },
+      "gridPos": { "h": 7, "w": 8, "x": 8, "y": 0 },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "red", "value": null }, { "color": "green", "value": 1 } ] },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "PA240B69645956401" },
+          "editorMode": "code",
+          "expr": "up{job=~\"amf|smf|pcf|upf\"}",
+          "legendFormat": "{{job}}",
+          "range": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "title": "How to use",
+      "gridPos": { "h": 7, "w": 8, "x": 16, "y": 0 },
+      "options": {
+        "mode": "markdown",
+        "content": "## Scenario B — Open5GS\n\n- **NFs up**: green = the NF is being scraped by Prometheus.\n- Open **Explore** (`g` then `e`) and query `{__name__=~\"fivegs.*\"}` for Open5GS counters (names depend on the Open5GS build).\n- **Correlate**: run `ping` / `iperf3` from the UE and watch the counters move.\n- Prometheus: http://127.0.0.1:9090 → *Status → Targets*.\n"
+      }
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": [ "open5gs", "scenario-b" ],
+  "templating": { "list": [] },
+  "time": { "from": "now-15m", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Open5GS",
+  "uid": "open5gs-scenario-b",
+  "version": 1
+}

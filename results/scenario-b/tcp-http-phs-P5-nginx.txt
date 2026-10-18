@@ -1,0 +1,14 @@
+# Protocol hierarchy — tcp-http / P5-nginx
+
+
+===================================================================
+Protocol Hierarchy Statistics
+Filter: 
+
+frame                                    frames:13 bytes:2039
+  eth                                    frames:13 bytes:2039
+    ip                                   frames:13 bytes:2039
+      tcp                                frames:13 bytes:2039
+        http                             frames:2 bytes:1048
+          data-text-lines                frames:1 bytes:962
+===================================================================

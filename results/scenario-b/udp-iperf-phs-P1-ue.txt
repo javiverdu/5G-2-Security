@@ -1,0 +1,19 @@
+# Protocol hierarchy — udp-iperf / P1-ue
+
+
+===================================================================
+Protocol Hierarchy Statistics
+Filter: 
+
+frame                                    frames:496 bytes:641008
+  raw                                    frames:496 bytes:641008
+    ip                                   frames:496 bytes:641008
+      tcp                                frames:30 bytes:2480
+        iperf3                           frames:18 bytes:1840
+          iperf3                         frames:2 bytes:112
+            iperf3                       frames:2 bytes:112
+              iperf3                     frames:2 bytes:112
+      udp                                frames:466 bytes:638528
+        iperf3                           frames:466 bytes:638528
+          data                           frames:464 bytes:638464
+===================================================================

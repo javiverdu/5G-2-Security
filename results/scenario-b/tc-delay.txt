@@ -1,0 +1,6 @@
+[impair] delay 50ms +/-10ms
+[impair] resulting qdisc state:
+--- sb-nginx:eth0 ---
+qdisc netem 8001: root refcnt 3 limit 1000 delay 50ms  10ms seed 12670509501380934555
+--- sb-iperf3:eth0 ---
+qdisc netem 8002: root refcnt 3 limit 1000 delay 50ms  10ms seed 9693550491120647815

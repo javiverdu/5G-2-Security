@@ -1,0 +1,12 @@
+# Protocol hierarchy — icmp / P4-upf
+
+
+===================================================================
+Protocol Hierarchy Statistics
+Filter: 
+
+frame                                    frames:10 bytes:1420
+  eth                                    frames:10 bytes:1420
+    ip                                   frames:10 bytes:1420
+      icmp                               frames:10 bytes:1420
+===================================================================

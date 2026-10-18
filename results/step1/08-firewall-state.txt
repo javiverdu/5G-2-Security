@@ -1,17 +1,20 @@
-# nft tables ('table ip raw' exists but EMPTY: dockerd's raw drops disabled via allow-direct-routing)
+# nft tables
 table ip nat
 table ip filter
 table ip6 nat
 table ip6 filter
-table ip raw
 
-# iptables DOCKER-USER (allow routed path into datanet)
+# iptables DOCKER-USER
 Chain DOCKER-USER (1 references)
  pkts bytes target     prot opt in     out     source               destination         
- 763K   33G ACCEPT     all  --  veth-hn *       0.0.0.0/0            10.0.4.0/24         
+ 903K   41G ACCEPT     all  --  veth-hn *       0.0.0.0/0            10.0.4.0/24         
 
-# iptables FORWARD (Docker default policy DROP)
+# iptables FORWARD
 Chain FORWARD (policy DROP 0 packets, 0 bytes)
  pkts bytes target     prot opt in     out     source               destination         
-1396K   33G DOCKER-USER  all  --  *      *       0.0.0.0/0            0.0.0.0/0           
- 633K   33M DOCKER-FORWARD  all  --  *      *       0.0.0.0/0            0.0.0.0/0           
+1578K   41G DOCKER-USER  all  --  *      *       0.0.0.0/0            0.0.0.0/0           
+ 675K   35M DOCKER-FORWARD  all  --  *      *       0.0.0.0/0            0.0.0.0/0           
+
+# host route lookup toward the service network
+10.0.4.10 dev br-85821ebb54dd src 10.0.4.1 uid 0 
+    cache 

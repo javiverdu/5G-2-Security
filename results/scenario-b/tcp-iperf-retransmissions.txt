@@ -1,0 +1,4 @@
+# TCP retransmissions (tcp-iperf)
+P1-ue          0
+P4-upf         0
+P5-iperf3      0

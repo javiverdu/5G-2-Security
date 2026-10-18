@@ -1,0 +1,6 @@
+[impair] 1% packet loss
+[impair] resulting qdisc state:
+--- sb-nginx:eth0 ---
+qdisc netem 8003: root refcnt 3 limit 1000 loss 1% seed 13103068941106140726
+--- sb-iperf3:eth0 ---
+qdisc netem 8004: root refcnt 3 limit 1000 loss 1% seed 7192213753301504534
