@@ -1,0 +1,11 @@
+# =============================================================================
+# Project 2 — Phase 1A: nr_ue uses the p2 image (persistent user-plane route).
+#
+# Applied as a compose override on the upstream nr-ue.yaml:
+#   docker compose -f nr-ue.yaml -f p2/docker-compose.ueransim.yaml up -d
+#
+# Only the image changes; the rest of the UE service is inherited.
+# =============================================================================
+services:
+  nr_ue:
+    image: telecom-lab-ueransim:3.3.0-p2
