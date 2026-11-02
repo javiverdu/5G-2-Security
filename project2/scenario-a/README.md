@@ -25,8 +25,9 @@ Scenario B (Jenkins, ZAP, Suricata, Trivy/Syft) starts only after 1E is green.
 ## Directory
 
 ```
-scenario-b/p2/
+project2/scenario-a/
 ├── README.md                   # this plan
+├── AGENTS.md                   # exact Scenario A contract
 ├── ueransim/                   # Phase 1A: Dockerfile + p2-init.sh (persistent route)
 ├── docker-compose.ueransim.yaml# compose override: nr_ue uses the p2 image
 └── scripts/
@@ -35,8 +36,7 @@ scenario-b/p2/
     └── verify-phase1a.sh       # acceptance for phase 1A
 ```
 
-Later phases add `django/`, `nginx/`, `tls/`, `docker-compose.p2.yaml` and
-`verify-phase1.sh`.
+Later phases add `django/`, `nginx/`, `pki/` and `docker-compose.p2.yaml`.
 
 ## Phase 1A — what and why
 
@@ -51,24 +51,25 @@ script:
 * `ueransim/p2-init.sh` starts a small watcher that, whenever `uesimtun0` exists,
   keeps the route the brief requires — **`10.20.6.0/24 dev uesimtun0`** — installed,
   so N6 traffic enters the PDU tunnel instead of the Docker `ran-net` path, and
-  then hands control to the original UERANSIM init.
-  It also keeps `default dev uesimtun0` (Project 1 behaviour); that part is not
-  required by the brief and must be justified or dropped — see
-  [`AGENTS.md`](AGENTS.md).
+  then hands control to the original UERANSIM init. The Project 1 `default` route
+  is **not** installed: the brief asks for the narrow N6 route, and a default
+  route would push management/DNS traffic into the tunnel.
 * The image is `telecom-lab-ueransim:3.3.0-p2`, built **on top of** the Project 1
-  base (`docker_ueransim`), so the rest of the deployment is untouched.
+  base (`docker_ueransim`), so the rest of the deployment is untouched. The brief
+  names `gradiant/ueransim:3.3.0`; that environment is not deployed in the lab, so
+  the substitution is recorded in the report (see `AGENTS.md`, open decisions).
 * `nr_ue` is recreated via a compose override; nothing else changes.
 
 ## Run (phase 1A)
 
 ```bash
 cd scenario-b
-./scripts/fetch-upstream.sh      # if not already done (provides docker_ueransim)
-./scripts/deploy.sh              # base deployment (core, gNB, UE, subscriber)
-sudo ./scripts/enable-n6.sh      # N6 + apps, no NAT
-./p2/scripts/build.sh            # build the p2 UE image
-./p2/scripts/upgrade-ue.sh      # recreate nr_ue with it
-./p2/scripts/verify-phase1a.sh   # route via uesimtun0, survives a restart
+./scripts/fetch-upstream.sh        # if not already done (provides docker_ueransim)
+./scripts/deploy.sh                # base deployment (core, gNB, UE, subscriber)
+sudo ./scripts/enable-n6.sh        # N6 + apps, no NAT
+../project2/scenario-a/scripts/build.sh
+../project2/scenario-a/scripts/upgrade-ue.sh
+../project2/scenario-a/scripts/verify-phase1a.sh
 ```
 
 ## Working specification

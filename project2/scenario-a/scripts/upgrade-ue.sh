@@ -5,8 +5,8 @@
 # Usage:  ./p2/scripts/upgrade-ue.sh     (after deploy.sh + enable-n6.sh)
 # =============================================================================
 set -euo pipefail
-HERE=$(cd "$(dirname "$0")/.." && pwd)          # scenario-b/p2
-UP="$HERE/../upstream"
+HERE=$(cd "$(dirname "$0")/.." && pwd)          # project2/scenario-a
+UP="$HERE/../../scenario-b/upstream"
 
 [[ -d "$UP" ]] || { echo "run scenario-b/scripts/fetch-upstream.sh first"; exit 1; }
 docker image inspect telecom-lab-ueransim:3.3.0-p2 >/dev/null 2>&1 \

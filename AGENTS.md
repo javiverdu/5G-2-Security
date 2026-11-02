@@ -89,8 +89,10 @@ The CA private key stays on the host and is mounted into **no** container.
 
 ## 5. Conventions
 
-**Layout.** Project 2 work lives in `scenario-b/p2/`. Do not scatter new files
-into the inherited tree; add a narrow `AGENTS.md` if a subtree needs its own rules.
+**Layout.** Project 2 work lives in `project2/scenario-a/` and
+`project2/scenario-b/`. The inherited 5G base stays in `scenario-b/` untouched.
+Do not scatter new files into the inherited tree; add a narrow `AGENTS.md` if a
+subtree needs its own rules.
 
 **Scripts.** Bash, `#!/usr/bin/env bash`, `set -euo pipefail`, idempotent,
 POSIX-safe paths, effect first then verify. Print `[tag]` prefixes. Never hide
@@ -123,26 +125,32 @@ exit criterion. Prefer machine-checkable assertions over prose.
 
 - Development happens on the **host** at
   `/home/x0riso/Documentos/VSCODE/5G-2-Security`.
-- Docker/VM work happens in the **Ubuntu lab VM**. Project 1 ran from a
-  VirtualBox shared folder (`/media/sf_5G_project/...`), where **vboxsf breaks
-  container mounts and permissions** (e.g. Grafana uid 472). For Project 2 use a
-  **native VM path** (`~/5G-2-Security`, cloned from GitHub).
+- Docker work happens in the **Ubuntu 25.04 VM `UWUNTU`**, reachable from the
+  host as `ssh uwuntu` (VirtualBox port forward `127.0.0.1:2222`). Repo path in
+  the VM: `~/5G-2-Security` (native disk, **not** the shared folder).
+- VM after preparation: 10 GB RAM, 32 GB disk (`/dev/sda2`), 4 GB swap.
+  Host: 15 GB RAM, ~21 GB free disk. Do not raise the VM above 10 GB or grow the
+  VDI beyond 32 GB without checking the host first.
+- **vboxsf breaks container mounts and permissions** (Grafana uid 472). Never run
+  Project 2 containers from `/media/sf_5G_project`; use the native clone.
 - The host has `gh` authenticated as `javiverdu`; the repository is public.
+- The brief is readable by agents at `docs/brief-p2.txt` (PDF text extraction).
 
-## 8. Open decisions (confirm with the user; do not guess)
+## 8. Decisions taken (do not reopen without cause)
 
-1. **Base images.** The brief names `gradiant/ueransim:3.3.0` and Open5GS 2.8.0;
-   Project 1 uses `herlesupreeth/docker_ueransim` + `docker_open5gs`. Confirm
-   whether the course delivers the `gradiant/*` environment or we keep the
-   Project 1 images and document the equivalence.
-2. **Network names.** The brief lists `ran-net`, `n2-net`, `n3-net`, `sbi-net`,
-   `n4-net`, `dn-net`, `obs-net`; Project 1 implements one flat `core` network
-   (`172.22.0.0/24`) plus `dn`. Never rename or claim networks that do not
-   exist — either split them or document the mapping explicitly.
-3. **`sb-nginx` vs `scenario-b-nginx`.** Scenario A requires the exact container
-   name `scenario-b-nginx`. Replace the Project 1 `sb-nginx`; never run both.
-4. **Django version.** The brief states `Django 6.0.8`; pin whatever installs
-   cleanly and record the real version in the Release Manifest/report.
+1. **Base images — Option B.** The course's `gradiant/*` environment is not
+   deployed in the lab. Keep `herlesupreeth/docker_ueransim` +
+   `docker_open5gs`; record the substitution and the real UERANSIM/Open5GS
+   versions in the report.
+2. **Network names — documented mapping.** Keep the flat `core`
+   (`172.22.0.0/24`) for N2/N3/N4/SBI, distinguished by port (`38412/2152/8805/
+   7777`). Create `dn-net`, `app-net` and `security-net` with the exact names the
+   brief requires. Never claim networks that do not exist.
+3. **Container names.** `scenario-b-nginx` replaces `sb-nginx`; never run both.
+   `scenario-b-django` is new.
+4. **Django version.** `Django==6.0.8` exists on PyPI (verified). Pin it exactly.
+5. **UE route.** Only `10.20.6.0/24 dev uesimtun0`. The Project 1
+   `default dev uesimtun0` is deliberately not installed.
 
 ## 9. Definition of done (per phase)
 

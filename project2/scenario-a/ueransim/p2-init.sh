@@ -16,10 +16,10 @@ set -uo pipefail
 (
     while true; do
         if ip link show uesimtun0 >/dev/null 2>&1; then
-            # user plane: everything except the management subnet goes via the
-            # 5G session (the connected 172.22.0.0/24 route is kept by the kernel)
-            ip route replace default dev uesimtun0 2>/dev/null || true
-            ip route replace 10.45.0.0/16 dev uesimtun0 2>/dev/null || true
+            # Only the N6/data-network subnet enters the PDU tunnel. Everything
+            # else (management, DNS) keeps using the Docker interface, so a
+            # dropped PDU session cannot isolate the container.
+            ip route replace 10.20.6.0/24 dev uesimtun0 2>/dev/null || true
         fi
         sleep 5
     done

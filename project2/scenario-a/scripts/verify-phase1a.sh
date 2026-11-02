@@ -13,7 +13,7 @@
 # Usage:  ./p2/scripts/verify-phase1a.sh
 # =============================================================================
 set -uo pipefail
-HERE=$(cd "$(dirname "$0")/.." && pwd)          # scenario-b/p2
+HERE=$(cd "$(dirname "$0")/.." && pwd)          # project2/scenario-a
 P2IMG="telecom-lab-ueransim:3.3.0-p2"
 
 ok()   { printf '\033[1;32m[ OK ]\033[0m %s\n' "$*"; }

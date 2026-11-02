@@ -35,13 +35,14 @@ is reused as the transport for Project 2.
 ```
 5G-2-Security/
 ├── AGENTS.md              # agent rules: design invariants that survive compaction
-├── scenario-b/            # 5G SA core (inherited from Project 1) + Project 2 additions
-│   ├── AGENTS.md          # inherited-base invariants and gotchas
-│   └── p2/                # Project 2 — Scenario A work (phases 1A–1E)
+├── scenario-b/            # 5G SA core (inherited from Project 1)
+│   └── AGENTS.md          # inherited-base invariants and gotchas
+├── project2/
+│   └── scenario-a/        # secure application delivery (phases 1A–1E)
 │       └── AGENTS.md      # exact Scenario A contract from the brief
-├── docs/                  # Project 1 reports (kept as reference; history preserves all)
+├── docs/                  # brief, reports and reference material
 ├── scripts/               # Project 1 Scenario A tooling (reference)
-└── results/               # Project 1 evidence (reference)
+└── results/               # evidence
 ```
 
 ## Inherited base (Project 1)
@@ -56,7 +57,7 @@ cd scenario-b
 sudo ./scripts/enable-n6.sh     # N6 + apps, no NAT
 ```
 
-Project 2 work happens in [`scenario-b/p2/`](scenario-b/p2/README.md).
+Project 2 work happens in [`project2/scenario-a/`](project2/scenario-a/README.md).
 
 ## Working specification (from the brief — confirm before wiring)
 
@@ -91,7 +92,7 @@ The design that must not drift is written down, not inferred from chat history:
 
 - [`AGENTS.md`](AGENTS.md) — architecture, frozen values, phase gates, evidence rules.
 - [`scenario-b/AGENTS.md`](scenario-b/AGENTS.md) — inherited 5G invariants and gotchas.
-- [`scenario-b/p2/AGENTS.md`](scenario-b/p2/AGENTS.md) — exact Scenario A contract.
+- [`project2/scenario-a/AGENTS.md`](project2/scenario-a/AGENTS.md) — exact Scenario A contract.
 
 Requirements source of truth:
 `Project 2_Telecommunication Security, DevSecOps, and Traffic Intelligence.pdf`.

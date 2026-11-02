@@ -1,8 +1,9 @@
 # AGENTS.md — Project 2, Scenario A (phases 1A–1E)
 
 Exact contract from the brief for the secure application path. Root
-[`../../AGENTS.md`](../../AGENTS.md) and [`../AGENTS.md`](../AGENTS.md) still
-apply. **Do not simplify the acceptance criteria.**
+[`../../AGENTS.md`](../../AGENTS.md) and
+[`../../scenario-b/AGENTS.md`](../../scenario-b/AGENTS.md) still apply.
+**Do not simplify the acceptance criteria.**
 
 ## Path
 
@@ -24,9 +25,10 @@ demonstration must cross the 5G user plane.
 
 Verification-only, `docker run --rm`, never part of the runtime: `curlimages/curl:latest`, `alpine`.
 
-> ⚠️ Current scaffold builds the UE image `FROM docker_ueransim:latest` (Project
-> 1). The brief names `gradiant/ueransim:3.3.0`. This is an **open decision**
-> (root §8); resolve it before claiming 1A complete.
+> The UE image builds `FROM docker_ueransim:latest` (Project 1). The brief names
+> `gradiant/ueransim:3.3.0`; that environment is not deployed in the lab, so the
+> substitution is **decided** (root §8) and must be reported as a documented
+> deviation, together with the real UERANSIM version.
 
 ## Places and files
 
@@ -48,9 +50,9 @@ hosts). **Do not hardcode secrets.**
   resolves via `uesimtun0`, including **after `docker restart` of the UE**.
 - UE can reach `10.20.6.20`.
 
-> Note: the scaffold's watcher also installs `default dev uesimtun0` (a Project 1
-> carry-over). The brief only requires the `/24` route. Keep the default route
-> only if it is verified not to break management/DNS traffic, and document why.
+> The watcher installs **only** `10.20.6.0/24 dev uesimtun0`. The Project 1
+> `default dev uesimtun0` is deliberately not installed: it would push
+> management/DNS traffic into the tunnel, and the brief does not ask for it.
 
 ## Phase 1B — Django
 

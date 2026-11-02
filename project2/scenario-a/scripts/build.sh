@@ -4,7 +4,7 @@
 # (UE image with a persistent user-plane route, on top of docker_ueransim)
 # =============================================================================
 set -euo pipefail
-HERE=$(cd "$(dirname "$0")/.." && pwd)          # scenario-b/p2
+HERE=$(cd "$(dirname "$0")/.." && pwd)          # project2/scenario-a
 
 docker image inspect docker_ueransim:latest >/dev/null 2>&1 \
     || { echo "docker_ueransim:latest not found — run scenario-b/scripts/fetch-upstream.sh first"; exit 1; }
