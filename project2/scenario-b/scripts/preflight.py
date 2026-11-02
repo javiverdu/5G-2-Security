@@ -47,7 +47,7 @@ def record(name: str, ok: bool, detail: str = "", hard: bool = True) -> bool:
         {
             "check": name,
             "status": "PASS" if ok else ("FAIL" if hard else "WARN"),
-            "detail": detail.strip()[:2000],
+            "detail": str(detail).strip()[:2000],
             "hard": hard,
         }
     )
@@ -221,9 +221,13 @@ def main() -> int:
     if have_zap:
         rc, out = run(["docker", "run", "--rm", "--entrypoint", "zap.sh", zap,
                        "-version"], timeout=180)
-        versions["zap"] = out.splitlines()[-1] if out else ""
-        record("ZAP executable reports a version", rc == 0 and "ZAP" in out,
-               out.splitlines()[-1] if out else "no output")
+        zap_version = ""
+        m = re.search(r"ZAP\s+([0-9][\w.\-]+)", out)
+        if m:
+            zap_version = m.group(0)
+        versions["zap"] = zap_version or out.splitlines()[-1] if out else ""
+        record("ZAP executable reports a version", rc == 0 and bool(zap_version),
+               zap_version or (out.splitlines()[-1] if out else "no output"))
     plan = REPO / "project2/scenario-b/security/zap/plan.yaml"
     record("targeted ZAP plan.yaml present", plan.is_file(), str(plan))
     if plan.is_file():
@@ -287,7 +291,7 @@ def main() -> int:
         ], timeout=180)
         loaded = re.search(r"(\d+) rules successfully loaded", out)
         record("Suricata accepts the configuration (suricata -T)", rc == 0,
-               out.splitlines()[-3:] if out else "no output")
+               " | ".join(out.splitlines()[-3:]) if out else "no output")
         record("SID 1000001 is loaded by the active rule set",
                bool(loaded) and int(loaded.group(1)) >= 1,
                loaded.group(0) if loaded else "rule count not reported")

@@ -19,6 +19,9 @@ COMPOSE="$HERE/docker-compose.security.yaml"
 echo "[up] building the Scenario B images"
 docker compose -f "$COMPOSE" build
 
+echo "[up] building the capture job image (no compose service)"
+docker build -t telecom-lab-capture:1.0 "$HERE/capture"
+
 echo "[up] starting juice-shop, selenium and jenkins"
 docker compose -f "$COMPOSE" up -d
 
