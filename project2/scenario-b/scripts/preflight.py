@@ -221,11 +221,9 @@ def main() -> int:
     if have_zap:
         rc, out = run(["docker", "run", "--rm", "--entrypoint", "zap.sh", zap,
                        "-version"], timeout=180)
-        zap_version = ""
-        m = re.search(r"ZAP\s+([0-9][\w.\-]+)", out)
-        if m:
-            zap_version = m.group(0)
-        versions["zap"] = zap_version or out.splitlines()[-1] if out else ""
+        matches = re.findall(r"^\s*(\d+\.\d+\.\d+)\s*$", out, re.M)
+        zap_version = matches[-1] if matches else ""
+        versions["zap"] = zap_version
         record("ZAP executable reports a version", rc == 0 and bool(zap_version),
                zap_version or (out.splitlines()[-1] if out else "no output"))
     plan = REPO / "project2/scenario-b/security/zap/plan.yaml"
@@ -285,7 +283,7 @@ def main() -> int:
     if have_suri and cfg.is_file() and rules.is_file():
         rc, out = run([
             "docker", "run", "--rm",
-            "-v", f"{HOST_REPO}/project2/scenario-b/security/ids:/etc/suricata:ro",
+            "-v", f"{HOST_REPO}/project2/scenario-b/security/ids/suricata.yaml:/etc/suricata/suricata.yaml:ro",
             "-v", f"{HOST_REPO}/project2/scenario-b/security/ids/rules:/rules:ro",
             suri, "-T", "-c", "/etc/suricata/suricata.yaml", "-v",
         ], timeout=180)
