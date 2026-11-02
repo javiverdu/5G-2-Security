@@ -21,7 +21,9 @@ set -uo pipefail
             # dropped PDU session cannot isolate the container.
             ip route replace 10.20.6.0/24 dev uesimtun0 2>/dev/null || true
         fi
-        sleep 5
+        # 1 s, not 5: the PDU session and the acceptance check can be seconds
+        # apart, and a missing route at that instant looks like a phase failure.
+        sleep 1
     done
 ) &
 

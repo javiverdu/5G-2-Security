@@ -33,6 +33,12 @@ for _ in $(seq 1 60); do
     printf '.'; sleep 2
 done
 
+printf '[upgrade-ran] waiting for the N6 route (installed by the image)'
+for _ in $(seq 1 20); do
+    grep -q uesimtun0 <<<"$(docker exec nr_ue ip route get 10.20.6.20 2>/dev/null)" && { echo " ...ok"; break; }
+    printf '.'; sleep 1
+done
+
 echo "[upgrade-ran] route toward N6:"
 docker exec nr_ue ip route get 10.20.6.20 2>/dev/null || true
 echo "[upgrade-ran] next: ./project2/scenario-a/scripts/verify-phase1a.sh"
