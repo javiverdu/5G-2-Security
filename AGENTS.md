@@ -145,8 +145,10 @@ exit criterion. Prefer machine-checkable assertions over prose.
    substitution and the verified versions in the report.
 2. **Network names — documented mapping.** Keep the flat `core`
    (`172.22.0.0/24`) for N2/N3/N4/SBI, distinguished by port (`38412/2152/8805/
-   7777`). Create `dn-net`, `app-net` and `security-net` with the exact names the
-   brief requires. Never claim networks that do not exist.
+   7777`). The N6 network is `dn-net` `10.20.6.0/24` (the Project 1 compose
+   called it `scenario-b-dn`; renamed, same subnet). `app-net`
+   (`10.20.8.0/24`, internal) and `security-net` use the exact names the brief
+   requires. Never claim networks that do not exist.
 3. **Container names.** `scenario-b-nginx` replaces `sb-nginx`; never run both.
    `scenario-b-django` is new.
 4. **Django version.** `Django==6.0.8` exists on PyPI (verified). Pin it exactly.

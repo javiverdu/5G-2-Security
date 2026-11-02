@@ -1,0 +1,279 @@
+[
+    {
+        "Id": "e985c869f0f69540da66753cd1b027490334269c0e0ed3e6e3eba454cf01a19f",
+        "Created": "2026-11-02T21:19:40.823764282Z",
+        "Path": "/docker-entrypoint.sh",
+        "Args": [
+            "nginx",
+            "-g",
+            "daemon off;"
+        ],
+        "State": {
+            "Status": "running",
+            "Running": true,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 47112,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2026-11-02T21:19:41.137481508Z",
+            "FinishedAt": "0001-01-01T00:00:00Z"
+        },
+        "Image": "sha256:a528769de37e32263f116f3dcf75cd9b922d64c45d9c3384339b8206b2b9f3df",
+        "ResolvConfPath": "/var/lib/docker/containers/e985c869f0f69540da66753cd1b027490334269c0e0ed3e6e3eba454cf01a19f/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/e985c869f0f69540da66753cd1b027490334269c0e0ed3e6e3eba454cf01a19f/hostname",
+        "HostsPath": "/var/lib/docker/containers/e985c869f0f69540da66753cd1b027490334269c0e0ed3e6e3eba454cf01a19f/hosts",
+        "LogPath": "/var/lib/docker/containers/e985c869f0f69540da66753cd1b027490334269c0e0ed3e6e3eba454cf01a19f/e985c869f0f69540da66753cd1b027490334269c0e0ed3e6e3eba454cf01a19f-json.log",
+        "Name": "/scenario-b-nginx",
+        "RestartCount": 0,
+        "Driver": "overlayfs",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "docker-default",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": [
+                "/home/x0riso/5G-2-Security/secrets/tls/server.crt:/etc/nginx/tls/server.crt:ro",
+                "/home/x0riso/5G-2-Security/secrets/tls/server.key:/etc/nginx/tls/server.key:ro"
+            ],
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {}
+            },
+            "NetworkMode": "app-net",
+            "PortBindings": {},
+            "RestartPolicy": {
+                "Name": "unless-stopped",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "CapAdd": [
+                "CAP_NET_ADMIN"
+            ],
+            "CapDrop": null,
+            "CgroupnsMode": "private",
+            "Dns": null,
+            "DnsOptions": null,
+            "DnsSearch": null,
+            "ExtraHosts": [],
+            "GroupAdd": null,
+            "IpcMode": "private",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": false,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": null,
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 0,
+            "NanoCpus": 0,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": null,
+            "BlkioDeviceReadBps": null,
+            "BlkioDeviceWriteBps": null,
+            "BlkioDeviceReadIOps": null,
+            "BlkioDeviceWriteIOps": null,
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": null,
+            "DeviceCgroupRules": null,
+            "DeviceRequests": null,
+            "MemoryReservation": 0,
+            "MemorySwap": 0,
+            "MemorySwappiness": null,
+            "OomKillDisable": null,
+            "PidsLimit": null,
+            "Ulimits": null,
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "MaskedPaths": [
+                "/proc/acpi",
+                "/proc/asound",
+                "/proc/interrupts",
+                "/proc/kcore",
+                "/proc/keys",
+                "/proc/latency_stats",
+                "/proc/sched_debug",
+                "/proc/scsi",
+                "/proc/timer_list",
+                "/proc/timer_stats",
+                "/sys/devices/virtual/powercap",
+                "/sys/firmware"
+            ],
+            "ReadonlyPaths": [
+                "/proc/bus",
+                "/proc/fs",
+                "/proc/irq",
+                "/proc/sys",
+                "/proc/sysrq-trigger"
+            ]
+        },
+        "Storage": {
+            "RootFS": {
+                "Snapshot": {
+                    "Name": "overlayfs"
+                }
+            }
+        },
+        "Mounts": [
+            {
+                "Type": "bind",
+                "Source": "/home/x0riso/5G-2-Security/secrets/tls/server.crt",
+                "Destination": "/etc/nginx/tls/server.crt",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            },
+            {
+                "Type": "bind",
+                "Source": "/home/x0riso/5G-2-Security/secrets/tls/server.key",
+                "Destination": "/etc/nginx/tls/server.key",
+                "Mode": "ro",
+                "RW": false,
+                "Propagation": "rprivate"
+            }
+        ],
+        "Config": {
+            "Hostname": "e985c869f0f6",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": true,
+            "AttachStderr": true,
+            "ExposedPorts": {
+                "80/tcp": {}
+            },
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "NGINX_VERSION=1.31.6",
+                "NJS_VERSION=1.0.1",
+                "NJS_RELEASE=1~trixie",
+                "ACME_VERSION=0.4.1",
+                "PKG_RELEASE=1~trixie",
+                "DYNPKG_RELEASE=1~trixie"
+            ],
+            "Cmd": [
+                "nginx",
+                "-g",
+                "daemon off;"
+            ],
+            "Image": "telecom-lab-nginx:p2",
+            "Volumes": null,
+            "WorkingDir": "",
+            "Entrypoint": [
+                "/docker-entrypoint.sh"
+            ],
+            "Labels": {
+                "com.docker.compose.config-hash": "4aa155c9a9826c9511ede63080f653ba5c0409f32e19dcc2bb5167378c6acabd",
+                "com.docker.compose.container-number": "1",
+                "com.docker.compose.depends_on": "django:service_started:false",
+                "com.docker.compose.image": "sha256:de43328303d21cd885726cccab57d4399101a2cdec1eb6eb9f8ee823b74119dc",
+                "com.docker.compose.oneoff": "False",
+                "com.docker.compose.project": "scenario-a",
+                "com.docker.compose.project.config_files": "/home/x0riso/5G-2-Security/project2/scenario-a/docker-compose.p2.yaml",
+                "com.docker.compose.project.working_dir": "/home/x0riso/5G-2-Security/project2/scenario-a",
+                "com.docker.compose.service": "nginx",
+                "com.docker.compose.version": "5.6.1",
+                "maintainer": "NGINX Docker Maintainers <docker-maint@nginx.com>"
+            },
+            "StopSignal": "SIGQUIT"
+        },
+        "NetworkSettings": {
+            "SandboxID": "1a5af6dd7f173dc59cb5cf5fd828205c6cb57537513e975d514ac5cf480c05e1",
+            "SandboxKey": "/var/run/docker/netns/1a5af6dd7f17",
+            "Ports": {
+                "80/tcp": null
+            },
+            "Networks": {
+                "app-net": {
+                    "IPAMConfig": {
+                        "IPv4Address": "10.20.8.10"
+                    },
+                    "Links": null,
+                    "Aliases": [
+                        "scenario-b-nginx",
+                        "nginx"
+                    ],
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "f17b072edb4dc95fe79ec110058e67e6c18a01a46c7c2eb8793d030e296ae8e0",
+                    "EndpointID": "efad5054e1e19b85cc1ce8b21d651c767fc32a81ebf74ef2acc5bccea693c3ba",
+                    "Gateway": "",
+                    "IPAddress": "10.20.8.10",
+                    "MacAddress": "46:61:61:12:6d:2a",
+                    "IPPrefixLen": 24,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                        "scenario-b-nginx",
+                        "nginx",
+                        "e985c869f0f6"
+                    ]
+                },
+                "dn-net": {
+                    "IPAMConfig": {
+                        "IPv4Address": "10.20.6.20"
+                    },
+                    "Links": null,
+                    "Aliases": [
+                        "scenario-b-nginx",
+                        "nginx"
+                    ],
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "38529bef29a13ca2667583feb14bf68af1471d090ee04620db38caee7b315ea8",
+                    "EndpointID": "9b14f492b86adc15c5ee43060ae7e4c854c9c9cc20c9e22d60041260300950d9",
+                    "Gateway": "10.20.6.1",
+                    "IPAddress": "10.20.6.20",
+                    "MacAddress": "92:51:42:8c:f2:c5",
+                    "IPPrefixLen": 24,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": [
+                        "scenario-b-nginx",
+                        "nginx",
+                        "e985c869f0f6"
+                    ]
+                }
+            }
+        },
+        "ImageManifestDescriptor": {
+            "mediaType": "application/vnd.oci.image.manifest.v1+json",
+            "digest": "sha256:de43328303d21cd885726cccab57d4399101a2cdec1eb6eb9f8ee823b74119dc",
+            "size": 2373,
+            "platform": {
+                "architecture": "amd64",
+                "os": "linux"
+            }
+        }
+    }
+]

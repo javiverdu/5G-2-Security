@@ -29,6 +29,24 @@ services:
       app-net:
         ipv4_address: 10.20.8.20
 
+  nginx:
+    build: ./nginx
+    image: telecom-lab-nginx:p2
+    container_name: scenario-b-nginx
+    restart: unless-stopped
+    depends_on:
+      - django
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ../../secrets/tls/server.crt:/etc/nginx/tls/server.crt:ro
+      - ../../secrets/tls/server.key:/etc/nginx/tls/server.key:ro
+    networks:
+      dn-net:
+        ipv4_address: 10.20.6.20
+      app-net:
+        ipv4_address: 10.20.8.10
+
 networks:
   app-net:
     name: app-net
@@ -37,6 +55,11 @@ networks:
     ipam:
       config:
         - subnet: 10.20.8.0/24
+
+  dn-net:
+    # Created by scenario-b/scripts/enable-n6.sh (N6/data network).
+    external: true
+    name: dn-net
 
 volumes:
   django-data:

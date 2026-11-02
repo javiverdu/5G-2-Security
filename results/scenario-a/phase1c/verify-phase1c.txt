@@ -1,0 +1,31 @@
+----] 1. gateway image and container
+[ OK ] telecom-lab-nginx:p2 built
+[ OK ] scenario-b-nginx runs telecom-lab-nginx:p2
+----] 2. addressing and network isolation
+[ OK ] dn-net 10.20.6.20
+[ OK ] app-net 10.20.8.10
+[ OK ] sb-nginx removed
+[ OK ] scenario-b-nginx running
+----] 3. server certificate
+       subject: O=Telecom Lab, CN=telecom-lab.local
+       issuer : O=Telecom Lab, CN=Telecom Lab Root CA
+       expires: Nov  2 21:18:27 2027 GMT
+       SAN    : DNS:telecom-lab.local, DNS:localhost, IP Address:10.20.6.20
+[ OK ] certificate verifies against the lab CA
+[ OK ] SAN contains IP 10.20.6.20
+[ OK ] SAN contains telecom-lab.local
+[ OK ] SAN contains localhost
+----] 4. the CA private key is mounted into no container
+[ OK ] no running container mounts ca.key
+----] 5. HTTP from the UE redirects to HTTPS
+[ OK ] 301 -> 301 https://10.20.6.20/health/
+----] 6. HTTPS from the UE, CA-validated, no -k
+[ OK ] HTTPS 200 with the lab CA
+[ OK ] exact JSON body through TLS
+----] 7. TLS 1.2 and TLS 1.3 handshakes
+[ OK ] TLSv1.2 handshake, certificate verified
+[ OK ] TLSv1.3 handshake, certificate verified
+----] 8. real UE source address in the access log (no NAT)
+[ OK ] gateway saw 10.45.0.6 (UE is 10.45.0.6)
+
+[ OK ] Phase 1C complete: HTTP 301 -> TLS 1.2/1.3 -> Django, trusted from the UE.

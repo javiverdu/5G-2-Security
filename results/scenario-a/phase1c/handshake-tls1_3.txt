@@ -1,0 +1,63 @@
+Connecting to 10.20.6.20
+depth=1 O=Telecom Lab, CN=Telecom Lab Root CA
+verify return:1
+depth=0 O=Telecom Lab, CN=telecom-lab.local
+verify return:1
+DONE
+CONNECTED(00000003)
+---
+Certificate chain
+ 0 s:O=Telecom Lab, CN=telecom-lab.local
+   i:O=Telecom Lab, CN=Telecom Lab Root CA
+   a:PKEY: RSA, 2048 (bit); sigalg: sha256WithRSAEncryption
+   v:NotBefore: Nov  2 21:18:27 2026 GMT; NotAfter: Nov  2 21:18:27 2027 GMT
+---
+Server certificate
+-----BEGIN CERTIFICATE-----
+MIIEmjCCAoKgAwIBAgIUHAlW6UeBKJY7+k6vkOvwO6FwWW0wDQYJKoZIhvcNAQEL
+BQAwNDEUMBIGA1UECgwLVGVsZWNvbSBMYWIxHDAaBgNVBAMME1RlbGVjb20gTGFi
+IFJvb3QgQ0EwHhcNMjYxMTAyMjExODI3WhcNMjcxMTAyMjExODI3WjAyMRQwEgYD
+VQQKDAtUZWxlY29tIExhYjEaMBgGA1UEAwwRdGVsZWNvbS1sYWIubG9jYWwwggEi
+MA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDJsvjRH1/v/ukDdVRapmp6V+2b
+vEB0vgJcqMG7yi5yYZDrCKw8sC922blwH2d/Gdtz61zbknbg7K/1YyLaGmJdbndo
+ycNTSJRJWUP4c+E5b7SqpyPhgQBT67c58PBT9lWKsBkLJDAbcT+gqPNyqtaI0D3t
+uDeDkbJcSmoj96jxhrk4Evy5yreDw8oH+ApXbD6OrXbei2iWiaf8I95RDIdYnbAs
+NbQLkJpJvv5Jz75XOERY0EtISM8r+I3JFm4wSzMYZ+fvCUVD0PoBPvZvh1ptMFRo
+mSujn93Al9gwlvnQxxuo6Do+dRFriIUUP09qvLOU460xR8DV4XNMIza4mYMVAgMB
+AAGjgaUwgaIwDAYDVR0TAQH/BAIwADAOBgNVHQ8BAf8EBAMCBaAwEwYDVR0lBAww
+CgYIKwYBBQUHAwEwHQYDVR0OBBYEFAlBV3eq2PBvEvorF09XlawSYYHKMB8GA1Ud
+IwQYMBaAFL7q4RHiu9Ma2OXAo/doHmPAKP6rMC0GA1UdEQQmMCSCEXRlbGVjb20t
+bGFiLmxvY2Fsgglsb2NhbGhvc3SHBAoUBhQwDQYJKoZIhvcNAQELBQADggIBAIRc
+1bfu3vxoF8P8pQ/leCJlP2vUUedMACxd3xbjYMDKoIcq46zTgRBZgtEM3T/k/NfZ
+18lI8chiL9eWvcGA2oxGcCD3WWc1ypGv50d3UEtRTZN149NasYATbWeRJuGpPv2u
+aWj/oXou35eiPcL4CD5D+twdHYqe4ErsD/j/LbaPqsPAd9hUeThSkgApV3v8DM5g
+NLs3JwFYQN4O2k9tCeyntxBGXrQs+bTNVvwoe+aYzakPScfzxZDEhyQKJuC4QoaT
+kxjhzI3WiGeBIxkgCS6ydXpFjyoXHAc2HHFA3vrwbhLQVszXRnKcukB/Hc5tTEFJ
+1qociit1i+1+TafG25yJtYzfObzoVrIfFYUqOUeSPmLQVysUqNiBW4vsms1Jrn90
+tFtQ74rVdrVM3K5bjsblgdDEO02494aMH6ebGVKE/nQLXi2Vz4ksLszmdyYIZTy2
+PKz7bf0ss3HCjYNvCry1GRa4REyuIQm7Jg1O7yZZ0780YlHB2qoP8PBE4Va3deSO
+PI3oYfaEO1IEdUWXQyNrFoNJOxwSVg1FsLAsQgcmRcpTKP67QTN0Qd4QimuWu4No
+y7aP4AIbAhU/nAp/AmbCIxqKpUbzmaGlZE6toBx3pG5seF9Z9Xtgb6M9KgVS/1h7
+w5HR+YhYZTt4ZZDc0Pm2D9qh+z7DMUCmwjdeW4IL
+-----END CERTIFICATE-----
+subject=O=Telecom Lab, CN=telecom-lab.local
+issuer=O=Telecom Lab, CN=Telecom Lab Root CA
+---
+No client certificate CA names sent
+Peer signing digest: SHA256
+Peer signature type: rsa_pss_rsae_sha256
+Negotiated TLS1.3 group: X25519MLKEM768
+---
+SSL handshake has read 2830 bytes and written 1566 bytes
+Verification: OK
+---
+New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
+Protocol: TLSv1.3
+Server public key is 2048 bit
+This TLS version forbids renegotiation.
+Compression: NONE
+Expansion: NONE
+No ALPN negotiated
+Early data was not sent
+Verify return code: 0 (ok)
+---

@@ -37,10 +37,16 @@ Verification-only, `docker run --rm`, never part of the runtime: `curlimages/cur
 | Thing | Where |
 |---|---|
 | Django DB | `/app/data/db.sqlite3`, named volume `django-data`, must survive container recreation |
-| UE CA | `/etc/telecom-lab/ca.crt` (read-only) |
+| PKI output | `secrets/tls/` (git-ignored): `ca.crt`, `ca.key`, `server.crt`, `server.key` |
+| UE CA | `/etc/telecom-lab/ca.crt`, mounted read-only into the client that shares `nr_ue`'s network namespace for TLS checks |
 | Nginx cert/key | mounted read-only |
 | CA private key | host only, **mounted into no container** |
 | Repo exclusions | `env`, `secrets/tls/` |
+
+The UE image is UERANSIM and carries no TLS client. TLS acceptance therefore
+runs `curlimages/curl` / the gateway image with `--network container:nr_ue`, so
+the request uses the UE's `uesimtun0` and source address, with `ca.crt` mounted
+at the documented path and `--cacert`. `-k` is never used.
 
 Django is configured through environment variables (secret key, debug, allowed
 hosts). **Do not hardcode secrets.**

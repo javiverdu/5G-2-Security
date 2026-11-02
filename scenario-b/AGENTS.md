@@ -12,7 +12,7 @@ Read the root [`../AGENTS.md`](../AGENTS.md) first.
 |---|---|
 | Core network | `172.22.0.0/24` (N2, N3, N4, SBI share L2, distinguished by port) |
 | UE PDU pool | `10.45.0.0/16`, gateway `10.45.0.1` |
-| Data network | `dn` `10.20.6.0/24`; upf `.2`, nginx `.20`, iperf3 `.21` |
+| Data network | `dn-net` `10.20.6.0/24`; upf `.2`, nginx `.20`, iperf3 `.21` |
 | Upstream | `herlesupreeth/docker_open5gs`, pinned commit `1f3bcf7` |
 | Images | prebuilt GHCR (`docker_open5gs`, `docker_ueransim`, `docker_metrics`) — **no local build** |
 | Subscriber | IMSI `001011234567895`, K `8baf473f2f8fd09487cccbd7097c6862`, OPc `8E27B6AF0E692E750F32667A3B14605D`, APN `internet` |
@@ -68,6 +68,13 @@ P4/P5 `eth:ip:icmp:data`. Counts that differ mean the topology or NAT changed.
 ## Where Project 2 work goes
 
 **Do not modify this base to implement Scenario A.** Add Project 2 files under
-`p2/` (own `AGENTS.md`) and reference the base by the names above. The only
-intentional base changes are the ones the brief requires: the UE image, the
-`scenario-b-nginx` replacement, and the added Docker networks.
+`project2/scenario-a/` (own `AGENTS.md`) and reference the base by the names
+above. The only intentional base changes are the ones the brief requires: the UE
+image, the `scenario-b-nginx` replacement, the `dn` network being named
+`dn-net`, and the added Docker networks.
+
+Once phase 1C is up, the Project 1 N6 test container `sb-nginx` is superseded by
+`scenario-b-nginx`; both use `10.20.6.20` and must never run together.
+`project2/scenario-a/scripts/up.sh` removes `sb-nginx` before starting the
+gateway. Do not re-run `scripts/enable-n6.sh` afterwards — it would try to
+create `sb-nginx` again.

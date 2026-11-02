@@ -1,0 +1,90 @@
+Connecting to 10.20.6.20
+depth=1 O=Telecom Lab, CN=Telecom Lab Root CA
+verify return:1
+depth=0 O=Telecom Lab, CN=telecom-lab.local
+verify return:1
+DONE
+CONNECTED(00000003)
+---
+Certificate chain
+ 0 s:O=Telecom Lab, CN=telecom-lab.local
+   i:O=Telecom Lab, CN=Telecom Lab Root CA
+   a:PKEY: RSA, 2048 (bit); sigalg: sha256WithRSAEncryption
+   v:NotBefore: Nov  2 21:18:27 2026 GMT; NotAfter: Nov  2 21:18:27 2027 GMT
+---
+Server certificate
+-----BEGIN CERTIFICATE-----
+MIIEmjCCAoKgAwIBAgIUHAlW6UeBKJY7+k6vkOvwO6FwWW0wDQYJKoZIhvcNAQEL
+BQAwNDEUMBIGA1UECgwLVGVsZWNvbSBMYWIxHDAaBgNVBAMME1RlbGVjb20gTGFi
+IFJvb3QgQ0EwHhcNMjYxMTAyMjExODI3WhcNMjcxMTAyMjExODI3WjAyMRQwEgYD
+VQQKDAtUZWxlY29tIExhYjEaMBgGA1UEAwwRdGVsZWNvbS1sYWIubG9jYWwwggEi
+MA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDJsvjRH1/v/ukDdVRapmp6V+2b
+vEB0vgJcqMG7yi5yYZDrCKw8sC922blwH2d/Gdtz61zbknbg7K/1YyLaGmJdbndo
+ycNTSJRJWUP4c+E5b7SqpyPhgQBT67c58PBT9lWKsBkLJDAbcT+gqPNyqtaI0D3t
+uDeDkbJcSmoj96jxhrk4Evy5yreDw8oH+ApXbD6OrXbei2iWiaf8I95RDIdYnbAs
+NbQLkJpJvv5Jz75XOERY0EtISM8r+I3JFm4wSzMYZ+fvCUVD0PoBPvZvh1ptMFRo
+mSujn93Al9gwlvnQxxuo6Do+dRFriIUUP09qvLOU460xR8DV4XNMIza4mYMVAgMB
+AAGjgaUwgaIwDAYDVR0TAQH/BAIwADAOBgNVHQ8BAf8EBAMCBaAwEwYDVR0lBAww
+CgYIKwYBBQUHAwEwHQYDVR0OBBYEFAlBV3eq2PBvEvorF09XlawSYYHKMB8GA1Ud
+IwQYMBaAFL7q4RHiu9Ma2OXAo/doHmPAKP6rMC0GA1UdEQQmMCSCEXRlbGVjb20t
+bGFiLmxvY2Fsgglsb2NhbGhvc3SHBAoUBhQwDQYJKoZIhvcNAQELBQADggIBAIRc
+1bfu3vxoF8P8pQ/leCJlP2vUUedMACxd3xbjYMDKoIcq46zTgRBZgtEM3T/k/NfZ
+18lI8chiL9eWvcGA2oxGcCD3WWc1ypGv50d3UEtRTZN149NasYATbWeRJuGpPv2u
+aWj/oXou35eiPcL4CD5D+twdHYqe4ErsD/j/LbaPqsPAd9hUeThSkgApV3v8DM5g
+NLs3JwFYQN4O2k9tCeyntxBGXrQs+bTNVvwoe+aYzakPScfzxZDEhyQKJuC4QoaT
+kxjhzI3WiGeBIxkgCS6ydXpFjyoXHAc2HHFA3vrwbhLQVszXRnKcukB/Hc5tTEFJ
+1qociit1i+1+TafG25yJtYzfObzoVrIfFYUqOUeSPmLQVysUqNiBW4vsms1Jrn90
+tFtQ74rVdrVM3K5bjsblgdDEO02494aMH6ebGVKE/nQLXi2Vz4ksLszmdyYIZTy2
+PKz7bf0ss3HCjYNvCry1GRa4REyuIQm7Jg1O7yZZ0780YlHB2qoP8PBE4Va3deSO
+PI3oYfaEO1IEdUWXQyNrFoNJOxwSVg1FsLAsQgcmRcpTKP67QTN0Qd4QimuWu4No
+y7aP4AIbAhU/nAp/AmbCIxqKpUbzmaGlZE6toBx3pG5seF9Z9Xtgb6M9KgVS/1h7
+w5HR+YhYZTt4ZZDc0Pm2D9qh+z7DMUCmwjdeW4IL
+-----END CERTIFICATE-----
+subject=O=Telecom Lab, CN=telecom-lab.local
+issuer=O=Telecom Lab, CN=Telecom Lab Root CA
+---
+No client certificate CA names sent
+Peer signing digest: SHA256
+Peer signature type: rsa_pss_rsae_sha256
+Peer Temp Key: X25519, 253 bits
+---
+SSL handshake has read 1859 bytes and written 310 bytes
+Verification: OK
+---
+New, TLSv1.2, Cipher is ECDHE-RSA-AES256-GCM-SHA384
+Protocol: TLSv1.2
+Server public key is 2048 bit
+Secure Renegotiation IS supported
+Compression: NONE
+Expansion: NONE
+No ALPN negotiated
+SSL-Session:
+    Protocol  : TLSv1.2
+    Cipher    : ECDHE-RSA-AES256-GCM-SHA384
+    Session-ID: C8A7B5602E485189575F55ED7BF129F631D1D30D3199A04D9CFB3F1E88F26AD5
+    Session-ID-ctx: 
+    Master-Key: FB53FC04FC5DC22D053A7FF442A39EE3F548E55330CC09FB8E85F21B5C91FF788F7AC75EFCF0F800061005981B1D379D
+    PSK identity: None
+    PSK identity hint: None
+    SRP username: None
+    TLS session ticket lifetime hint: 600 (seconds)
+    TLS session ticket:
+    0000 - c5 6b c9 45 df 50 f8 ff-53 35 e9 37 33 c7 24 ba   .k.E.P..S5.73.$.
+    0010 - 7b b0 15 74 7e 16 cd dc-82 aa ae 03 b8 0b c7 97   {..t~...........
+    0020 - 81 3a aa a7 38 46 b4 26-6e 85 50 b9 29 15 89 93   .:..8F.&n.P.)...
+    0030 - db 3e 7c f0 78 bb 65 b9-fa 2f 3a ad e4 64 53 6a   .>|.x.e../:..dSj
+    0040 - 33 38 2f df c8 4b e1 36-8f 8a ce 53 a8 63 43 64   38/..K.6...S.cCd
+    0050 - 32 d3 09 1f 24 9e cc 8c-c6 63 dc af 6b 33 60 70   2...$....c..k3`p
+    0060 - 9e b7 08 b8 8c 58 db 2f-5e 3b 23 71 a4 a3 49 39   .....X./^;#q..I9
+    0070 - ef fc 97 88 bc 92 a9 72-fe 77 e4 42 90 f9 a3 44   .......r.w.B...D
+    0080 - b6 9a ef fa 3a fb 33 11-c7 b8 b8 31 0e 44 b8 9a   ....:.3....1.D..
+    0090 - 5c e8 e0 72 dd 98 9c fd-1a b7 56 b4 15 a9 42 06   \..r......V...B.
+    00a0 - 58 b8 54 58 ff 4c 3d 30-6c 75 c6 5a d8 21 88 88   X.TX.L=0lu.Z.!..
+    00b0 - 73 3b 4e e6 e8 c7 e5 7a-e8 15 68 d2 ad 46 e6 73   s;N....z..h..F.s
+    00c0 - 09 be d0 38 96 d2 e7 db-69 ca 75 88 d4 41 14 ec   ...8....i.u..A..
+
+    Start Time: 1793654401
+    Timeout   : 7200 (sec)
+    Verify return code: 0 (ok)
+    Extended master secret: yes
+---

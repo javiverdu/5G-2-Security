@@ -1,0 +1,21 @@
+# =============================================================================
+# Project 2 — Scenario A lab PKI: root CA
+#
+# The CA private key lives only in secrets/tls/ on the host and is mounted into
+# no container. Only ca.crt (public) is ever handed to clients.
+# =============================================================================
+
+[req]
+distinguished_name = req_distinguished_name
+x509_extensions    = v3_ca
+prompt             = no
+
+[req_distinguished_name]
+O  = Telecom Lab
+CN = Telecom Lab Root CA
+
+[v3_ca]
+basicConstraints       = critical, CA:TRUE
+keyUsage               = critical, keyCertSign, cRLSign
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid:always

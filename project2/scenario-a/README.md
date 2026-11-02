@@ -32,7 +32,11 @@ Scenario B (Jenkins, ZAP, Suricata, Trivy/Syft) starts only after 1E is green.
   [`results/scenario-a/phase1b/`](../../results/scenario-a/phase1b/README.md).
   `scenario-b-django` healthy on the internal `app-net` only, `/health/` exact,
   `django-data` survives recreation.
-- 1C–1E: pending.
+- **1C — done** (2026-11-02). Evidence:
+  [`results/scenario-a/phase1c/`](../../results/scenario-a/phase1c/README.md).
+  `scenario-b-nginx` on `dn-net 10.20.6.20` + `app-net 10.20.8.10`; HTTP 301 →
+  HTTPS 200 with the lab CA from the UE, TLS 1.2 and 1.3 verified.
+- 1D–1E: pending.
 
 ## Directory
 
@@ -43,17 +47,21 @@ project2/scenario-a/
 ├── ueransim/                   # Phase 1A: UERANSIM v3.3.0 Dockerfile + p2-init.sh
 ├── docker-compose.ueransim.yaml# compose override: nr_gnb and nr_ue use the p2 image
 ├── django/                     # Phase 1B: Django 6.0.8 + Gunicorn + SQLite
-├── docker-compose.p2.yaml      # Phase 1B: django-data volume, app-net (internal)
+├── nginx/                      # Phase 1C: gateway image, TLS config, return route
+├── pki/                        # Phase 1C: OpenSSL configs (CA + server SAN)
+├── docker-compose.p2.yaml      # django + nginx, app-net (internal) + dn-net
 ├── env.example                 # template of the git-ignored ./env (secret key)
 └── scripts/
     ├── build.sh                # build telecom-lab-ueransim:3.3.0-p2
     ├── upgrade-ran.sh          # recreate nr_gnb then nr_ue with the p2 image
     ├── verify-phase1a.sh       # acceptance for phase 1A
-    └── verify-phase1b.sh       # acceptance for phase 1B
+    ├── verify-phase1b.sh       # acceptance for phase 1B
+    ├── gen-pki.sh              # create secrets/tls/ (CA + server certificate)
+    ├── up.sh                   # start django + scenario-b-nginx
+    └── verify-phase1c.sh       # acceptance for phase 1C
 ```
 
-Later phases add `nginx/`, `pki/` and the gateway service in
-`docker-compose.p2.yaml`.
+Later phases add the application endpoints and the final acceptance script.
 
 ## Phase 1A — what and why
 
@@ -99,6 +107,38 @@ network or the internet; the only path in will be the gateway in phase 1C.
   container reports `healthy` without an external tool.
 * `verify-phase1b.sh` proves isolation, health, volume persistence, the exact
   `/health/` body, and that an Nginx proxy on `app-net` reaches Django.
+
+## Phase 1C — what and why
+
+* **PKI.** `scripts/gen-pki.sh` creates a 4096-bit root CA and a 2048-bit
+  server key in `secrets/tls/` (git-ignored). The server certificate carries the
+  SAN the UE validates — `IP:10.20.6.20`, `DNS:telecom-lab.local`,
+  `DNS:localhost` — and is signed by the lab CA. The CA key stays on the host
+  and is mounted into **no** container; only `server.crt`/`server.key` reach the
+  gateway, and only `ca.crt` reaches the verification client.
+* **Gateway.** `telecom-lab-nginx:p2` extends `nginx:latest` with `iproute2` and
+  a `/docker-entrypoint.d` hook that installs `10.45.0.0/16 via 10.20.6.2` on
+  every start, so replies to the UE return through the UPF (Project 1 did this
+  by hand). Nginx terminates TLS 1.2/1.3, redirects `:80` with `301`, and
+  proxies to `http://10.20.8.20:8000` with `X-Forwarded-Proto: https`.
+* **Addressing.** `dn-net 10.20.6.20` + `app-net 10.20.8.10`. Django stays
+  attached only to `app-net`.
+* **Superseded container.** `sb-nginx` (Project 1's N6 test endpoint) also uses
+  `10.20.6.20`; `up.sh` removes it before starting the gateway. Do not run
+  `scenario-b/scripts/enable-n6.sh` after this phase — it would recreate it.
+* **UE-side proof.** The UE image has no TLS client, so acceptance runs `curl`
+  and `openssl s_client` in a throwaway container that shares `nr_ue`'s network
+  namespace, with `ca.crt` at `/etc/telecom-lab/ca.crt` and `--cacert`/`-CAfile`.
+  Traffic therefore exits through `uesimtun0`; `-k` is never used.
+
+## Run (phase 1C)
+
+```bash
+cd project2/scenario-a
+./scripts/gen-pki.sh                # once; --force replaces the whole PKI
+./scripts/up.sh                     # django + scenario-b-nginx
+./scripts/verify-phase1c.sh
+```
 
 ## Run (phase 1B)
 

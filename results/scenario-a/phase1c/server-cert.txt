@@ -1,0 +1,78 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            1c:09:56:e9:47:81:28:96:3b:fa:4e:af:90:eb:f0:3b:a1:70:59:6d
+        Signature Algorithm: sha256WithRSAEncryption
+        Issuer: O=Telecom Lab, CN=Telecom Lab Root CA
+        Validity
+            Not Before: Nov  2 21:18:27 2026 GMT
+            Not After : Nov  2 21:18:27 2027 GMT
+        Subject: O=Telecom Lab, CN=telecom-lab.local
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (2048 bit)
+                Modulus:
+                    00:c9:b2:f8:d1:1f:5f:ef:fe:e9:03:75:54:5a:a6:
+                    6a:7a:57:ed:9b:bc:40:74:be:02:5c:a8:c1:bb:ca:
+                    2e:72:61:90:eb:08:ac:3c:b0:2f:76:d9:b9:70:1f:
+                    67:7f:19:db:73:eb:5c:db:92:76:e0:ec:af:f5:63:
+                    22:da:1a:62:5d:6e:77:68:c9:c3:53:48:94:49:59:
+                    43:f8:73:e1:39:6f:b4:aa:a7:23:e1:81:00:53:eb:
+                    b7:39:f0:f0:53:f6:55:8a:b0:19:0b:24:30:1b:71:
+                    3f:a0:a8:f3:72:aa:d6:88:d0:3d:ed:b8:37:83:91:
+                    b2:5c:4a:6a:23:f7:a8:f1:86:b9:38:12:fc:b9:ca:
+                    b7:83:c3:ca:07:f8:0a:57:6c:3e:8e:ad:76:de:8b:
+                    68:96:89:a7:fc:23:de:51:0c:87:58:9d:b0:2c:35:
+                    b4:0b:90:9a:49:be:fe:49:cf:be:57:38:44:58:d0:
+                    4b:48:48:cf:2b:f8:8d:c9:16:6e:30:4b:33:18:67:
+                    e7:ef:09:45:43:d0:fa:01:3e:f6:6f:87:5a:6d:30:
+                    54:68:99:2b:a3:9f:dd:c0:97:d8:30:96:f9:d0:c7:
+                    1b:a8:e8:3a:3e:75:11:6b:88:85:14:3f:4f:6a:bc:
+                    b3:94:e3:ad:31:47:c0:d5:e1:73:4c:23:36:b8:99:
+                    83:15
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints: critical
+                CA:FALSE
+            X509v3 Key Usage: critical
+                Digital Signature, Key Encipherment
+            X509v3 Extended Key Usage: 
+                TLS Web Server Authentication
+            X509v3 Subject Key Identifier: 
+                09:41:57:77:AA:D8:F0:6F:12:FA:2B:17:4F:57:95:AC:12:61:81:CA
+            X509v3 Authority Key Identifier: 
+                BE:EA:E1:11:E2:BB:D3:1A:D8:E5:C0:A3:F7:68:1E:63:C0:28:FE:AB
+            X509v3 Subject Alternative Name: 
+                DNS:telecom-lab.local, DNS:localhost, IP Address:10.20.6.20
+    Signature Algorithm: sha256WithRSAEncryption
+    Signature Value:
+        84:5c:d5:b7:ee:de:fc:68:17:c3:fc:a5:0f:e5:78:22:65:3f:
+        6b:d4:51:e7:4c:00:2c:5d:df:16:e3:60:c0:ca:a0:87:2a:e3:
+        ac:d3:81:10:59:82:d1:0c:dd:3f:e4:fc:d7:d9:d7:c9:48:f1:
+        c8:62:2f:d7:96:bd:c1:80:da:8c:46:70:20:f7:59:67:35:ca:
+        91:af:e7:47:77:50:4b:51:4d:93:75:e3:d3:5a:b1:80:13:6d:
+        67:91:26:e1:a9:3e:fd:ae:69:68:ff:a1:7a:2e:df:97:a2:3d:
+        c2:f8:08:3e:43:fa:dc:1d:1d:8a:9e:e0:4a:ec:0f:f8:ff:2d:
+        b6:8f:aa:c3:c0:77:d8:54:79:38:52:92:00:29:57:7b:fc:0c:
+        ce:60:34:bb:37:27:01:58:40:de:0e:da:4f:6d:09:ec:a7:b7:
+        10:46:5e:b4:2c:f9:b4:cd:56:fc:28:7b:e6:98:cd:a9:0f:49:
+        c7:f3:c5:90:c4:87:24:0a:26:e0:b8:42:86:93:93:18:e1:cc:
+        8d:d6:88:67:81:23:19:20:09:2e:b2:75:7a:45:8f:2a:17:1c:
+        07:36:1c:71:40:de:fa:f0:6e:12:d0:56:cc:d7:46:72:9c:ba:
+        40:7f:1d:ce:6d:4c:41:49:d6:aa:1c:8a:2b:75:8b:ed:7e:4d:
+        a7:c6:db:9c:89:b5:8c:df:39:bc:e8:56:b2:1f:15:85:2a:39:
+        47:92:3e:62:d0:57:2b:14:a8:d8:81:5b:8b:ec:9a:cd:49:ae:
+        7f:74:b4:5b:50:ef:8a:d5:76:b5:4c:dc:ae:5b:8e:c6:e5:81:
+        d0:c4:3b:4d:b8:f7:86:8c:1f:a7:9b:19:52:84:fe:74:0b:5e:
+        2d:95:cf:89:2c:2e:cc:e6:77:26:08:65:3c:b6:3c:ac:fb:6d:
+        fd:2c:b3:71:c2:8d:83:6f:0a:bc:b5:19:16:b8:44:4c:ae:21:
+        09:bb:26:0d:4e:ef:26:59:d3:bf:34:62:51:c1:da:aa:0f:f0:
+        f0:44:e1:56:b7:75:e4:8e:3c:8d:e8:61:f6:84:3b:52:04:75:
+        45:97:43:23:6b:16:83:49:3b:1c:12:56:0d:45:b0:b0:2c:42:
+        07:26:45:ca:53:28:fe:bb:41:33:74:41:de:10:8a:6b:96:bb:
+        83:68:cb:b6:8f:e0:02:1b:02:15:3f:9c:0a:7f:02:66:c2:23:
+        1a:8a:a5:46:f3:99:a1:a5:64:4e:ad:a0:1c:77:a4:6e:6c:78:
+        5f:59:f5:7b:60:6f:a3:3d:2a:05:52:ff:58:7b:c3:91:d1:f9:
+        88:58:65:3b:78:65:90:dc:d0:f9:b6:0f:da:a1:fb:3e:c3:31:
+        40:a6:c2:37:5e:5b:82:0b
