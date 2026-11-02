@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Telecom Lab — Search{% endblock %}
+{% block content %}
+<h1>Search</h1>
+<form method="get" action="/search/">
+  <label for="q">Query</label>
+  <input id="q" name="q" type="text" value="{{ query }}" maxlength="200">
+  <button type="submit">Search</button>
+</form>
+{% if query %}
+  <p>Query: {{ query }}</p>
+  <p>Results: {{ total }}</p>
+  <ul>
+    {% for item in results %}<li>{{ item }}</li>{% empty %}<li>No matches.</li>{% endfor %}
+  </ul>
+{% else %}
+  <p>Enter a term to search the lab corpus.</p>
+{% endif %}
+{% endblock %}

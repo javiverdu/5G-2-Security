@@ -11,6 +11,10 @@ cd /app
 
 python manage.py migrate --noinput
 
+# The account is created only after the schema exists, and only once: an
+# existing account keeps its password.
+python manage.py ensure_lab_user
+
 exec gunicorn telecom_lab.wsgi:application \
     --bind 0.0.0.0:8000 \
     --workers "${GUNICORN_WORKERS:-3}" \

@@ -1,0 +1,36 @@
+----] 1. public endpoints
+[ OK ] / -> 200
+[ OK ] /health/ -> 200
+[ OK ] /api/status/ -> 200
+[ OK ] /search/ -> 200
+[ OK ] /admin/ -> 302 (login)
+----] 2. anonymous /profile/
+[ OK ] 302 https://10.20.6.20/accounts/login/?next=/profile/
+----] 3. login and session cookie
+[ OK ] login page 200
+[ OK ] login POST 302
+[ OK ] session cookie set
+[ OK ] session cookie has Secure
+[ OK ] session cookie has HttpOnly
+[ OK ] session cookie has SameSite=Lax
+----] 4. authenticated /profile/
+[ OK ] profile 200
+[ OK ] Username: securityadmin
+[ OK ] Authenticated: True
+----] 5. CSRF cookie
+[ OK ] csrftoken set
+[ OK ] csrftoken has Secure
+----] 6. /feedback/ CSRF behaviour
+[ OK ] feedback GET 200
+[ OK ] valid CSRF POST -> 200
+[ OK ] missing CSRF -> 403
+[ OK ] invalid CSRF -> 403
+----] 7. security headers
+[ OK ] HSTS max-age=3600
+[ OK ] X-Frame-Options: DENY
+[ OK ] X-Content-Type-Options: nosniff
+[ OK ] Referrer-Policy: same-origin
+----] 8. /search/ escaping
+[ OK ] reflected input escaped
+
+[ OK ] Phase 1D complete: authentication, authorization, CSRF and headers enforced.

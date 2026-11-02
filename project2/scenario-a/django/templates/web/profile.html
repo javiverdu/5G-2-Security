@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Telecom Lab — Profile{% endblock %}
+{% block content %}
+<h1>Profile</h1>
+<p>Username: {{ user.username }}</p>
+<p>Authenticated: {{ user.is_authenticated }}</p>
+<p>Staff: {{ user.is_staff }}</p>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Telecom Lab — Home{% endblock %}
+{% block content %}
+<h1>Secure application delivery over 5G</h1>
+<p>Django is reachable only through the Nginx TLS gateway on the N6 network.</p>
+<ul>
+  <li><a href="/health/">/health/</a></li>
+  <li><a href="/api/status/">/api/status/</a></li>
+  <li><a href="/search/">/search/</a></li>
+  <li><a href="/profile/">/profile/</a> (authentication required)</li>
+  <li><a href="/feedback/">/feedback/</a> (authentication required)</li>
+</ul>
+{% endblock %}

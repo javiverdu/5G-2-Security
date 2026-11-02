@@ -1,0 +1,9 @@
+### GET /accounts/login/
+set-cookie: csrftoken=JKVtjZMbdoFwAyQNRcP62IJQm91JZz9T; expires=Mon, 01 Nov 2027 21:28:19 GMT; Max-Age=31449600; Path=/; SameSite=Lax; Secure
+
+### POST /accounts/login/ (authenticated)
+set-cookie: csrftoken=N3rvT8GARAZIXKNe3dInbTmB6Q0zHVjK; expires=Mon, 01 Nov 2027 21:28:19 GMT; Max-Age=31449600; Path=/; SameSite=Lax; Secure
+set-cookie: sessionid=1ees4zjn47my81rwmp3q5w0gjmmyzced; expires=Mon, 16 Nov 2026 21:28:19 GMT; HttpOnly; Max-Age=1209600; Path=/; SameSite=Lax; Secure
+
+### GET /feedback/ (CSRF cookie rotation)
+set-cookie: csrftoken=N3rvT8GARAZIXKNe3dInbTmB6Q0zHVjK; expires=Mon, 01 Nov 2027 21:28:19 GMT; Max-Age=31449600; Path=/; SameSite=Lax; Secure

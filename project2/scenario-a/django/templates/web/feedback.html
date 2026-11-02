@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Telecom Lab — Feedback{% endblock %}
+{% block content %}
+<h1>Feedback</h1>
+{% if submitted %}
+  <p>Feedback received.</p>
+{% endif %}
+<form method="post" action="/feedback/">
+  {% csrf_token %}
+  <label for="message">Message</label>
+  <textarea id="message" name="message" rows="4" cols="50" maxlength="2000" required></textarea>
+  <button type="submit">Send</button>
+</form>
+<p>Authenticated as {{ user.username }}.</p>
+{% endblock %}

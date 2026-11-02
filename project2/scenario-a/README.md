@@ -36,7 +36,11 @@ Scenario B (Jenkins, ZAP, Suricata, Trivy/Syft) starts only after 1E is green.
   [`results/scenario-a/phase1c/`](../../results/scenario-a/phase1c/README.md).
   `scenario-b-nginx` on `dn-net 10.20.6.20` + `app-net 10.20.8.10`; HTTP 301 →
   HTTPS 200 with the lab CA from the UE, TLS 1.2 and 1.3 verified.
-- 1D–1E: pending.
+- **1D — done** (2026-11-02). Evidence:
+  [`results/scenario-a/phase1d/`](../../results/scenario-a/phase1d/README.md).
+  Public/protected endpoints, `securityadmin` login, CSRF 200/403, Secure
+  cookies, HSTS 3600 and the four headers.
+- 1E: pending.
 
 ## Directory
 
@@ -46,11 +50,11 @@ project2/scenario-a/
 ├── AGENTS.md                   # exact Scenario A contract
 ├── ueransim/                   # Phase 1A: UERANSIM v3.3.0 Dockerfile + p2-init.sh
 ├── docker-compose.ueransim.yaml# compose override: nr_gnb and nr_ue use the p2 image
-├── django/                     # Phase 1B: Django 6.0.8 + Gunicorn + SQLite
+├── django/                     # Django 6.0.8: app, templates, Gunicorn, SQLite
 ├── nginx/                      # Phase 1C: gateway image, TLS config, return route
 ├── pki/                        # Phase 1C: OpenSSL configs (CA + server SAN)
 ├── docker-compose.p2.yaml      # django + nginx, app-net (internal) + dn-net
-├── env.example                 # template of the git-ignored ./env (secret key)
+├── env.example                 # template of the git-ignored ./env (secrets)
 └── scripts/
     ├── build.sh                # build telecom-lab-ueransim:3.3.0-p2
     ├── upgrade-ran.sh          # recreate nr_gnb then nr_ue with the p2 image
@@ -58,10 +62,11 @@ project2/scenario-a/
     ├── verify-phase1b.sh       # acceptance for phase 1B
     ├── gen-pki.sh              # create secrets/tls/ (CA + server certificate)
     ├── up.sh                   # start django + scenario-b-nginx
-    └── verify-phase1c.sh       # acceptance for phase 1C
+    ├── verify-phase1c.sh       # acceptance for phase 1C
+    └── verify-phase1d.sh       # acceptance for phase 1D
 ```
 
-Later phases add the application endpoints and the final acceptance script.
+Phase 1E adds the single end-to-end acceptance script.
 
 ## Phase 1A — what and why
 
@@ -131,6 +136,26 @@ network or the internet; the only path in will be the gateway in phase 1C.
   namespace, with `ca.crt` at `/etc/telecom-lab/ca.crt` and `--cacert`/`-CAfile`.
   Traffic therefore exits through `uesimtun0`; `-k` is never used.
 
+## Phase 1D — what and why
+
+* **Endpoints.** Public `/`, `/health/`, `/api/status/`, `/search/`; protected
+  `/profile/`, `/feedback/` via `@login_required`; Django's `admin/` and
+  `accounts/` URL sets. `/search/` echoes the query through templates, so
+  autoescaping is observable (and is a useful negative test later).
+* **Account.** `manage.py ensure_lab_user` runs after `migrate` in the entrypoint
+  and creates `securityadmin` from `LAB_ADMIN_USER`/`LAB_ADMIN_PASSWORD`
+  (git-ignored `env`). It never resets an existing password.
+* **Cookies and proxy.** `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE`,
+  `HttpOnly`, `SameSite=Lax`; `SECURE_PROXY_SSL_HEADER` makes Django trust
+  `X-Forwarded-Proto: https` from the gateway, which is also what enables HSTS.
+* **Baseline.** `SECURE_HSTS_SECONDS = 3600` with subdomains/preload off,
+  `X_FRAME_OPTIONS = DENY`, `SECURE_CONTENT_TYPE_NOSNIFF`,
+  `SECURE_REFERRER_POLICY = same-origin`; the security middleware stays first
+  in `MIDDLEWARE`.
+* **CSRF stays enforced.** The acceptance script performs a real token flow
+  (cookie + form token + `Origin`) and then proves that a missing or invalid
+  token returns `403`. Nothing is exempted.
+
 ## Run (phase 1C)
 
 ```bash
@@ -138,6 +163,14 @@ cd project2/scenario-a
 ./scripts/gen-pki.sh                # once; --force replaces the whole PKI
 ./scripts/up.sh                     # django + scenario-b-nginx
 ./scripts/verify-phase1c.sh
+```
+
+## Run (phase 1D)
+
+```bash
+cd project2/scenario-a
+docker compose -f docker-compose.p2.yaml up -d --build django
+./scripts/verify-phase1d.sh
 ```
 
 ## Run (phase 1B)

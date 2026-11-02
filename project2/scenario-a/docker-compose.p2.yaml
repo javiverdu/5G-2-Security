@@ -23,6 +23,8 @@ services:
       DJANGO_DEBUG: "False"
       DJANGO_ALLOWED_HOSTS: "10.20.8.20,10.20.6.20,telecom-lab.local,localhost,127.0.0.1"
       DJANGO_DB_PATH: "/app/data/db.sqlite3"
+      LAB_ADMIN_USER: "securityadmin"
+      LAB_ADMIN_EMAIL: "securityadmin@telecom-lab.local"
     volumes:
       - django-data:/app/data
     networks:

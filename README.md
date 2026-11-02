@@ -26,7 +26,7 @@ is reused as the transport for Project 2.
 | A | 1A | 5G SA base + **persistent UE route** (survives container restart) | ✅ done |
 | A | 1B | Django + Gunicorn + SQLite on a private `app-net`, `/health/` | ✅ done |
 | A | 1C | Lab PKI + Nginx TLS gateway (`80 → 301 → 443`) | ✅ done |
-| A | 1D | Django security baseline (login, CSRF, cookies, HSTS, headers) | ⬜ |
+| A | 1D | Django security baseline (login, CSRF, cookies, HSTS, headers) | ✅ done |
 | A | 1E | End-to-end acceptance from the UE through the 5G path | ⬜ |
 | B | 2A–2E | Preflight, ZAP + Selenium, PCAP + Suricata, Trivy/Syft, correlation + gate | ⬜ planned |
 

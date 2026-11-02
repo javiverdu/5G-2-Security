@@ -1,0 +1,11 @@
+HTTP/2 200 
+server: nginx/1.31.6
+date: Mon, 02 Nov 2026 21:28:12 GMT
+content-type: application/json
+content-length: 87
+x-frame-options: DENY
+strict-transport-security: max-age=3600
+x-content-type-options: nosniff
+referrer-policy: same-origin
+cross-origin-opener-policy: same-origin
+

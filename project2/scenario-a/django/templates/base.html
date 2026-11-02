@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}Telecom Lab{% endblock %}</title>
+</head>
+<body>
+  <header>
+    <strong>Telecom Lab — Project 2</strong>
+    <nav>
+      <a href="/">Home</a> |
+      <a href="/health/">Health</a> |
+      <a href="/api/status/">API status</a> |
+      <a href="/search/">Search</a> |
+      <a href="/feedback/">Feedback</a> |
+      <a href="/profile/">Profile</a> |
+      {% if user.is_authenticated %}
+        <form method="post" action="/accounts/logout/" style="display:inline">
+          {% csrf_token %}
+          <button type="submit">Log out ({{ user.username }})</button>
+        </form>
+      {% else %}
+        <a href="/accounts/login/">Log in</a>
+      {% endif %}
+    </nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
