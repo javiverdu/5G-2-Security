@@ -40,7 +40,12 @@ Scenario B (Jenkins, ZAP, Suricata, Trivy/Syft) starts only after 1E is green.
   [`results/scenario-a/phase1d/`](../../results/scenario-a/phase1d/README.md).
   Public/protected endpoints, `securityadmin` login, CSRF 200/403, Secure
   cookies, HSTS 3600 and the four headers.
-- 1E: pending.
+- **1E — done** (2026-11-02). Evidence:
+  [`results/scenario-a/phase1e/`](../../results/scenario-a/phase1e/README.md).
+  `verify-phase1.sh` green end to end from the UE: 301 → TLS 200, auth, CSRF,
+  cookies, headers, real `10.45.0.x` client at the gateway.
+
+Scenario A is complete; Scenario B may start.
 
 ## Directory
 
@@ -63,10 +68,11 @@ project2/scenario-a/
     ├── gen-pki.sh              # create secrets/tls/ (CA + server certificate)
     ├── up.sh                   # start django + scenario-b-nginx
     ├── verify-phase1c.sh       # acceptance for phase 1C
-    └── verify-phase1d.sh       # acceptance for phase 1D
+    ├── verify-phase1d.sh       # acceptance for phase 1D
+    └── verify-phase1.sh        # end-to-end acceptance (phase 1E, gate to B)
 ```
 
-Phase 1E adds the single end-to-end acceptance script.
+Scenario A ends with `verify-phase1.sh`; Scenario B starts after it is green.
 
 ## Phase 1A — what and why
 
@@ -156,44 +162,52 @@ network or the internet; the only path in will be the gateway in phase 1C.
   (cookie + form token + `Origin`) and then proves that a missing or invalid
   token returns `403`. Nothing is exempted.
 
-## Run (phase 1C)
+## Run — full sequence
 
 ```bash
-cd project2/scenario-a
+# 1A — base network, UE route
+cd scenario-b
+./scripts/fetch-upstream.sh         # once: pinned upstream clone
+./scripts/deploy.sh                 # core, gNB, UE, subscriber
+sudo ./scripts/enable-n6.sh         # N6 (dn-net) + iperf3, no NAT
+cd ../project2/scenario-a
+./scripts/build.sh                  # UERANSIM v3.3.0 + route watcher
+./scripts/upgrade-ran.sh            # nr_gnb and nr_ue use the pinned image
+./scripts/verify-phase1a.sh
+
+# 1B — Django on app-net
+cp env.example env                  # then replace the secrets
+docker compose -f docker-compose.p2.yaml up -d --build
+./scripts/verify-phase1b.sh
+
+# 1C — PKI and TLS gateway
 ./scripts/gen-pki.sh                # once; --force replaces the whole PKI
 ./scripts/up.sh                     # django + scenario-b-nginx
 ./scripts/verify-phase1c.sh
-```
 
-## Run (phase 1D)
-
-```bash
-cd project2/scenario-a
+# 1D — security baseline (already deployed by 1C; rebuild if code changed)
 docker compose -f docker-compose.p2.yaml up -d --build django
 ./scripts/verify-phase1d.sh
+
+# 1E — gate into Scenario B
+./scripts/verify-phase1.sh
 ```
 
-## Run (phase 1B)
+## Phase 1E — what and why
 
-```bash
-cd project2/scenario-a
-cp env.example env                  # then replace DJANGO_SECRET_KEY
-docker compose -f docker-compose.p2.yaml up -d --build
-./scripts/verify-phase1b.sh
-```
+One script, no new application code and no new runtime image. It reuses the
+verification-only `curlimages/curl` and the gateway image for `openssl`, both
+`docker run --rm`, and drives the complete contract from the UE network
+namespace:
 
-## Run (phase 1A)
-
-```bash
-cd scenario-b
-./scripts/fetch-upstream.sh        # if not already done (provides docker_ueransim)
-./scripts/deploy.sh                # base deployment (core, gNB, UE, subscriber)
-sudo ./scripts/enable-n6.sh        # N6 + apps, no NAT
-cd ../project2/scenario-a
-./scripts/build.sh                 # build UERANSIM v3.3.0 + route watcher
-./scripts/upgrade-ran.sh           # recreate nr_gnb and nr_ue with that image
-./scripts/verify-phase1a.sh        # route via uesimtun0, survives a restart
-```
+* data path (`uesimtun0`, route, N6 reachability);
+* certificate chain and TLS 1.2 / 1.3 handshakes;
+* `HTTP 301 → HTTPS 200` with the lab CA (never `-k`);
+* the four public endpoints and the exact `/health/` body;
+* the four authentication cases, the two CSRF outcomes, cookie attributes,
+  security headers and input escaping;
+* the real `10.45.0.x` client address in the gateway log (proof that the flow
+  crossed the 5G user plane, not a direct connection).
 
 ## Working specification
 

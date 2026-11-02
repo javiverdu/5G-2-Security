@@ -1,0 +1,3 @@
+10.20.6.20 dev uesimtun0 src 10.45.0.3 uid 0 
+    cache 
+uesimtun0        UNKNOWN        10.45.0.3/16 

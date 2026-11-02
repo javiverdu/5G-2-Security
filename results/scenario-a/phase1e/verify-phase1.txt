@@ -1,0 +1,48 @@
+----] 1. UE data path
+[ OK ] uesimtun0 = 10.45.0.3/16
+[ OK ] nr_ue runs UERANSIM v3.3.0 image
+[ OK ] 10.20.6.20 resolves via uesimtun0
+[ OK ] UE reaches the gateway on N6
+----] 2. certificate and TLS handshakes
+[ OK ] scenario-b-nginx runs telecom-lab-nginx:p2
+[ OK ] server certificate verifies against the lab CA
+[ OK ] TLSv1.2 handshake, certificate verified
+[ OK ] TLSv1.3 handshake, certificate verified
+----] 3. HTTP 301 -> HTTPS 200 (trusted, no -k)
+[ OK ] HTTP / -> 301
+[ OK ] Location: https://10.20.6.20/
+[ OK ] HTTP /health/ -> 301
+[ OK ] HTTPS / -> 200
+[ OK ] HTTPS /health/ -> 200
+[ OK ] exact /health/ body
+----] 4. public endpoints
+[ OK ] /api/status/ -> 200
+[ OK ] /search/ -> 200
+[ OK ] /admin/ -> 302 (login)
+[ OK ] api reports unauthenticated caller
+----] 5. authentication
+[ OK ] anonymous /profile/ -> 302
+[ OK ] login page 200
+[ OK ] authenticated login -> 302
+[ OK ] authenticated /profile/ -> 200
+[ OK ] Username: securityadmin
+[ OK ] Authenticated: True
+----] 6. CSRF protection
+[ OK ] feedback form 200
+[ OK ] valid CSRF POST -> 200
+[ OK ] missing CSRF -> 403
+[ OK ] invalid CSRF -> 403
+----] 7. cookies and headers
+[ OK ] session cookie has Secure
+[ OK ] session cookie has HttpOnly
+[ OK ] session cookie has SameSite=Lax
+[ OK ] CSRF cookie has Secure
+[ OK ] HSTS max-age=3600
+[ OK ] X-Frame-Options: DENY
+[ OK ] X-Content-Type-Options: nosniff
+[ OK ] Referrer-Policy: same-origin
+[ OK ] search input escaped
+----] 8. real UE address at the gateway (no NAT)
+[ OK ] gateway access log shows 10.45.0.3
+
+[ OK ] Phase 1E complete: the 5G user-plane path serves the secured application.

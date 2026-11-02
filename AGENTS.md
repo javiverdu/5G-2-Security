@@ -133,6 +133,11 @@ exit criterion. Prefer machine-checkable assertions over prose.
   VDI beyond 32 GB without checking the host first.
 - **vboxsf breaks container mounts and permissions** (Grafana uid 472). Never run
   Project 2 containers from `/media/sf_5G_project`; use the native clone.
+- The guest has frozen once under host memory pressure (host at ~13 GB used with
+  4.3 GB swap, `ssh` timing out while the VM state stayed `running`). Recovery:
+  hard poweroff, boot, then `scenario-b/scripts/deploy.sh`, the N6 override and
+  `project2/scenario-a/scripts/upgrade-ran.sh`. Stop unneeded host applications
+  before long container work.
 - The host has `gh` authenticated as `javiverdu`; the repository is public.
 - The brief is readable by agents at `docs/brief-p2.txt` (PDF text extraction).
 
