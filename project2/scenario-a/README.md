@@ -22,6 +22,14 @@ runbook (`scenario-b/README.md` §7) is unchanged.
 
 Scenario B (Jenkins, ZAP, Suricata, Trivy/Syft) starts only after 1E is green.
 
+## Status
+
+- **1A — done** (2026-11-02). Evidence:
+  [`results/scenario-a/phase1a/`](../../results/scenario-a/phase1a/README.md).
+  UERANSIM v3.3.0 image running on gNB and UE; `10.20.6.20` resolves via
+  `uesimtun0` and keeps doing so after `docker restart nr_ue`.
+- 1B–1E: pending.
+
 ## Directory
 
 ```

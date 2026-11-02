@@ -1,0 +1,17 @@
+----] 1. p2 image
+[ OK ] telecom-lab-ueransim:3.3.0-p2 built
+[ OK ] UERANSIM v3.3.0
+----] 2. nr_gnb and nr_ue run the p2 image
+[ OK ] nr_gnb uses telecom-lab-ueransim:3.3.0-p2
+[ OK ] nr_ue uses telecom-lab-ueransim:3.3.0-p2
+----] 3. PDU session
+[ OK ] uesimtun0 = 10.45.0.4/16
+----] 4. route toward N6 resolves via uesimtun0
+[ OK ] 10.20.6.20 via uesimtun0
+----] 5. persistence: restart nr_ue and re-check
+       waiting for re-registration.. ...ok
+[ OK ] route via uesimtun0 survived the restart (installed by the image)
+----] 6. N6 reachability (optional — needs enable-n6.sh)
+[ OK ] UE -> 10.20.6.20 reachable
+
+[ OK ] Phase 1A complete: the user-plane route is a property of the UE image.
