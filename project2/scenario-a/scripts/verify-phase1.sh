@@ -22,8 +22,18 @@
 set -uo pipefail
 HERE=$(cd "$(dirname "$0")/.." && pwd)          # project2/scenario-a
 ROOT=$(cd "$HERE/../.." && pwd)
-CA="$ROOT/secrets/tls/ca.crt"
-CRT="$ROOT/secrets/tls/server.crt"
+SECRETS="$ROOT/secrets/tls"
+# Inside Jenkins the checkout has no git-ignored secrets, but the host repo is
+# mounted read-only at /lab.
+if [[ ! -f "$SECRETS/ca.crt" && -d /lab/secrets/tls ]]; then
+    SECRETS=/lab/secrets/tls
+fi
+# Paths passed to `docker run -v` must be host paths, even when this script runs
+# inside Jenkins (Docker-outside-of-Docker). P2_HOST_REPO points at the host copy
+# of the repository when the script runs in a container.
+HOST_SECRETS="${P2_HOST_REPO:-$ROOT}/secrets/tls"
+CA="$SECRETS/ca.crt"
+CRT="$SECRETS/server.crt"
 IMG="telecom-lab-nginx:p2"
 CT="scenario-b-nginx"
 CURL_IMG="curlimages/curl:latest"
@@ -37,11 +47,12 @@ fail() { printf '\033[1;31m[FAIL]\033[0m %s\n' "$*"; ERRORS=$((ERRORS+1)); }
 step() { printf '\033[1;34m----]\033[0m %s\n' "$*"; }
 ERRORS=0
 
-set -a; . "$HERE/env"; set +a
+ENV_FILE="${P2_ENV_FILE:-$HERE/env}"
+set -a; . "$ENV_FILE"; set +a
 
 client() {
     docker run --rm --network container:nr_ue \
-        -v "$CA:/etc/telecom-lab/ca.crt:ro" \
+        -v "$HOST_SECRETS/ca.crt:/etc/telecom-lab/ca.crt:ro" \
         -v "$TMP/client.sh:/client.sh:ro" \
         -e LAB_USER="${LAB_ADMIN_USER:-securityadmin}" \
         -e LAB_PASS="${LAB_ADMIN_PASSWORD:-}" \
@@ -134,7 +145,7 @@ fi
 for v in "-tls1_2 TLSv1.2" "-tls1_3 TLSv1.3"; do
     FLAG=${v%% *}; WANT=${v##* }
     OUT=$(docker run --rm --network container:nr_ue \
-        -v "$CA:/etc/telecom-lab/ca.crt:ro" --entrypoint openssl "$IMG" \
+        -v "$HOST_SECRETS/ca.crt:/etc/telecom-lab/ca.crt:ro" --entrypoint openssl "$IMG" \
         s_client -connect 10.20.6.20:443 -servername telecom-lab.local \
         -CAfile /etc/telecom-lab/ca.crt "$FLAG" -verify_return_error </dev/null 2>&1 || true)
     PROTO=$(grep -oE 'Protocol *: *TLSv1\.[0-9]' <<<"$OUT" | head -1 | awk '{print $NF}')

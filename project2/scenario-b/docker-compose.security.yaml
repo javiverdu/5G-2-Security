@@ -1,0 +1,72 @@
+# =============================================================================
+# Project 2 — Scenario B: security-testing environment (phase 2A)
+#
+# security-net is isolated from Scenario A's dn-net/app-net. Juice Shop is the
+# deliberately vulnerable positive-control target; it is never a 5G function.
+#
+# Usage:
+#   docker compose -f project2/scenario-b/docker-compose.security.yaml up -d --build
+#
+# Private values (Jenkins admin password) come from ./env (git-ignored).
+# =============================================================================
+name: scenario-b-security
+
+services:
+  juice-shop:
+    image: bkimminich/juice-shop:v20.2.0
+    container_name: juice-shop
+    restart: unless-stopped
+    networks:
+      security-net:
+        ipv4_address: 10.20.10.20
+
+  selenium:
+    build: ./selenium
+    image: telecom-lab-selenium:1.0
+    container_name: scenario-b-selenium
+    restart: unless-stopped
+    shm_size: "2gb"
+    networks:
+      security-net:
+        ipv4_address: 10.20.10.30
+
+  jenkins:
+    build: ./jenkins
+    image: telecom-lab-jenkins:2.580.1-jdk21
+    container_name: scenario-b-jenkins
+    restart: unless-stopped
+    env_file:
+      - ./env
+    environment:
+      JAVA_OPTS: "-Djenkins.install.runSetupWizard=false -Djava.awt.headless=true -Xmx1g"
+      JENKINS_URL: "http://10.20.10.40:8080/"
+    ports:
+      - "8080:8080"
+    group_add:
+      - "971"                  # host docker group, for /var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - jenkins_home:/var/jenkins_home
+      - ../../:/lab:ro          # repo incl. git-ignored env/secrets for checks
+      - ../../results:/evidence # evidence archive, writable
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/login"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    networks:
+      security-net:
+        ipv4_address: 10.20.10.40
+
+networks:
+  security-net:
+    name: security-net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.20.10.0/24
+
+volumes:
+  jenkins_home:
+    name: scenario-b-jenkins-home

@@ -1,0 +1,59 @@
+# =============================================================================
+# Scenario B — targeted ZAP SQL-injection plan (ZAP Automation Framework)
+#
+# Executed in phase 2B as:
+#   zap.sh -cmd -autorun /zap/wrk/plan.yaml
+#
+# It is a persistent, versioned configuration: the plan proves what was asked,
+# the JSON report proves what was detected. Alert 40018 is the positive control.
+# =============================================================================
+env:
+  contexts:
+    - name: juice-shop
+      urls:
+        - http://10.20.10.20:3000
+      includePaths:
+        - http://10\.20\.10\.20:3000.*
+  parameters:
+    failOnError: true
+    failOnWarning: false
+    progressToStdout: true
+
+jobs:
+  - type: spider
+    parameters:
+      context: juice-shop
+      url: http://10.20.10.20:3000
+      maxDuration: 1
+      maxDepth: 2
+
+  - type: requestor
+    parameters:
+      user: ""
+      requests:
+        # Controlled login seed, as required by the brief.
+        - url: http://10.20.10.20:3000/rest/user/login
+          method: POST
+          data: '{"email":"jim@juice-sh.op","password":"ncc1701"}'
+          headers:
+            - "Content-Type: application/json"
+        # Deterministic SQLi transaction, encoded quote/parenthesis.
+        - url: "http://10.20.10.20:3000/rest/products/search?q=%27%28"
+          method: GET
+
+  - type: activeScan
+    parameters:
+      context: juice-shop
+      url: "http://10.20.10.20:3000/rest/products/search?q=%27%28"
+      policyDefinition:
+        rules:
+          - id: 40018
+            name: SQL Injection
+            strength: HIGH
+            threshold: LOW
+
+  - type: report
+    parameters:
+      template: traditional-json
+      reportDir: /zap/wrk
+      reportFile: zap-sqli.json

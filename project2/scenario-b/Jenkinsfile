@@ -1,0 +1,64 @@
+// =============================================================================
+// Project 2 — Scenario B: Jenkins security pipeline (phase 2A so far)
+//
+// Stage order is the contract from the brief. Later phases append stages; they
+// never move these earlier ones.
+//
+// The Jenkins container mounts:
+//   /lab        host repository, read-only (git-ignored env/secrets)
+//   /evidence   host results/ directory, writable
+//   /var/run/docker.sock
+// =============================================================================
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+    }
+
+    environment {
+        P2_HOST_REPO       = '/home/x0riso/5G-2-Security'
+        P2_ENV_FILE        = '/lab/project2/scenario-a/env'
+        EVIDENCE_HOST_ROOT = '/home/x0riso/5G-2-Security/results/scenario-b/phase2a'
+    }
+
+    stages {
+        stage('Prepare RUN_ID') {
+            steps {
+                script {
+                    env.RUN_ID = sh(
+                        returnStdout: true,
+                        script: 'date -u +%Y%m%dT%H%M%SZ'
+                    ).trim()
+                    env.EVIDENCE_DIR = "/evidence/scenario-b/phase2a/${env.RUN_ID}"
+                    env.EVIDENCE_HOST_DIR = "${env.EVIDENCE_HOST_ROOT}/${env.RUN_ID}"
+                    sh 'mkdir -p "$EVIDENCE_DIR"'
+                    echo "RUN_ID=${env.RUN_ID}"
+                }
+            }
+        }
+
+        stage('1E - Scenario A acceptance baseline') {
+            steps {
+                sh '''
+                    bash project2/scenario-a/scripts/verify-phase1.sh 2>&1 \
+                        | tee "$EVIDENCE_DIR/baseline-1e.txt"
+                '''
+            }
+        }
+
+        stage('2A - Preflight and environment acceptance') {
+            steps {
+                sh 'python3 project2/scenario-b/scripts/preflight.py'
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'project2/scenario-b/**', allowEmptyArchive: true
+        }
+    }
+}

@@ -1,0 +1,8 @@
+# =============================================================================
+# Scenario B — local Suricata rule (host-side input, mounted read-only)
+#
+# SID 1000001 matches the deterministic SQLi network positive control:
+#   GET /rest/products/search?q=%27%28
+# This rule is for the controlled Juice Shop target only.
+# =============================================================================
+alert http any any -> any any (msg:"LOCAL Scenario B SQLi test - encoded quote/parenthesis in product search"; flow:to_server,established; http.uri; content:"/rest/products/search"; nocase; http.uri; content:"q=%27%28"; nocase; classtype:web-application-attack; sid:1000001; rev:1;)
