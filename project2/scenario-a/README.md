@@ -28,7 +28,11 @@ Scenario B (Jenkins, ZAP, Suricata, Trivy/Syft) starts only after 1E is green.
   [`results/scenario-a/phase1a/`](../../results/scenario-a/phase1a/README.md).
   UERANSIM v3.3.0 image running on gNB and UE; `10.20.6.20` resolves via
   `uesimtun0` and keeps doing so after `docker restart nr_ue`.
-- 1B–1E: pending.
+- **1B — done** (2026-11-02). Evidence:
+  [`results/scenario-a/phase1b/`](../../results/scenario-a/phase1b/README.md).
+  `scenario-b-django` healthy on the internal `app-net` only, `/health/` exact,
+  `django-data` survives recreation.
+- 1C–1E: pending.
 
 ## Directory
 
@@ -38,13 +42,18 @@ project2/scenario-a/
 ├── AGENTS.md                   # exact Scenario A contract
 ├── ueransim/                   # Phase 1A: UERANSIM v3.3.0 Dockerfile + p2-init.sh
 ├── docker-compose.ueransim.yaml# compose override: nr_gnb and nr_ue use the p2 image
+├── django/                     # Phase 1B: Django 6.0.8 + Gunicorn + SQLite
+├── docker-compose.p2.yaml      # Phase 1B: django-data volume, app-net (internal)
+├── env.example                 # template of the git-ignored ./env (secret key)
 └── scripts/
     ├── build.sh                # build telecom-lab-ueransim:3.3.0-p2
     ├── upgrade-ran.sh          # recreate nr_gnb then nr_ue with the p2 image
-    └── verify-phase1a.sh       # acceptance for phase 1A
+    ├── verify-phase1a.sh       # acceptance for phase 1A
+    └── verify-phase1b.sh       # acceptance for phase 1B
 ```
 
-Later phases add `django/`, `nginx/`, `pki/` and `docker-compose.p2.yaml`.
+Later phases add `nginx/`, `pki/` and the gateway service in
+`docker-compose.p2.yaml`.
 
 ## Phase 1A — what and why
 
@@ -71,6 +80,34 @@ script:
   the lab, so the substitution is recorded in the report (see `AGENTS.md`).
 * `nr_gnb` and `nr_ue` are recreated via a compose override; nothing else
   changes.
+
+## Phase 1B — what and why
+
+The application never touches N6. `scenario-b-django` is attached **only** to
+`app-net` (`10.20.8.0/24`, `internal: true`), so it has no route to the data
+network or the internet; the only path in will be the gateway in phase 1C.
+
+* `django/` — Django 6.0.8 project (`telecom_lab`), Gunicorn, SQLite at
+  `/app/data/db.sqlite3`. Everything environment-specific (secret key, debug,
+  allowed hosts) comes from the environment; `env` is git-ignored and
+  `env.example` documents the keys.
+* The image runs as a non-root user. `/app/data` is created with that ownership
+  so the named volume inherits it and SQLite stays writable.
+* `entrypoint.sh` runs `manage.py migrate --noinput` before Gunicorn, which
+  satisfies the "migrations before the lab account" order for phase 1D.
+* A Docker `HEALTHCHECK` probes `http://127.0.0.1:8000/health/`, so the
+  container reports `healthy` without an external tool.
+* `verify-phase1b.sh` proves isolation, health, volume persistence, the exact
+  `/health/` body, and that an Nginx proxy on `app-net` reaches Django.
+
+## Run (phase 1B)
+
+```bash
+cd project2/scenario-a
+cp env.example env                  # then replace DJANGO_SECRET_KEY
+docker compose -f docker-compose.p2.yaml up -d --build
+./scripts/verify-phase1b.sh
+```
 
 ## Run (phase 1A)
 

@@ -1,0 +1,25 @@
+----] 1. image build and Django system check
+[ OK ] telecom-lab-django:0.1 built
+[ OK ] manage.py check: System check identified no issues (0 silenced).
+----] 2. container health
+[ OK ] scenario-b-django healthy
+----] 3. network attachment (app-net only)
+[ OK ] attached only to app-net
+[ OK ] Django address 10.20.8.20
+[ OK ] Django is not on dn-net
+----] 4. app-net definition
+[ OK ] app-net is internal
+[ OK ] app-net subnet 10.20.8.0/24
+----] 5. django-data volume survives recreation
+[ OK ] volume django-data exists
+[ OK ] wrote a marker into /app/data
+[ OK ] recreated container healthy
+[ OK ] marker survived the recreation
+[ OK ] SQLite database at /app/data/db.sqlite3
+----] 6. /health/ response
+[ OK ] exact JSON body
+       {"service": "project2-django", "status": "ok", "project": "Telecommunication Security"}
+----] 7. Nginx on app-net can reach Django
+[ OK ] health through an Nginx proxy: 200
+
+[ OK ] Phase 1B complete: Django is healthy on the isolated app-net.

@@ -23,8 +23,8 @@ is reused as the transport for Project 2.
 
 | Scenario | Phase | Description | Status |
 |---|---|---|---|
-| A | 1A | 5G SA base + **persistent UE route** (survives container restart) | 🚧 in progress |
-| A | 1B | Django + Gunicorn + SQLite on a private `app-net`, `/health/` | ⬜ |
+| A | 1A | 5G SA base + **persistent UE route** (survives container restart) | ✅ done |
+| A | 1B | Django + Gunicorn + SQLite on a private `app-net`, `/health/` | ✅ done |
 | A | 1C | Lab PKI + Nginx TLS gateway (`80 → 301 → 443`) | ⬜ |
 | A | 1D | Django security baseline (login, CSRF, cookies, HSTS, headers) | ⬜ |
 | A | 1E | End-to-end acceptance from the UE through the 5G path | ⬜ |

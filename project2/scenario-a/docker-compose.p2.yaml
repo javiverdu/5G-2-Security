@@ -1,0 +1,43 @@
+# =============================================================================
+# Project 2 — Scenario A: application layer (phase 1B)
+#
+# Django is connected ONLY to app-net (10.20.8.0/24, internal). It never joins
+# dn-net: the only way in is through the Nginx gateway added in phase 1C.
+#
+# Usage:
+#   docker compose -f project2/scenario-a/docker-compose.p2.yaml up -d --build
+#
+# Secrets come from ./env, which is git-ignored (copy env.example).
+# =============================================================================
+name: scenario-a
+
+services:
+  django:
+    build: ./django
+    image: telecom-lab-django:0.1
+    container_name: scenario-b-django
+    restart: unless-stopped
+    env_file:
+      - ./env
+    environment:
+      DJANGO_DEBUG: "False"
+      DJANGO_ALLOWED_HOSTS: "10.20.8.20,10.20.6.20,telecom-lab.local,localhost,127.0.0.1"
+      DJANGO_DB_PATH: "/app/data/db.sqlite3"
+    volumes:
+      - django-data:/app/data
+    networks:
+      app-net:
+        ipv4_address: 10.20.8.20
+
+networks:
+  app-net:
+    name: app-net
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 10.20.8.0/24
+
+volumes:
+  django-data:
+    name: django-data
