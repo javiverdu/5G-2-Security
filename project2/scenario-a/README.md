@@ -14,7 +14,7 @@ runbook (`scenario-b/README.md` §7) is unchanged.
 
 | Phase | Deliverable | Exit criterion |
 |---|---|---|
-| **1A** | UE image with a **persistent user-plane route**: `telecom-lab-ueransim:3.3.0-p2` | `ip route get 10.20.6.20` resolves via `uesimtun0` **and survives `docker restart nr_ue`** |
+| **1A** | RAN image pinned to **UERANSIM v3.3.0** with a **persistent user-plane route**: `telecom-lab-ueransim:3.3.0-p2` | `ip route get 10.20.6.20` resolves via `uesimtun0` **and survives `docker restart nr_ue`** |
 | **1B** | Django + Gunicorn + SQLite on a private `app-net` (`10.20.8.0/24`, internal) | container `healthy`; `/health/` reachable from Nginx only |
 | **1C** | Lab PKI + Nginx TLS gateway on N6 (`10.20.6.20`) | from the UE: `https://…/health/` returns **200 without `-k`**; `http://` returns **301** |
 | **1D** | Django security baseline (login, CSRF, secure cookies, HSTS, headers) | acceptance list green |
@@ -28,11 +28,11 @@ Scenario B (Jenkins, ZAP, Suricata, Trivy/Syft) starts only after 1E is green.
 project2/scenario-a/
 ├── README.md                   # this plan
 ├── AGENTS.md                   # exact Scenario A contract
-├── ueransim/                   # Phase 1A: Dockerfile + p2-init.sh (persistent route)
-├── docker-compose.ueransim.yaml# compose override: nr_ue uses the p2 image
+├── ueransim/                   # Phase 1A: UERANSIM v3.3.0 Dockerfile + p2-init.sh
+├── docker-compose.ueransim.yaml# compose override: nr_gnb and nr_ue use the p2 image
 └── scripts/
     ├── build.sh                # build telecom-lab-ueransim:3.3.0-p2
-    ├── upgrade-ue.sh           # recreate nr_ue with the p2 image + verify
+    ├── upgrade-ran.sh          # recreate nr_gnb then nr_ue with the p2 image
     └── verify-phase1a.sh       # acceptance for phase 1A
 ```
 
@@ -54,11 +54,15 @@ script:
   then hands control to the original UERANSIM init. The Project 1 `default` route
   is **not** installed: the brief asks for the narrow N6 route, and a default
   route would push management/DNS traffic into the tunnel.
-* The image is `telecom-lab-ueransim:3.3.0-p2`, built **on top of** the Project 1
-  base (`docker_ueransim`), so the rest of the deployment is untouched. The brief
-  names `gradiant/ueransim:3.3.0`; that environment is not deployed in the lab, so
-  the substitution is recorded in the report (see `AGENTS.md`, open decisions).
-* `nr_ue` is recreated via a compose override; nothing else changes.
+* The image is `telecom-lab-ueransim:3.3.0-p2`, built **from source** at UERANSIM
+  tag `v3.3.0`, so the running RAN matches the version the brief specifies.
+  The Project 1 image (`herlesupreeth/docker_ueransim:latest`) is built from
+  `v3.2.6`; using it would leave the deployment one release behind. The gNB and
+  the UE both run the pinned image, so they cannot drift apart.
+  The brief names `gradiant/ueransim:3.3.0`; that environment is not deployed in
+  the lab, so the substitution is recorded in the report (see `AGENTS.md`).
+* `nr_gnb` and `nr_ue` are recreated via a compose override; nothing else
+  changes.
 
 ## Run (phase 1A)
 
@@ -67,9 +71,10 @@ cd scenario-b
 ./scripts/fetch-upstream.sh        # if not already done (provides docker_ueransim)
 ./scripts/deploy.sh                # base deployment (core, gNB, UE, subscriber)
 sudo ./scripts/enable-n6.sh        # N6 + apps, no NAT
-../project2/scenario-a/scripts/build.sh
-../project2/scenario-a/scripts/upgrade-ue.sh
-../project2/scenario-a/scripts/verify-phase1a.sh
+cd ../project2/scenario-a
+./scripts/build.sh                 # build UERANSIM v3.3.0 + route watcher
+./scripts/upgrade-ran.sh           # recreate nr_gnb and nr_ue with that image
+./scripts/verify-phase1a.sh        # route via uesimtun0, survives a restart
 ```
 
 ## Working specification

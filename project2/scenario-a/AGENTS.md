@@ -21,14 +21,16 @@ demonstration must cross the 5G user plane.
 |---|---|---|
 | `telecom-lab-nginx:p2` | `nginx:latest` + `iproute2` | TLS, proxy, HTTP→HTTPS, routes for the UE PDU path |
 | `telecom-lab-django:0.1` | `python:3.12-slim` | Django **6.0.8**, Gunicorn, SQLite |
-| `telecom-lab-ueransim:3.3.0-p2` | `gradiant/ueransim:3.3.0` | keeps `10.20.6.0/24 → uesimtun0` after container recreation |
+| `telecom-lab-ueransim:3.3.0-p2` | `ubuntu:jammy` (UERANSIM **v3.3.0** from source) | keeps `10.20.6.0/24 → uesimtun0` after container recreation |
 
 Verification-only, `docker run --rm`, never part of the runtime: `curlimages/curl:latest`, `alpine`.
 
-> The UE image builds `FROM docker_ueransim:latest` (Project 1). The brief names
+> The RAN image is built **from source** at UERANSIM `v3.3.0`. The Project 1
+> image (`herlesupreeth/docker_ueransim:latest`) is built from `v3.2.6`, one
+> release behind the brief, so it is not used. The brief names
 > `gradiant/ueransim:3.3.0`; that environment is not deployed in the lab, so the
 > substitution is **decided** (root §8) and must be reported as a documented
-> deviation, together with the real UERANSIM version.
+> deviation, together with the verified UERANSIM version.
 
 ## Places and files
 

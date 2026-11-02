@@ -139,9 +139,10 @@ exit criterion. Prefer machine-checkable assertions over prose.
 ## 8. Decisions taken (do not reopen without cause)
 
 1. **Base images — Option B.** The course's `gradiant/*` environment is not
-   deployed in the lab. Keep `herlesupreeth/docker_ueransim` +
-   `docker_open5gs`; record the substitution and the real UERANSIM/Open5GS
-   versions in the report.
+   deployed in the lab. Keep `docker_open5gs`; build the RAN from UERANSIM
+   **v3.3.0** source (`telecom-lab-ueransim:3.3.0-p2`) instead of using
+   `herlesupreeth/docker_ueransim:latest`, which is **v3.2.6**. Record the
+   substitution and the verified versions in the report.
 2. **Network names — documented mapping.** Keep the flat `core`
    (`172.22.0.0/24`) for N2/N3/N4/SBI, distinguished by port (`38412/2152/8805/
    7777`). Create `dn-net`, `app-net` and `security-net` with the exact names the

@@ -3,14 +3,14 @@
 # Project 2 — Phase 1A acceptance.
 #
 # Checks, in order:
-#   1. the p2 image exists
-#   2. nr_ue runs it
+#   1. the p2 image exists and reports UERANSIM v3.3.0
+#   2. nr_gnb and nr_ue run it
 #   3. the UE has a PDU session (uesimtun0 = 10.45.x)
 #   4. traffic toward N6 resolves via uesimtun0
 #   5. the route SURVIVES a container restart (the point of phase 1A)
 #   6. (optional) N6 is reachable (requires enable-n6.sh)
 #
-# Usage:  ./p2/scripts/verify-phase1a.sh
+# Usage:  ./project2/scenario-a/scripts/verify-phase1a.sh
 # =============================================================================
 set -uo pipefail
 HERE=$(cd "$(dirname "$0")/.." && pwd)          # project2/scenario-a
@@ -22,16 +22,27 @@ step() { printf '\033[1;34m----]\033[0m %s\n' "$*"; }
 ERRORS=0
 
 step "1. p2 image"
-docker image inspect "$P2IMG" >/dev/null 2>&1 && ok "$P2IMG built" \
-    || fail "$P2IMG missing (run ./p2/scripts/build.sh)"
-
-step "2. nr_ue runs the p2 image"
-RUNNING_IMG=$(docker inspect -f '{{.Config.Image}}' nr_ue 2>/dev/null || true)
-if [[ "$RUNNING_IMG" == "$P2IMG" ]]; then
-    ok "nr_ue uses $P2IMG"
+if docker image inspect "$P2IMG" >/dev/null 2>&1; then
+    ok "$P2IMG built"
+    VER=$(docker run --rm --entrypoint /UERANSIM/build/nr-ue "$P2IMG" --version 2>/dev/null | tr -d '\r')
+    if [[ "$VER" == *3.3.0* ]]; then
+        ok "UERANSIM $VER"
+    else
+        fail "UERANSIM reports '${VER:-unknown}', expected 3.3.0"
+    fi
 else
-    fail "nr_ue uses '${RUNNING_IMG:-none}' (run ./p2/scripts/upgrade-ue.sh)"
+    fail "$P2IMG missing (run ./project2/scenario-a/scripts/build.sh)"
 fi
+
+step "2. nr_gnb and nr_ue run the p2 image"
+for c in nr_gnb nr_ue; do
+    RUNNING_IMG=$(docker inspect -f '{{.Config.Image}}' "$c" 2>/dev/null || true)
+    if [[ "$RUNNING_IMG" == "$P2IMG" ]]; then
+        ok "$c uses $P2IMG"
+    else
+        fail "$c uses '${RUNNING_IMG:-none}' (run ./project2/scenario-a/scripts/upgrade-ran.sh)"
+    fi
+done
 
 step "3. PDU session"
 UADDR=$(docker exec nr_ue ip -4 -brief addr show uesimtun0 2>/dev/null | awk '{print $3}')
