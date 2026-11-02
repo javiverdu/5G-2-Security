@@ -325,7 +325,8 @@ def main() -> int:
                out[-400:] if rc else "database ready")
     if docker_image_tag(syft):
         rc, out = run(["docker", "run", "--rm", syft, "version"], timeout=120)
-        versions["syft"] = out.splitlines()[0] if out else ""
+        m = re.search(r"Version:\s*(\S+)", out)
+        versions["syft"] = m.group(1) if m else (out.splitlines()[0] if out else "")
         record("Syft reports a version", rc == 0, versions["syft"])
 
     # -- 11. record versions -------------------------------------------------

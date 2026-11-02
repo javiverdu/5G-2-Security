@@ -138,6 +138,14 @@ exit criterion. Prefer machine-checkable assertions over prose.
   hard poweroff, boot, then `scenario-b/scripts/deploy.sh`, the N6 override and
   `project2/scenario-a/scripts/upgrade-ran.sh`. Stop unneeded host applications
   before long container work.
+- Scenario B consumes most of the 32 GB disk (ZAP 3.75 GB, Selenium 3.28 GB,
+  Open5GS 2.21 GB, Jenkins, Trivy + DB). The Project 1 `grafana` and `metrics`
+  containers were removed to free space; they remain defined in the base
+  compose files, so re-running `deploy.sh` would pull them again.
+- `docker_ueransim:latest` is kept as a tag pointing at
+  `telecom-lab-ueransim:3.3.0-p2` because the inherited `deploy.sh` and
+  `nr-gnb.yaml`/`nr-ue.yaml` reference that name. `upgrade-ran.sh` then puts the
+  p2 tag back on the running containers.
 - The host has `gh` authenticated as `javiverdu`; the repository is public.
 - The brief is readable by agents at `docs/brief-p2.txt` (PDF text extraction).
 

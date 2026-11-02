@@ -28,7 +28,8 @@ is reused as the transport for Project 2.
 | A | 1C | Lab PKI + Nginx TLS gateway (`80 → 301 → 443`) | ✅ done |
 | A | 1D | Django security baseline (login, CSRF, cookies, HSTS, headers) | ✅ done |
 | A | 1E | End-to-end acceptance from the UE through the 5G path | ✅ done |
-| B | 2A–2E | Preflight, ZAP + Selenium, PCAP + Suricata, Trivy/Syft, correlation + gate | ⬜ planned |
+| B | 2A | Preflight + environment acceptance (Jenkins, Juice Shop, Selenium, capture, Suricata, Trivy/Syft) | ✅ done |
+| B | 2B–2E | ZAP/Selenium/SQLi, PCAP + Suricata, Trivy/Syft, correlation + gate | ⬜ pending |
 
 ## Structure
 
@@ -38,8 +39,10 @@ is reused as the transport for Project 2.
 ├── scenario-b/            # 5G SA core (inherited from Project 1)
 │   └── AGENTS.md          # inherited-base invariants and gotchas
 ├── project2/
-│   └── scenario-a/        # secure application delivery (phases 1A–1E)
-│       └── AGENTS.md      # exact Scenario A contract from the brief
+│   ├── scenario-a/        # secure application delivery (phases 1A–1E)
+│   │   └── AGENTS.md      # exact Scenario A contract from the brief
+│   └── scenario-b/        # security CI/CD pipeline (phases 2A–2E)
+│       └── AGENTS.md      # Scenario B contract, order and evidence rules
 ├── docs/                  # brief, reports and reference material
 ├── scripts/               # Project 1 Scenario A tooling (reference)
 └── results/               # evidence
