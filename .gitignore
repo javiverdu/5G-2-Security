@@ -57,3 +57,9 @@ env/
 # ---------- Docker local overrides ----------
 docker-compose.override.yml
 .env
+
+# ---------- Project 2: private inputs (brief excludes `env` and `secrets/tls/`) ----------
+# Private credentials, lab CA/server keys — never committed.
+env
+secrets/tls/*
+!secrets/tls/.gitkeep

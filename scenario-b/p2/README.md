@@ -49,8 +49,12 @@ Project 2 needs the route to be a property of the **UE image**, not of a host
 script:
 
 * `ueransim/p2-init.sh` starts a small watcher that, whenever `uesimtun0` exists,
-  keeps `default dev uesimtun0` and `10.45.0.0/16 dev uesimtun0` installed, and
+  keeps the route the brief requires — **`10.20.6.0/24 dev uesimtun0`** — installed,
+  so N6 traffic enters the PDU tunnel instead of the Docker `ran-net` path, and
   then hands control to the original UERANSIM init.
+  It also keeps `default dev uesimtun0` (Project 1 behaviour); that part is not
+  required by the brief and must be justified or dropped — see
+  [`AGENTS.md`](AGENTS.md).
 * The image is `telecom-lab-ueransim:3.3.0-p2`, built **on top of** the Project 1
   base (`docker_ueransim`), so the rest of the deployment is untouched.
 * `nr_ue` is recreated via a compose override; nothing else changes.
@@ -69,6 +73,6 @@ sudo ./scripts/enable-n6.sh      # N6 + apps, no NAT
 
 ## Working specification
 
-See the [root README](../../../README.md#working-specification-from-the-brief--confirm-before-wiring)
+See the [root README](../../README.md#working-specification-from-the-brief--confirm-before-wiring)
 for the values used while scaffolding (UE pool, N6, `app-net`, PKI, TLS policy).
 If your copy of the brief differs, that table is the single place to change.

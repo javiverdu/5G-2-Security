@@ -34,8 +34,11 @@ is reused as the transport for Project 2.
 
 ```
 5G-2-Security/
+├── AGENTS.md              # agent rules: design invariants that survive compaction
 ├── scenario-b/            # 5G SA core (inherited from Project 1) + Project 2 additions
+│   ├── AGENTS.md          # inherited-base invariants and gotchas
 │   └── p2/                # Project 2 — Scenario A work (phases 1A–1E)
+│       └── AGENTS.md      # exact Scenario A contract from the brief
 ├── docs/                  # Project 1 reports (kept as reference; history preserves all)
 ├── scripts/               # Project 1 Scenario A tooling (reference)
 └── results/               # Project 1 evidence (reference)
@@ -63,18 +66,32 @@ they are collected in one place to change:
 | Item | Value |
 |---|---|
 | UE PDU pool | `10.45.0.0/16` (`uesimtun0`) |
-| N6 / public network | `10.20.6.0/24` (`dn-net`), Nginx at `10.20.6.20` |
-| Private application network | `app-net` `10.20.8.0/24` (internal), Django at `10.20.8.20:8000` |
+| N6 / data network | `dn-net` `10.20.6.0/24`; `scenario-b-nginx` at `10.20.6.20` |
+| Private application network | `app-net` `10.20.8.0/24` (internal); `scenario-b-django` at `10.20.8.20:8000`; Nginx `10.20.8.10` |
 | Lab PKI | local root CA; server cert with `SAN = IP:10.20.6.20` |
 | TLS policy | TLS 1.2/1.3, `HTTP:80 → 301 → HTTPS:443` |
 | UE image (Project 2) | `telecom-lab-ueransim:3.3.0-p2` — keeps `10.20.6.0/24 dev uesimtun0` across restarts |
 
 ## Repository
 
-Fork of `javiverdu/5G-project-RTU` (Project 1). The origin of this fork points to
-the new Project 2 repository — create it on GitHub and:
+Fork of [`javiverdu/5G-project-RTU`](https://github.com/javiverdu/5G-project-RTU)
+(Project 1). Project 2 lives at
+[`javiverdu/5G-2-Security`](https://github.com/javiverdu/5G-2-Security).
 
 ```bash
-git remote add origin https://github.com/<user>/5G-2-Security.git
-git push -u origin main
+git clone https://github.com/javiverdu/5G-2-Security.git ~/5G-2-Security
 ```
+
+Clone it to a **native VM path** (not the VirtualBox shared folder): vboxsf
+breaks container mounts such as Grafana's provisioning directory.
+
+## For AI agents / new sessions
+
+The design that must not drift is written down, not inferred from chat history:
+
+- [`AGENTS.md`](AGENTS.md) — architecture, frozen values, phase gates, evidence rules.
+- [`scenario-b/AGENTS.md`](scenario-b/AGENTS.md) — inherited 5G invariants and gotchas.
+- [`scenario-b/p2/AGENTS.md`](scenario-b/p2/AGENTS.md) — exact Scenario A contract.
+
+Requirements source of truth:
+`Project 2_Telecommunication Security, DevSecOps, and Traffic Intelligence.pdf`.
