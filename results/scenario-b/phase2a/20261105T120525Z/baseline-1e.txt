@@ -1,0 +1,49 @@
+[1;34m----][0m 1. UE data path
+[1;32m[ OK ][0m uesimtun0 = 10.45.0.3/16
+[1;32m[ OK ][0m nr_ue runs UERANSIM v3.3.0 image
+[1;32m[ OK ][0m 10.20.6.20 resolves via uesimtun0
+[1;32m[ OK ][0m UE reaches the gateway on N6
+[1;34m----][0m 2. certificate and TLS handshakes
+[1;32m[ OK ][0m scenario-b-nginx runs telecom-lab-nginx:p2
+[1;32m[ OK ][0m server certificate verifies against the lab CA
+[1;32m[ OK ][0m TLSv1.2 handshake, certificate verified
+[1;32m[ OK ][0m TLSv1.3 handshake, certificate verified
+[1;34m----][0m 3. HTTP 301 -> HTTPS 200 (trusted, no -k)
+[1;31m[FAIL][0m HTTP / -> ''
+[1;31m[FAIL][0m redirect target: ''
+[1;31m[FAIL][0m HTTP /health/ -> ''
+[1;31m[FAIL][0m HTTPS / -> ''
+[1;31m[FAIL][0m HTTPS /health/ -> ''
+[1;31m[FAIL][0m body: ''
+[1;34m----][0m 4. public endpoints
+[1;31m[FAIL][0m /api/status/ -> ''
+[1;31m[FAIL][0m /search/ -> ''
+[1;31m[FAIL][0m /admin/ -> ''
+[1;31m[FAIL][0m api body: ''
+[1;34m----][0m 5. authentication
+[1;31m[FAIL][0m anon: 'none'
+[1;31m[FAIL][0m login page: ''
+[1;31m[FAIL][0m login -> ''
+[1;31m[FAIL][0m profile -> ''
+[1;31m[FAIL][0m missing Username line
+[1;31m[FAIL][0m missing Authenticated line
+[1;34m----][0m 6. CSRF protection
+[1;31m[FAIL][0m feedback GET: ''
+[1;31m[FAIL][0m valid POST: ''
+[1;31m[FAIL][0m missing: ''
+[1;31m[FAIL][0m invalid: ''
+[1;34m----][0m 7. cookies and headers
+[1;31m[FAIL][0m session cookie lacks Secure
+[1;31m[FAIL][0m session cookie lacks HttpOnly
+[1;31m[FAIL][0m session cookie lacks SameSite=Lax
+[1;31m[FAIL][0m CSRF cookie lacks Secure
+[1;31m[FAIL][0m HSTS missing
+[1;31m[FAIL][0m X-Frame-Options missing
+[1;31m[FAIL][0m nosniff missing
+[1;31m[FAIL][0m referrer policy missing
+[1;31m[FAIL][0m search input not escaped
+[1;34m----][0m 8. real UE address at the gateway (no NAT)
+[1;32m[ OK ][0m gateway access log shows 10.45.0.3
+
+[1;31m[FAIL][0m 29 check(s) failed.
+--- client output ---

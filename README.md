@@ -4,8 +4,8 @@
 
 This repository is a **fork of Project 1** (`5G-project-RTU`, full history kept).
 Only **Project 2 documentation** is maintained here. The inherited 5G Standalone
-code remains, but the Project 1 reports, screenshots and PDF were removed from
-the working tree.
+code, scripts and raw results remain as the working base, but the Project 1
+reports, screenshots and PDF were removed from the working tree.
 
 > **Workflow:** Secure the app path → test it → automate the testing → observe and correlate.
 
@@ -45,7 +45,7 @@ the working tree.
 │   ├── scenario-a/           # secure application delivery (1A–1E)
 │   └── scenario-b/           # security CI/CD pipeline (2A–2E)
 ├── scripts/                  # inherited Project 1 tooling (reference)
-└── results/                  # Project 2 evidence
+└── results/                  # Project 2 evidence; inherited raw results kept
 ```
 
 ## Run the environment
@@ -65,7 +65,7 @@ cd ~/5G-2-Security
 
 # ---------------------------------------------------------------- Scenario A
 # First time only: create the git-ignored inputs.
-cd scenario-b && cp env.example .env && cd ..
+cd scenario-b && cp -n env.example .env && cd ..
 
 # 1. Base 5G core, gNB, UE and subscriber
 cd scenario-b

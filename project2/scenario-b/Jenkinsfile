@@ -43,6 +43,7 @@ pipeline {
         stage('1E - Scenario A acceptance baseline') {
             steps {
                 sh '''
+                    set -euo pipefail
                     bash project2/scenario-a/scripts/verify-phase1.sh 2>&1 \
                         | tee "$EVIDENCE_DIR/baseline-1e.txt"
                 '''

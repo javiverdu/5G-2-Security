@@ -39,7 +39,17 @@ CT="scenario-b-nginx"
 CURL_IMG="curlimages/curl:latest"
 BASE="https://10.20.6.20"
 EXPECTED='{"service": "project2-django", "status": "ok", "project": "Telecommunication Security"}'
-TMP=$(mktemp -d)
+# The temporary client script is mounted into `docker run`, so its path must be
+# a HOST path. When this runs inside Jenkins (Docker-outside-of-Docker), use the
+# run-specific evidence directory, which is mounted at a known host path.
+if [[ -n "${EVIDENCE_DIR:-}" && -n "${EVIDENCE_HOST_DIR:-}" ]]; then
+    TMP="$EVIDENCE_DIR/.verify-tmp.$$"
+    TMP_HOST="$EVIDENCE_HOST_DIR/.verify-tmp.$$"
+    mkdir -p "$TMP"
+else
+    TMP=$(mktemp -d)
+    TMP_HOST="$TMP"
+fi
 trap 'rm -rf "$TMP"' EXIT
 
 ok()   { printf '\033[1;32m[ OK ]\033[0m %s\n' "$*"; }
@@ -53,7 +63,7 @@ set -a; . "$ENV_FILE"; set +a
 client() {
     docker run --rm --network container:nr_ue \
         -v "$HOST_SECRETS/ca.crt:/etc/telecom-lab/ca.crt:ro" \
-        -v "$TMP/client.sh:/client.sh:ro" \
+        -v "$TMP_HOST/client.sh:/client.sh:ro" \
         -e LAB_USER="${LAB_ADMIN_USER:-securityadmin}" \
         -e LAB_PASS="${LAB_ADMIN_PASSWORD:-}" \
         -e BASE="$BASE" \
