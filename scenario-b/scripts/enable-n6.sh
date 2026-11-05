@@ -16,7 +16,10 @@ set -a; . "$HERE/.env"; set +a
 cd "$UP"
 
 echo "[n6] attaching UPF to dn and starting nginx (${NGINX_IP})"
-docker compose -f sa-deploy.yaml -f "$HERE/n6/docker-compose.n6.yaml" up -d --no-build
+# Start only the services this milestone owns. A bare `compose up` would also
+# try to start the observability stack, which is disabled on this VM.
+docker compose -f sa-deploy.yaml -f "$HERE/n6/docker-compose.n6.yaml" \
+    up -d --no-build upf nginx iperf3
 
 echo "[n6] waiting for nginx"
 for _ in $(seq 1 30); do

@@ -46,11 +46,14 @@ project2/scenario-b/
 
 ## Run (phase 2A)
 
+Prerequisite: Scenario A is up and its 1E gate is green (see the
+[root README](../../README.md#run-the-environment)).
+
 ```bash
 cd project2/scenario-b
-cp env.example env             # set JENKINS_ADMIN_PASSWORD
-./scripts/up.sh
-./scripts/run-pipeline.sh
+cp -n env.example env          # set JENKINS_ADMIN_PASSWORD
+./scripts/up.sh                # build images, start services, create the job
+./scripts/run-pipeline.sh      # trigger and follow the Jenkins build
 ```
 
 Jenkins mounts the host repository read-only at `/lab` (for the git-ignored

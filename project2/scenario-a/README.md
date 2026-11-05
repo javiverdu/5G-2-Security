@@ -5,8 +5,8 @@ Scenario A reuses the 5G Standalone path from Project 1
 delivery path**: a Django application on a private network behind an Nginx **TLS
 reverse proxy**, with the lab PKI and HTTP→HTTPS redirection.
 
-Everything is built **on top of** the inherited `scenario-b/` deployment; the base
-runbook (`scenario-b/README.md` §7) is unchanged.
+Everything is built **on top of** the inherited `scenario-b/` deployment; the
+base runbook is [`scenario-b/README.md`](../../scenario-b/README.md).
 
 ---
 
@@ -167,6 +167,7 @@ network or the internet; the only path in will be the gateway in phase 1C.
 ```bash
 # 1A — base network, UE route
 cd scenario-b
+cp env.example .env                 # once; git-ignored
 ./scripts/fetch-upstream.sh         # once: pinned upstream clone
 ./scripts/deploy.sh                 # core, gNB, UE, subscriber
 sudo ./scripts/enable-n6.sh         # N6 (dn-net) + iperf3, no NAT

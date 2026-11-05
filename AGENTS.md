@@ -12,12 +12,17 @@ file in the same change.
 - Course **Project 2: Telecommunication Security, DevSecOps, and Traffic
   Intelligence**, built as a **fork of Project 1** (`javiverdu/5G-project-RTU`,
   full history kept, remote `origin` = `javiverdu/5G-2-Security`).
-- **Project 1 is finished.** Its Scenario A (Linux namespaces) and its docs,
-  results and PDFs in `docs/`, `scripts/`, `results/`, are **reference only**.
-  Do not refactor, "improve" or delete them.
+- **Project 1 is finished and its documentation is not maintained here.** The
+  Project 1 reports, screenshots and PDF were removed from the working tree;
+  they remain in Git history. Do not restore them. The inherited scripts and
+  raw results are kept only as the working base.
 - The reusable asset inherited from Project 1 is the **5G Standalone network**
-  in `scenario-b/` (Open5GS + UERANSIM + MongoDB + N6 + Prometheus/Grafana/
-  cAdvisor). Project 2 is built **on top of** it, never as a second network.
+  in `scenario-b/` (Open5GS + UERANSIM + MongoDB + N6). Project 2 is built
+  **on top of** it, never as a second network. Observability is optional and
+  disabled by default on the 32 GB VM.
+- Documentation in `docs/` is Project 2 only: the readable brief is
+  `docs/brief-p2.txt`. The operational base runbook is
+  `scenario-b/README.md`.
 - Requirements source of truth: `Project 2_Telecommunication Security,
   DevSecOps, and Traffic Intelligence.pdf` (repo root).
 
@@ -98,9 +103,10 @@ subtree needs its own rules.
 POSIX-safe paths, effect first then verify. Print `[tag]` prefixes. Never hide
 failures with `|| true` unless the failure is explicitly tolerated.
 
-**Docs.** English in the repository, Spanish with the user. Every claim of
-success needs an artifact under `results/` or a command the reader can rerun.
-Never invent measurements, screenshots, versions or outputs.
+**Docs.** English in the repository, Spanish with the user. Keep only Project 2
+documentation: do not add Project 1 step reports, screenshots or final reports.
+Every claim of success needs an artifact under `results/` or a command the
+reader can rerun. Never invent measurements, screenshots, versions or outputs.
 
 **Git.** Conventional, descriptive messages. Never rewrite published history or
 force-push. Do not commit unless the user asks. Raw `.pcap`/`.pcapng` and

@@ -20,7 +20,17 @@ set -a; . "$HERE/.env"; set +a
 cd "$UP"
 
 echo "[deploy] 1/4 core network (5GC)"
-docker compose -f sa-deploy.yaml up -d --no-build
+# The 32 GB lab VM cannot hold the Project 2 images and the inherited
+# observability stack at the same time. Start only the 5G core functions by
+# default; set ENABLE_OBSERVABILITY=1 when metrics/grafana are available.
+CORE_SERVICES=(
+    mongo webui nrf scp ausf udr udm smf upf amf pcf bsf nssf
+)
+if [[ "${ENABLE_OBSERVABILITY:-0}" == "1" ]]; then
+    docker compose -f sa-deploy.yaml up -d --no-build
+else
+    docker compose -f sa-deploy.yaml up -d --no-build "${CORE_SERVICES[@]}"
+fi
 
 echo "[deploy] 2/4 waiting for webui/mongo and provisioning the subscriber"
 for _ in $(seq 1 60); do

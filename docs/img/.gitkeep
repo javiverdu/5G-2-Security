@@ -1,5 +1,0 @@
-# Screenshots for the final report live in this directory.
-# Naming: <scenario>-pageN-NN-description.png
-#   Scenario A: stepN-NN-description.png   (docs/screenshots-plan.md)
-#   Scenario B: sb-pageN-NN-description.png (scenario-b/docs/screenshots-plan.md)
-# Keep this file so the (otherwise empty) directory is tracked by Git.

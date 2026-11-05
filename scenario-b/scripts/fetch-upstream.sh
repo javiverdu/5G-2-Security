@@ -38,6 +38,10 @@ pull_tag ghcr.io/herlesupreeth/docker_ueransim:master docker_ueransim:latest
 pull_tag ghcr.io/herlesupreeth/docker_metrics:master  docker_metrics:latest
 
 echo "[fetch] applying scenario-b/.env"
+[[ -f "$HERE/.env" ]] || {
+    echo "[fetch] missing $HERE/.env — run: cp env.example .env"
+    exit 1
+}
 cp "$HERE/.env" "$UP/.env"
 
 echo "[fetch] patching upf_init.sh so the internet APN is NOT masqueraded (N6 stays un-NATed)"
