@@ -1,5 +1,5 @@
 // =============================================================================
-// Project 2 — Scenario B: Jenkins security pipeline (phase 2A so far)
+// Project 2 — Scenario B: Jenkins security pipeline (phases 2A–2B)
 //
 // Stage order is the contract from the brief. Later phases append stages; they
 // never move these earlier ones.
@@ -21,10 +21,16 @@ pipeline {
     environment {
         P2_HOST_REPO       = '/home/x0riso/5G-2-Security'
         P2_ENV_FILE        = '/lab/project2/scenario-a/env'
-        EVIDENCE_HOST_ROOT = '/home/x0riso/5G-2-Security/results/scenario-b/phase2a'
+        EVIDENCE_HOST_ROOT = '/home/x0riso/5G-2-Security/results/scenario-b'
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Prepare RUN_ID') {
             steps {
                 script {
@@ -32,9 +38,13 @@ pipeline {
                         returnStdout: true,
                         script: 'date -u +%Y%m%dT%H%M%SZ'
                     ).trim()
-                    env.EVIDENCE_DIR = "/evidence/scenario-b/phase2a/${env.RUN_ID}"
-                    env.EVIDENCE_HOST_DIR = "${env.EVIDENCE_HOST_ROOT}/${env.RUN_ID}"
-                    sh 'mkdir -p "$EVIDENCE_DIR"'
+                    env.P2A_DIR = "/evidence/scenario-b/phase2a/${env.RUN_ID}"
+                    env.P2A_HOST_DIR = "${env.EVIDENCE_HOST_ROOT}/phase2a/${env.RUN_ID}"
+                    env.P2B_DIR = "/evidence/scenario-b/phase2b/${env.RUN_ID}"
+                    env.P2B_HOST_DIR = "${env.EVIDENCE_HOST_ROOT}/phase2b/${env.RUN_ID}"
+                    env.P2C_DIR = "/evidence/scenario-b/phase2c/${env.RUN_ID}"
+                    env.P2C_HOST_DIR = "${env.EVIDENCE_HOST_ROOT}/phase2c/${env.RUN_ID}"
+                    sh 'mkdir -p "$P2A_DIR" "$P2B_DIR" "$P2C_DIR"'
                     echo "RUN_ID=${env.RUN_ID}"
                 }
             }
@@ -45,14 +55,58 @@ pipeline {
                 sh '''
                     set -euo pipefail
                     bash project2/scenario-a/scripts/verify-phase1.sh 2>&1 \
-                        | tee "$EVIDENCE_DIR/baseline-1e.txt"
+                        | tee "$P2A_DIR/baseline-1e.txt"
                 '''
             }
         }
 
         stage('2A - Preflight and environment acceptance') {
             steps {
-                sh 'python3 project2/scenario-b/scripts/preflight.py'
+                withEnv(["EVIDENCE_DIR=${env.P2A_DIR}",
+                         "EVIDENCE_HOST_DIR=${env.P2A_HOST_DIR}"]) {
+                    sh 'python3 project2/scenario-b/scripts/preflight.py'
+                }
+            }
+        }
+
+        stage('2B - ZAP baseline') {
+            options { timeout(time: 40, unit: 'MINUTES') }
+            steps {
+                withEnv(["EVIDENCE_DIR=${env.P2B_DIR}",
+                         "EVIDENCE_HOST_DIR=${env.P2B_HOST_DIR}"]) {
+                    sh 'python3 project2/scenario-b/scripts/phase2b.py zap-baseline'
+                }
+            }
+        }
+
+        stage('2B - Selenium runtime and authentication') {
+            options { timeout(time: 20, unit: 'MINUTES') }
+            steps {
+                withEnv(["EVIDENCE_DIR=${env.P2B_DIR}",
+                         "EVIDENCE_HOST_DIR=${env.P2B_HOST_DIR}"]) {
+                    sh 'python3 project2/scenario-b/scripts/phase2b.py selenium'
+                }
+            }
+        }
+
+        stage('2B - capture, controlled SQLi and targeted ZAP') {
+            options { timeout(time: 45, unit: 'MINUTES') }
+            steps {
+                withEnv(["EVIDENCE_DIR=${env.P2B_DIR}",
+                         "EVIDENCE_HOST_DIR=${env.P2B_HOST_DIR}",
+                         "PCAP_DIR=${env.P2C_DIR}",
+                         "PCAP_HOST_DIR=${env.P2C_HOST_DIR}"]) {
+                    script {
+                        def captureRc = sh(
+                            script: 'python3 project2/scenario-b/scripts/phase2b.py capture-sqli',
+                            returnStatus: true
+                        )
+                        sh 'python3 project2/scenario-b/scripts/phase2b.py summarize || true'
+                        if (captureRc != 0) {
+                            error('Phase 2B capture/targeted ZAP failed')
+                        }
+                    }
+                }
             }
         }
     }

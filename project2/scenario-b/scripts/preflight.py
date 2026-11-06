@@ -304,6 +304,7 @@ def main() -> int:
     scripts = [
         REPO / "project2/scenario-a/scripts/verify-phase1.sh",
         REPO / "project2/scenario-b/scripts/preflight.py",
+        REPO / "project2/scenario-b/scripts/phase2b.py",
     ]
     record("required scripts present and executable",
            all(p.is_file() and os.access(p, os.X_OK) for p in scripts),

@@ -18,7 +18,7 @@ source/GitHub → Jenkins → Preflight → ZAP baseline → Selenium runtime
 | Phase | Deliverable | Status |
 |---|---|---|
 | 2A | Preflight + environment acceptance (Jenkins, Juice Shop, Selenium, capture, Suricata, ZAP, Trivy/Syft, tools) | ✅ done |
-| 2B | ZAP baseline, Selenium runtime, capture window, controlled SQLi, targeted ZAP | ⬜ pending |
+| 2B | ZAP baseline, Selenium runtime, capture window, controlled SQLi, targeted ZAP | 🟡 stages implemented; green run pending |
 | 2C | Fresh PCAP validation, Suricata offline detection, traffic intelligence | ⬜ pending |
 | 2D | Trivy scan + Syft CycloneDX SBOM | ⬜ pending |
 | 2E | Evidence correlation, archive, Security Gate (REPORT_ONLY / ENFORCE) | ⬜ pending |
@@ -41,7 +41,8 @@ project2/scenario-b/
     ├── up.sh                   # build and start the environment
     ├── jenkins-bootstrap.sh    # create the pipeline job
     ├── run-pipeline.sh         # trigger and follow a build
-    └── preflight.py            # phase 2A checks -> preflight.json/.md
+    ├── preflight.py            # phase 2A checks -> preflight.json/.md
+    └── phase2b.py              # ZAP baseline, Selenium, capture + SQLi + targeted ZAP
 ```
 
 ## Run (phase 2A)
@@ -65,6 +66,23 @@ The pipeline job is checked out from GitHub, so push before triggering.
 Phase 2A:
 [`results/scenario-b/phase2a/`](../../results/scenario-b/phase2a/README.md)
 — 35 checks, decision PASS.
+
+## Phase 2B stages
+
+The Jenkins pipeline now runs, after Preflight:
+
+1. **ZAP baseline** `2B - ZAP baseline`: HTML, Markdown and JSON reports.
+   Baseline findings are observations; only a tool error fails the stage.
+2. **Selenium runtime** `2B - Selenium runtime and authentication`: Chrome
+   login, JWT/session assertions, cookies, `localStorage` and an authenticated
+   screenshot.
+3. **Controlled SQLi** `2B - capture, controlled SQLi and targeted ZAP`:
+   start capture, GET `/rest/products/search?q=%27%28`, targeted ZAP Alert
+   40018, stop capture. The fresh PCAP is written to the phase 2C directory
+   for the network stage. Alert 40018 missing fails the stage.
+
+Evidence: `results/scenario-b/phase2b/<RUN_ID>/` and the fresh PCAP under
+`results/scenario-b/phase2c/<RUN_ID>/`.
 
 ## Known limitations
 
