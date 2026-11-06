@@ -30,13 +30,25 @@ curl -fsS -b "$JAR" -u "$JENKINS_ADMIN_ID:$JENKINS_ADMIN_PASSWORD" \
 
 [[ "$WAIT" -eq 1 ]] || { echo "[run] queued"; exit 0; }
 
-echo "[run] waiting for build $BEFORE"
-for _ in $(seq 1 240); do
+MAX_WAIT="${MAX_WAIT_SECONDS:-5400}"
+START=$(date +%s)
+LAST_REPORT=$START
+echo "[run] waiting for build $BEFORE (max ${MAX_WAIT}s)"
+while true; do
     BUILDING=$(curl -s -u "$JENKINS_ADMIN_ID:$JENKINS_ADMIN_PASSWORD" \
         "$URL/job/$JOB/$BEFORE/api/json" \
         | sed -n 's/.*"building":\(true\|false\).*/\1/p')
     [[ "$BUILDING" == "false" ]] && break
-    sleep 5
+    NOW=$(date +%s)
+    if (( NOW - START >= MAX_WAIT )); then
+        echo "[run] wait timeout after ${MAX_WAIT}s; build may still be running"
+        break
+    fi
+    if (( NOW - LAST_REPORT >= 60 )); then
+        echo "[run] still building $BEFORE ($((NOW - START))s)"
+        LAST_REPORT=$NOW
+    fi
+    sleep 10
 done
 
 RESULT=$(curl -s -u "$JENKINS_ADMIN_ID:$JENKINS_ADMIN_PASSWORD" \
