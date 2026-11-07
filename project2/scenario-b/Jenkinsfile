@@ -19,9 +19,7 @@ pipeline {
     }
 
     environment {
-        P2_HOST_REPO       = '/home/x0riso/5G-2-Security'
-        P2_ENV_FILE        = '/lab/project2/scenario-a/env'
-        EVIDENCE_HOST_ROOT = '/home/x0riso/5G-2-Security/results/scenario-b'
+        P2_ENV_FILE = '/lab/project2/scenario-a/env'
     }
 
     stages {
@@ -34,6 +32,27 @@ pipeline {
         stage('Prepare RUN_ID') {
             steps {
                 script {
+                    // Docker-outside-of-Docker: paths passed to `docker run -v`
+                    // must be host paths. Resolve them from the bind mounts of
+                    // this Jenkins container instead of hardcoding a checkout
+                    // location (the repo moves between hosts).
+                    env.P2_HOST_REPO = sh(
+                        returnStdout: true,
+                        script: 'docker inspect "$(hostname)" | jq -r \'.[0].Mounts[] | select(.Destination=="/lab") | .Source\''
+                    ).trim()
+                    def evidenceSource = sh(
+                        returnStdout: true,
+                        script: 'docker inspect "$(hostname)" | jq -r \'.[0].Mounts[] | select(.Destination=="/evidence") | .Source\''
+                    ).trim()
+                    if (!env.P2_HOST_REPO || env.P2_HOST_REPO == 'null') {
+                        error('cannot resolve the host path of the /lab bind mount')
+                    }
+                    if (!evidenceSource || evidenceSource == 'null') {
+                        error('cannot resolve the host path of the /evidence bind mount')
+                    }
+                    env.EVIDENCE_HOST_ROOT = "${evidenceSource}/scenario-b"
+                    echo "P2_HOST_REPO=${env.P2_HOST_REPO}"
+                    echo "EVIDENCE_HOST_ROOT=${env.EVIDENCE_HOST_ROOT}"
                     env.RUN_ID = sh(
                         returnStdout: true,
                         script: 'date -u +%Y%m%dT%H%M%SZ'
