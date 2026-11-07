@@ -6,6 +6,10 @@
 #
 # It is a persistent, versioned configuration: the plan proves what was asked,
 # the JSON report proves what was detected. Alert 40018 is the positive control.
+#
+# ZAP 2.17 layout: `requests` and `policyDefinition` are job-level fields, not
+# members of `parameters`. Nesting them under `parameters` makes ZAP warn
+# "Unrecognised parameter" and the requestor/activeScan jobs do nothing.
 # =============================================================================
 env:
   contexts:
@@ -28,28 +32,33 @@ jobs:
       maxDepth: 2
 
   - type: requestor
-    parameters:
-      requests:
-        # Controlled login seed, as required by the brief.
-        - url: http://10.20.10.20:3000/rest/user/login
-          method: POST
-          data: '{"email":"jim@juice-sh.op","password":"ncc1701"}'
-          headers:
-            - "Content-Type: application/json"
-        # Deterministic SQLi transaction, encoded quote/parenthesis.
-        - url: "http://10.20.10.20:3000/rest/products/search?q=%27%28"
-          method: GET
+    requests:
+      # Controlled login seed, as required by the brief.
+      - url: http://10.20.10.20:3000/rest/user/login
+        method: POST
+        data: '{"email":"admin@juice-sh.op","password":"admin123"}'
+        headers:
+          - "Content-Type: application/json"
+        responseCode: 200
+      # Deterministic SQLi transaction, encoded quote/parenthesis. It also
+      # seeds the endpoint in the sites tree for the active scan below.
+      - url: "http://10.20.10.20:3000/rest/products/search?q=%27%28"
+        method: GET
+        responseCode: 500
 
   - type: activeScan
     parameters:
       context: juice-shop
-      url: "http://10.20.10.20:3000/rest/products/search?q=%27%28"
-      policyDefinition:
-        rules:
-          - id: 40018
-            name: SQL Injection
-            strength: HIGH
-            threshold: LOW
+      maxRuleDurationInMins: 2
+      maxScanDurationInMins: 10
+    policyDefinition:
+      defaultStrength: Medium
+      defaultThreshold: "Off"
+      rules:
+        - id: 40018
+          name: SQL Injection
+          strength: HIGH
+          threshold: LOW
 
   - type: report
     parameters:

@@ -79,7 +79,10 @@ The Jenkins pipeline now runs, after Preflight:
    Baseline findings are observations; only a tool error fails the stage.
 2. **Selenium runtime** `2B - Selenium runtime and authentication`: Chrome
    login, JWT/session assertions, cookies, `localStorage` and an authenticated
-   screenshot.
+   screenshot. It uses the Juice Shop seeded administrator account
+   (`admin@juice-sh.op`) on the deliberately vulnerable target; the cookie
+   banner can cover the Angular login button, so an intercepted native click
+   falls back to a synthetic element click.
 3. **Controlled SQLi** `2B - capture, controlled SQLi and targeted ZAP`:
    start capture, GET `/rest/products/search?q=%27%28`, targeted ZAP Alert
    40018, stop capture. The fresh PCAP is written to the phase 2C directory

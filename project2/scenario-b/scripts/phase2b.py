@@ -51,8 +51,8 @@ ZAP_IMAGE = "ghcr.io/zaproxy/zaproxy:stable"
 CAPTURE_IMAGE = "telecom-lab-capture:1.0"
 NETWORK = "security-net"
 
-JUICE_USER = "jim@juice-sh.op"
-JUICE_PASSWORD = "ncc1701"
+JUICE_USER = "admin@juice-sh.op"
+JUICE_PASSWORD = "admin123"
 SQLI_PATH = "/rest/products/search?q=%27%28"
 
 EVIDENCE_DIR = Path(os.environ.get("EVIDENCE_DIR", ".")).resolve()
@@ -369,11 +369,26 @@ class WebDriver:
                       {"text": text})
 
     def click(self, element: str) -> None:
-        self._request("POST", self._path(f"/element/{element}/click"), {})
+        try:
+            self._request("POST", self._path(f"/element/{element}/click"), {})
+        except WebDriverError as exc:
+            # Juice Shop overlays (cookie/ welcome banners) can cover the
+            # Angular button even after it is rendered. A synthetic click on
+            # the element itself bypasses hit-testing and still runs the
+            # framework handler; only fall back for interception errors.
+            text = str(exc)
+            if "click intercepted" not in text and "not clickable" not in text:
+                raise
+            print(f"[2B] native click intercepted, using element click: {text[:200]}")
+            self.execute(
+                "const e = arguments[0];"
+                "e.scrollIntoView({block: 'center', inline: 'center'});"
+                "e.click(); return true;",
+                [{"element-6066-11e4-a52e-4f735466cecf": element}])
 
-    def execute(self, script: str) -> object:
+    def execute(self, script: str, args: list | None = None) -> object:
         return self._request("POST", self._path("/execute/sync"), {
-            "script": script, "args": [],
+            "script": script, "args": args or [],
         }).get("value")
 
     def cookies(self) -> list[dict]:
@@ -442,6 +457,14 @@ def selenium_runtime() -> int:
         password = driver.wait_find("input#password", timeout=30)
         check(results, "Juice Shop login page rendered", True,
               "input#email and input#password found")
+
+        dismissed = driver.execute(
+            "const b = [...document.querySelectorAll('button')]"
+            ".find(x => /me want it/i.test(x.textContent || ''));"
+            "if (b) { b.click(); return true; } return false;")
+        if dismissed:
+            print("[2B] dismissed the cookie banner")
+            time.sleep(1)
 
         driver.clear(email)
         driver.send_keys(email, JUICE_USER)
