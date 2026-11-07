@@ -28,10 +28,18 @@ echo "[run] triggering $JOB (build $BEFORE)"
 # Pass the gate mode only when the caller sets it; otherwise Jenkins uses the
 # job parameter default (REPORT_ONLY).
 if [[ -n "${SECURITY_GATE_MODE:-}" ]]; then
-    curl -fsS -b "$JAR" -u "$JENKINS_ADMIN_ID:$JENKINS_ADMIN_PASSWORD" \
+    CODE=$(curl -s -o /dev/null -w '%{http_code}' \
+        -b "$JAR" -u "$JENKINS_ADMIN_ID:$JENKINS_ADMIN_PASSWORD" \
         -H "Jenkins-Crumb: $CRUMB" -X POST \
         --data-urlencode "SECURITY_GATE_MODE=$SECURITY_GATE_MODE" \
-        "$URL/job/$JOB/buildWithParameters" >/dev/null
+        "$URL/job/$JOB/buildWithParameters" || true)
+    if [[ "$CODE" != "200" && "$CODE" != "201" ]]; then
+        echo "[run] WARN: buildWithParameters returned $CODE; the job has not"
+        echo "[run] registered the parameter yet. Falling back to /build, which"
+        echo "[run] uses the Jenkinsfile default (REPORT_ONLY)."
+        curl -fsS -b "$JAR" -u "$JENKINS_ADMIN_ID:$JENKINS_ADMIN_PASSWORD" \
+            -H "Jenkins-Crumb: $CRUMB" -X POST "$URL/job/$JOB/build" >/dev/null
+    fi
 else
     curl -fsS -b "$JAR" -u "$JENKINS_ADMIN_ID:$JENKINS_ADMIN_PASSWORD" \
         -H "Jenkins-Crumb: $CRUMB" -X POST "$URL/job/$JOB/build" >/dev/null
