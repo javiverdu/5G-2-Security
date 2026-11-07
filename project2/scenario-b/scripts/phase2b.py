@@ -217,9 +217,11 @@ def zap_baseline() -> int:
         "-v", f"{EVIDENCE_HOST_DIR}:/zap/wrk:rw",
         ZAP_IMAGE, "zap-baseline.py",
         "-t", JUICE,
-        "-r", "/zap/wrk/zap-baseline.html",
-        "-w", "/zap/wrk/zap-baseline-report.md",
-        "-J", "/zap/wrk/zap-baseline-report.json",
+        # zap-baseline.py resolves these names relative to /zap/wrk; an
+        # absolute path is prefixed again and the report is never written.
+        "-r", "zap-baseline.html",
+        "-w", "zap-baseline-report.md",
+        "-J", "zap-baseline-report.json",
         "-I",
     ]
     rc, command_started, command_finished = run_logged(

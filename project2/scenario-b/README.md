@@ -19,7 +19,7 @@ source/GitHub → Jenkins → Preflight → ZAP baseline → Selenium runtime
 |---|---|---|
 | 2A | Preflight + environment acceptance (Jenkins, Juice Shop, Selenium, capture, Suricata, ZAP, Trivy/Syft, tools) | ✅ done |
 | 2B | ZAP baseline, Selenium runtime, capture window, controlled SQLi, targeted ZAP | 🟡 stages implemented; green run pending |
-| 2C | Fresh PCAP validation, Suricata offline detection, traffic intelligence | ⬜ pending |
+| 2C | Fresh PCAP validation, Suricata offline detection, traffic intelligence | 🟡 stages implemented; green run pending |
 | 2D | Trivy scan + Syft CycloneDX SBOM | ⬜ pending |
 | 2E | Evidence correlation, archive, Security Gate (REPORT_ONLY / ENFORCE) | ⬜ pending |
 
@@ -42,7 +42,8 @@ project2/scenario-b/
     ├── jenkins-bootstrap.sh    # create the pipeline job
     ├── run-pipeline.sh         # trigger and follow a build
     ├── preflight.py            # phase 2A checks -> preflight.json/.md
-    └── phase2b.py              # ZAP baseline, Selenium, capture + SQLi + targeted ZAP
+    ├── phase2b.py              # ZAP baseline, Selenium, capture + SQLi + targeted ZAP
+    └── phase2c.py              # fresh PCAP, offline Suricata, traffic intelligence
 ```
 
 ## Run (phase 2A)
@@ -87,10 +88,28 @@ The Jenkins pipeline now runs, after Preflight:
 Evidence: `results/scenario-b/phase2b/<RUN_ID>/` and the fresh PCAP under
 `results/scenario-b/phase2c/<RUN_ID>/`.
 
+## Phase 2C stages
+
+1. **`2C - fresh PCAP, Suricata offline and traffic intelligence`** consumes
+   the PCAP that 2B wrote into the same run directory. It never captures and
+   never sits inline:
+   - `tshark` proves the file parses and contains
+     `/rest/products/search?q=%27%28`;
+   - the SHA-256 must match the 2B `capture.json`;
+   - Suricata `jasonish/suricata:8.0` runs offline with
+     `security/ids/suricata.yaml` and the local rules;
+   - SID `1000001` must appear in `eve.json`/`fast.log`. The rule reads
+     `http.uri.raw` because Suricata normalizes `http.uri` (the encoded
+     `%27%28` payload would otherwise be decoded before matching).
+   - `traffic` in `phase2c.json` records packet and HTTP request counts as
+     context, never as the gate.
+
+Evidence: `results/scenario-b/phase2c/<RUN_ID>/` — `phase2c.json/.md`,
+`eve.json`, `fast.log`, `stats.log`, `suricata-command.log`.
+
 ## Known limitations
 
-- The VM disk (32 GB) cannot hold every Scenario B image plus the Project 1
-  observability stack; Grafana/Prometheus containers were stopped to free
-  space (they are still defined in the base compose files).
+- The environment now runs on a native Linux host; the earlier 32 GB VM is no
+  longer the deployment target.
 - ZAP is referenced as `stable` in the manifest; the archived run used 2.17.0.
 - No Security Gate yet: REPORT_ONLY/ENFORCE semantics arrive in 2E.

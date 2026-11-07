@@ -131,6 +131,17 @@ pipeline {
                 }
             }
         }
+
+        stage('2C - fresh PCAP, Suricata offline and traffic intelligence') {
+            options { timeout(time: 20, unit: 'MINUTES') }
+            steps {
+                withEnv(["EVIDENCE_DIR=${env.P2C_DIR}",
+                         "EVIDENCE_HOST_DIR=${env.P2C_HOST_DIR}",
+                         "P2B_DIR=${env.P2B_DIR}"]) {
+                    sh 'python3 project2/scenario-b/scripts/phase2c.py'
+                }
+            }
+        }
     }
 
     post {
