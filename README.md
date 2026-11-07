@@ -93,8 +93,47 @@ the Project 1 UERANSIM image and a default route; Project 2 replaces it with
 UERANSIM v3.3.0 and the narrow `10.20.6.0/24 dev uesimtun0` route.
 
 `scenario-a/up.sh` removes the inherited N6 test container `sb-nginx` because
-it also uses `10.20.6.20`. Do not run `enable-n6.sh` again after that, or it
-will recreate the conflicting container.
+it also uses `10.20.6.20`. If you re-run `enable-n6.sh`, it recreates
+`sb-nginx`; run `scenario-a/up.sh` again afterwards so the two gateways do not
+conflict.
+
+### Restart after a VM reboot
+
+Containers use `restart: unless-stopped`, so normally they come back by
+themselves. Check first; do not redeploy if the gate is already green:
+
+```bash
+cd ~/5G-2-Security
+docker ps --format 'table {{.Names}}\t{{.Status}}'
+./project2/scenario-a/scripts/verify-phase1.sh
+```
+
+If that is green, the Scenario A gate is satisfied. Start the Scenario B
+containers only if they are not already up, then run the pipeline.
+
+If core, gNB or UE were recreated (for example after `scenario-b/scripts/deploy.sh`),
+the N6 attachment and the UE PDU session must be rebuilt in this order:
+
+```bash
+cd ~/5G-2-Security
+
+# A restarting scenario-b-nginx owns 10.20.6.20; free it before N6
+docker rm -f sb-nginx scenario-b-nginx 2>/dev/null || true
+
+cd scenario-b
+sudo ./scripts/enable-n6.sh          # recreates upf with dn-net, no NAT
+cd ..
+
+./project2/scenario-a/scripts/upgrade-ran.sh  # UE registers after the new UPF
+./project2/scenario-a/scripts/up.sh           # Django + TLS gateway
+./project2/scenario-a/scripts/verify-phase1.sh
+```
+
+Order matters: `deploy.sh` starts the UPF without the `dn-net` override and
+starts the UE before N6 exists. `enable-n6.sh` recreates the UPF, so the UE
+must register afterwards (`upgrade-ran.sh`). Running `enable-n6.sh` after the
+UE is up leaves a dead PDU session; symptom is `UE cannot reach 10.20.6.20`
+or `gateway access log has no request from 10.45.0.x`.
 
 ## Verify the steps
 

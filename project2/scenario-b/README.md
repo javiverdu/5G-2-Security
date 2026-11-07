@@ -48,7 +48,10 @@ project2/scenario-b/
 ## Run (phase 2A)
 
 Prerequisite: Scenario A is up and its 1E gate is green (see the
-[root README](../../README.md#run-the-environment)).
+[root README](../../README.md#run-the-environment)). After a VM reboot, run
+`verify-phase1.sh` first. If it reports `UE cannot reach 10.20.6.20`, replay
+the restart order from the root README: `enable-n6.sh`, then `upgrade-ran.sh`,
+then `scenario-a/up.sh`.
 
 ```bash
 cd project2/scenario-b

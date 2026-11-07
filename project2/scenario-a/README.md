@@ -194,6 +194,23 @@ docker compose -f docker-compose.p2.yaml up -d --build django
 ./scripts/verify-phase1.sh
 ```
 
+If you re-run `scenario-b/scripts/deploy.sh`, replay the N6 and RAN steps in
+this order before trusting 1E:
+
+```bash
+cd ~/5G-2-Security
+docker rm -f sb-nginx scenario-b-nginx 2>/dev/null || true
+cd scenario-b && sudo ./scripts/enable-n6.sh && cd ..
+./project2/scenario-a/scripts/upgrade-ran.sh
+./project2/scenario-a/scripts/up.sh
+./project2/scenario-a/scripts/verify-phase1.sh
+```
+
+`enable-n6.sh` recreates the UPF. A UE that registered before that recreation
+keeps a dead PDU session: N6 checks fail until `upgrade-ran.sh` registers it
+again. A running `scenario-b-nginx` also holds `10.20.6.20`, so remove it
+before `enable-n6.sh` starts `sb-nginx`.
+
 ## Phase 1E — what and why
 
 One script, no new application code and no new runtime image. It reuses the
