@@ -25,8 +25,17 @@ CRUMB=$(curl -fsS -c "$JAR" -u "$JENKINS_ADMIN_ID:$JENKINS_ADMIN_PASSWORD" \
 [[ -n "$CRUMB" ]] || { echo "[run] could not obtain a CSRF crumb"; exit 1; }
 
 echo "[run] triggering $JOB (build $BEFORE)"
-curl -fsS -b "$JAR" -u "$JENKINS_ADMIN_ID:$JENKINS_ADMIN_PASSWORD" \
-    -H "Jenkins-Crumb: $CRUMB" -X POST "$URL/job/$JOB/build" >/dev/null
+# Pass the gate mode only when the caller sets it; otherwise Jenkins uses the
+# job parameter default (REPORT_ONLY).
+if [[ -n "${SECURITY_GATE_MODE:-}" ]]; then
+    curl -fsS -b "$JAR" -u "$JENKINS_ADMIN_ID:$JENKINS_ADMIN_PASSWORD" \
+        -H "Jenkins-Crumb: $CRUMB" -X POST \
+        --data-urlencode "SECURITY_GATE_MODE=$SECURITY_GATE_MODE" \
+        "$URL/job/$JOB/buildWithParameters" >/dev/null
+else
+    curl -fsS -b "$JAR" -u "$JENKINS_ADMIN_ID:$JENKINS_ADMIN_PASSWORD" \
+        -H "Jenkins-Crumb: $CRUMB" -X POST "$URL/job/$JOB/build" >/dev/null
+fi
 
 [[ "$WAIT" -eq 1 ]] || { echo "[run] queued"; exit 0; }
 

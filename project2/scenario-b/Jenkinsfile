@@ -18,6 +18,11 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '20'))
     }
 
+    parameters {
+        choice(name: 'SECURITY_GATE_MODE', choices: ['REPORT_ONLY', 'ENFORCE'],
+               description: 'REPORT_ONLY archives findings; ENFORCE fails on HIGH/CRITICAL')
+    }
+
     environment {
         P2_ENV_FILE = '/lab/project2/scenario-a/env'
     }
@@ -63,7 +68,11 @@ pipeline {
                     env.P2B_HOST_DIR = "${env.EVIDENCE_HOST_ROOT}/phase2b/${env.RUN_ID}"
                     env.P2C_DIR = "/evidence/scenario-b/phase2c/${env.RUN_ID}"
                     env.P2C_HOST_DIR = "${env.EVIDENCE_HOST_ROOT}/phase2c/${env.RUN_ID}"
-                    sh 'mkdir -p "$P2A_DIR" "$P2B_DIR" "$P2C_DIR"'
+                    env.P2D_DIR = "/evidence/scenario-b/phase2d/${env.RUN_ID}"
+                    env.P2D_HOST_DIR = "${env.EVIDENCE_HOST_ROOT}/phase2d/${env.RUN_ID}"
+                    env.P2E_DIR = "/evidence/scenario-b/phase2e/${env.RUN_ID}"
+                    env.P2E_HOST_DIR = "${env.EVIDENCE_HOST_ROOT}/phase2e/${env.RUN_ID}"
+                    sh 'mkdir -p "$P2A_DIR" "$P2B_DIR" "$P2C_DIR" "$P2D_DIR" "$P2E_DIR"'
                     echo "RUN_ID=${env.RUN_ID}"
                 }
             }
@@ -139,6 +148,52 @@ pipeline {
                          "EVIDENCE_HOST_DIR=${env.P2C_HOST_DIR}",
                          "P2B_DIR=${env.P2B_DIR}"]) {
                     sh 'python3 project2/scenario-b/scripts/phase2c.py'
+                }
+            }
+        }
+
+        stage('2D - Trivy scan and Syft CycloneDX SBOM') {
+            options { timeout(time: 40, unit: 'MINUTES') }
+            steps {
+                withEnv(["EVIDENCE_DIR=${env.P2D_DIR}",
+                         "EVIDENCE_HOST_DIR=${env.P2D_HOST_DIR}"]) {
+                    sh 'python3 project2/scenario-b/scripts/phase2d.py'
+                }
+            }
+        }
+
+        stage('2E - Security evidence correlation') {
+            options { timeout(time: 20, unit: 'MINUTES') }
+            steps {
+                withEnv(["EVIDENCE_DIR=${env.P2E_DIR}",
+                         "EVIDENCE_HOST_DIR=${env.P2E_HOST_DIR}",
+                         "EVIDENCE_ROOT=/evidence/scenario-b",
+                         "EVIDENCE_HOST_ROOT=${env.EVIDENCE_HOST_ROOT}"]) {
+                    sh 'python3 project2/scenario-b/scripts/phase2e.py correlate'
+                }
+            }
+        }
+
+        stage('2E - Evidence archive') {
+            steps {
+                withEnv(["EVIDENCE_DIR=${env.P2E_DIR}",
+                         "EVIDENCE_HOST_DIR=${env.P2E_HOST_DIR}",
+                         "EVIDENCE_ROOT=/evidence/scenario-b",
+                         "EVIDENCE_HOST_ROOT=${env.EVIDENCE_HOST_ROOT}"]) {
+                    sh 'python3 project2/scenario-b/scripts/phase2e.py archive'
+                }
+            }
+        }
+
+        stage('2E - Security Gate') {
+            steps {
+                withEnv(["EVIDENCE_DIR=${env.P2E_DIR}",
+                         "EVIDENCE_HOST_DIR=${env.P2E_HOST_DIR}",
+                         "EVIDENCE_ROOT=/evidence/scenario-b",
+                         "EVIDENCE_HOST_ROOT=${env.EVIDENCE_HOST_ROOT}",
+                         "SECURITY_GATE_MODE=${params.SECURITY_GATE_MODE ?: 'REPORT_ONLY'}",
+                         "GATE_MAX_HIGH_CRITICAL=0"]) {
+                    sh 'python3 project2/scenario-b/scripts/phase2e.py gate'
                 }
             }
         }
