@@ -1,5 +1,7 @@
 git:5.11.0
 docker-workflow:653.v2f2c08eff0ec
+mina-sshd-api-common:2.20.1-199.v8ce76b_c93542
+mina-sshd-api-core:2.20.1-199.v8ce76b_c93542
 credentials-binding:728.v902a_273b_8947
 timestamper:1.30
 htmlpublisher:429
