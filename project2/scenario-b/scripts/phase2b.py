@@ -222,8 +222,8 @@ def zap_baseline() -> int:
         "-J", "/zap/wrk/zap-baseline-report.json",
         "-I",
     ]
-    rc, finished = run_logged(cmd, log, timeout=1800,
-                              container_name="scenario-b-zap-baseline")
+    rc, command_started, command_finished = run_logged(
+        cmd, log, timeout=1800, container_name="scenario-b-zap-baseline")
 
     results: list[dict] = []
     # zap-baseline.py: 0 = success, 1 = FAIL alert, 2 = WARN only,
@@ -251,6 +251,8 @@ def zap_baseline() -> int:
     extra = {
         "target": JUICE,
         "command": cmd,
+        "command_started_utc": command_started,
+        "command_finished_utc": command_finished,
         "exit_code": rc,
         "log_tail": tail(log),
         "reports": {
