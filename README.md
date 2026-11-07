@@ -29,7 +29,7 @@ reports, screenshots and PDF were removed from the working tree.
 | A | 1D | Django security baseline (login, CSRF, cookies, HSTS, headers) | ✅ done |
 | A | 1E | End-to-end acceptance from the UE through the 5G path | ✅ done |
 | B | 2A | Preflight + environment acceptance (Jenkins, Juice Shop, Selenium, capture, Suricata, Trivy/Syft) | ✅ done |
-| B | 2B–2E | ZAP/Selenium/SQLi, PCAP + Suricata, Trivy/Syft, correlation + gate | ⬜ pending |
+| B | 2B–2E | ZAP/Selenium/SQLi, PCAP + Suricata, Trivy/Syft, correlation + gate | ✅ done |
 
 ## Structure
 
@@ -50,15 +50,10 @@ reports, screenshots and PDF were removed from the working tree.
 
 ## Run the environment
 
-All container work runs on the **Ubuntu VM `UWUNTU`**, not on the host and not
-on the VirtualBox shared folder. From the host:
-
-```bash
-VBoxManage startvm UWUNTU --type gui        # or start it from the VirtualBox GUI
-ssh uwuntu
-```
-
-Inside the VM:
+All container work runs natively on the Linux host, from the repository
+checkout. The examples assume the repository is at `~/5G-2-Security`; use the
+actual checkout path (for example
+`~/Documentos/VSCODE/5G-2-Security`) if it differs.
 
 ```bash
 cd ~/5G-2-Security
@@ -97,7 +92,7 @@ it also uses `10.20.6.20`. If you re-run `enable-n6.sh`, it recreates
 `sb-nginx`; run `scenario-a/up.sh` again afterwards so the two gateways do not
 conflict.
 
-### Restart after a VM reboot
+### Restart after a host reboot
 
 Containers use `restart: unless-stopped`, so normally they come back by
 themselves. Check first; do not redeploy if the gate is already green:
@@ -159,32 +154,46 @@ docker exec nr_ue ip route get 10.20.6.20         # dev uesimtun0
 docker ps --format '{{.Names}} {{.Status}}'       # nr_gnb, nr_ue, scenario-b-nginx, scenario-b-django
 ```
 
-### Scenario B — preflight (2A) through Jenkins
+### Scenario B — full pipeline (2A through 2E)
 
 ```bash
 cd ~/5G-2-Security
-./project2/scenario-b/scripts/run-pipeline.sh
+SECURITY_GATE_MODE=REPORT_ONLY ./project2/scenario-b/scripts/run-pipeline.sh
 echo $?                    # must be 0
 ```
+
+`SECURITY_GATE_MODE` defaults to `REPORT_ONLY`. To demonstrate the gate
+policy, run with `ENFORCE`: the build then fails at the last stage when the
+Juice Shop image has HIGH/CRITICAL findings.
 
 Expected at the end:
 
 ```text
 [run] build N result: SUCCESS
 [preflight] PASS — 0 failed of 35
+[2B] summary: PASS — 0 failed of 23
+[2C] phase2c: PASS — 0 failed of 12
+[2D] phase2d: PASS — 0 failed of 10
+[2E] correlation: PASS — 0 failed of 18
+[2E] gate: PASS (REPORT_ONLY) — ...
 ```
 
-Artifacts are written by the Jenkins build to
-`results/scenario-b/phase2a/<RUN_ID>/`:
+Artifacts are written by the Jenkins build per run and phase:
 
-| File | Check |
-|---|---|
-| `baseline-1e.txt` | Scenario A gate output; must contain no `FAIL` |
-| `preflight.json` | `jq -r '.decision'` = `PASS`; 35 checks |
-| `preflight.md` | human-readable table with the same decision |
-| `preflight-capture.pcapng` | non-empty proof capture |
+| Phase | Directory | Key files |
+|---|---|---|
+| 2A | `results/scenario-b/phase2a/<RUN_ID>/` | `baseline-1e.txt`, `preflight.json/.md`, proof PCAP |
+| 2B | `results/scenario-b/phase2b/<RUN_ID>/` | ZAP baseline HTML/MD/JSON, Selenium JSON + screenshot, `plan.yaml`, targeted `zap-sqli.json` |
+| 2C | `results/scenario-b/phase2c/<RUN_ID>/` | fresh `juice-shop-ci-sqli.pcapng`, `eve.json`, `fast.log`, `stats.log`, `phase2c.json/.md` |
+| 2D | `results/scenario-b/phase2d/<RUN_ID>/` | `trivy-juice-shop.json`, `trivy-config.json`, `sbom.cdx.json`, `phase2d.json/.md` |
+| 2E | `results/scenario-b/phase2e/<RUN_ID>/` | `security-event-correlation.json/.md`, `scenario-b-evidence.tar.gz`, `gate.json/.md` |
 
-On the VM:
+The latest locally verified runs are
+`phase2b/20261107T132531Z` (REPORT_ONLY, build SUCCESS) and
+`phase2e/20261107T132809Z` (ENFORCE, expected gate failure). Raw evidence and
+PCAPs stay out of Git.
+
+On the host:
 
 ```bash
 R=$(ls -d ~/5G-2-Security/results/scenario-b/phase2a/*/ | tail -1)
@@ -195,8 +204,9 @@ grep -c '\[FAIL\]' "$R/baseline-1e.txt" || true
 Jenkins UI: <http://127.0.0.1:8080/job/scenario-b-security/>. Log in as
 `securityadmin` with the password from `project2/scenario-b/env`.
 
-The archived green run used in this repository is
+The tracked green 2A run in this repository is
 [`results/scenario-b/phase2a/20261102T230116Z/`](results/scenario-b/phase2a/20261102T230116Z/).
+Later run directories contain raw evidence and PCAPs, so they stay untracked.
 
 ## Working specification
 
@@ -212,11 +222,12 @@ The archived green run used in this repository is
 
 ## Environment notes
 
-- VM: 10 GB RAM, 32 GB disk, 4 GB swap. The full Project 2 image set leaves
-  little free space; the inherited observability stack (`metrics`, `grafana`)
-  is disabled by default. Set `ENABLE_OBSERVABILITY=1` only if the images fit.
-- The host has frozen the guest under memory pressure. Recovery: hard poweroff,
-  boot, then the run sequence above.
+- The lab now runs natively on Linux (no VirtualBox VM). The full Project 2
+  image set needs several GB; the inherited observability stack (`metrics`,
+  `grafana`) is still disabled by default. Set `ENABLE_OBSERVABILITY=1` only
+  if the images fit.
+- After a host reboot, run `host-up.sh --with-b` (or the restart order above),
+  then `verify-phase1.sh` before trusting the pipeline.
 - `env`, `secrets/tls/`, `*.pcap` and `*.pcapng` are git-ignored and must never
   be committed. The CA private key is mounted into no container.
 - The brief is readable by tools at [`docs/brief-p2.txt`](docs/brief-p2.txt).
@@ -231,8 +242,8 @@ Forked from [`javiverdu/5G-project-RTU`](https://github.com/javiverdu/5G-project
 git clone https://github.com/javiverdu/5G-2-Security.git ~/5G-2-Security
 ```
 
-Clone to a **native VM path**, not the VirtualBox shared folder: vboxsf breaks
-container mounts and permissions.
+Clone to a **native Linux path**, never to a VirtualBox shared folder: vboxsf
+breaks container mounts and permissions.
 
 ## For AI agents / new sessions
 

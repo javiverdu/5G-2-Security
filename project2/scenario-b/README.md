@@ -18,10 +18,18 @@ source/GitHub → Jenkins → Preflight → ZAP baseline → Selenium runtime
 | Phase | Deliverable | Status |
 |---|---|---|
 | 2A | Preflight + environment acceptance (Jenkins, Juice Shop, Selenium, capture, Suricata, ZAP, Trivy/Syft, tools) | ✅ done |
-| 2B | ZAP baseline, Selenium runtime, capture window, controlled SQLi, targeted ZAP | 🟡 stages implemented; green run pending |
-| 2C | Fresh PCAP validation, Suricata offline detection, traffic intelligence | 🟡 stages implemented; green run pending |
-| 2D | Trivy scan + Syft CycloneDX SBOM | 🟡 stages implemented; green run pending |
-| 2E | Evidence correlation, archive, Security Gate (REPORT_ONLY / ENFORCE) | 🟡 stages implemented; green run pending |
+| 2B | ZAP baseline, Selenium runtime, capture window, controlled SQLi, targeted ZAP | ✅ done |
+| 2C | Fresh PCAP validation, Suricata offline detection, traffic intelligence | ✅ done |
+| 2D | Trivy scan + Syft CycloneDX SBOM | ✅ done |
+| 2E | Evidence correlation, archive, Security Gate (REPORT_ONLY / ENFORCE) | ✅ done |
+
+Verified on the native host:
+
+- REPORT_ONLY, build 6: RUN_ID `20261107T132531Z`, Jenkins `SUCCESS`,
+  gate `PASS` with HIGH/CRITICAL=70 recorded.
+- ENFORCE, build 7: RUN_ID `20261107T132809Z`, Jenkins `FAILURE` at the gate
+  as expected (`HIGH/CRITICAL=70 exceeds threshold 0`); every upstream phase
+  still `PASS`.
 
 ## Layout
 
@@ -52,7 +60,7 @@ project2/scenario-b/
 ## Run (phase 2A)
 
 Prerequisite: Scenario A is up and its 1E gate is green (see the
-[root README](../../README.md#run-the-environment)). After a VM reboot, run
+[root README](../../README.md#run-the-environment)). After a host reboot, run
 `verify-phase1.sh` first. If it reports `UE cannot reach 10.20.6.20`, replay
 the restart order from the root README: `enable-n6.sh`, then `upgrade-ran.sh`,
 then `scenario-a/up.sh`.
