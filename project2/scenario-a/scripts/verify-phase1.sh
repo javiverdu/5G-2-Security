@@ -36,6 +36,7 @@ CA="$SECRETS/ca.crt"
 CRT="$SECRETS/server.crt"
 IMG="telecom-lab-nginx:p2"
 CT="scenario-b-nginx"
+RUN_START=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 CURL_IMG="curlimages/curl:latest"
 BASE="https://10.20.6.20"
 EXPECTED='{"service": "project2-django", "status": "ok", "project": "Telecommunication Security"}'
@@ -215,10 +216,20 @@ has "referrer-policy: same-origin" && ok "Referrer-Policy: same-origin" || fail 
 
 step "8. real UE address at the gateway (no NAT)"
 UEIP=$(docker exec nr_ue ip -4 -brief addr show uesimtun0 2>/dev/null | awk '{print $3}' | cut -d/ -f1)
-if docker logs --tail 60 "$CT" 2>&1 | grep -q "^${UEIP} "; then
+# Only this run's log lines count, and allow the container log to flush. A
+# fixed --tail window is racy when the previous run's requests sit next to it.
+FOUND=0
+for _ in $(seq 1 5); do
+    if docker logs --since "$RUN_START" "$CT" 2>&1 | grep -q "^${UEIP} "; then
+        FOUND=1
+        break
+    fi
+    sleep 1
+done
+if [[ "$FOUND" -eq 1 ]]; then
     ok "gateway access log shows $UEIP"
 else
-    fail "gateway access log has no request from ${UEIP:-unknown}"
+    fail "gateway access log has no request from ${UEIP:-unknown} since $RUN_START"
 fi
 
 echo
