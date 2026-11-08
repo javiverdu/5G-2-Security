@@ -25,11 +25,11 @@ source/GitHub → Jenkins → Preflight → ZAP baseline → Selenium runtime
 
 Verified on the native host:
 
-- REPORT_ONLY, build 6: RUN_ID `20261107T132531Z`, Jenkins `SUCCESS`,
-  gate `PASS` with HIGH/CRITICAL=70 recorded.
-- ENFORCE, build 7: RUN_ID `20261107T132809Z`, Jenkins `FAILURE` at the gate
+- REPORT_ONLY, build 11: RUN_ID `20261108T144011Z`, Jenkins `SUCCESS`,
+  correlation 19/19, gate `PASS` with HIGH/CRITICAL=70 recorded.
+- ENFORCE, build 13: RUN_ID `20261108T144511Z`, Jenkins `FAILURE` at the gate
   as expected (`HIGH/CRITICAL=70 exceeds threshold 0`); every upstream phase
-  still `PASS`.
+  still `PASS` and the correlation is 19/19.
 
 ## Layout
 

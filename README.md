@@ -184,7 +184,7 @@ Expected at the end:
 [2B] summary: PASS — 0 failed of 23
 [2C] phase2c: PASS — 0 failed of 12
 [2D] phase2d: PASS — 0 failed of 10
-[2E] correlation: PASS — 0 failed of 18
+[2E] correlation: PASS — 0 failed of 19
 [2E] gate: PASS (REPORT_ONLY) — ...
 ```
 
@@ -199,9 +199,9 @@ Artifacts are written by the Jenkins build per run and phase:
 | 2E | `results/scenario-b/phase2e/<RUN_ID>/` | `security-event-correlation.json/.md`, `scenario-b-evidence.tar.gz`, `gate.json/.md` |
 
 The latest locally verified runs are
-`phase2b/20261107T132531Z` (REPORT_ONLY, build SUCCESS) and
-`phase2e/20261107T132809Z` (ENFORCE, expected gate failure). Raw evidence and
-PCAPs stay out of Git.
+`phase2b/20261108T144011Z` (REPORT_ONLY, build 11 SUCCESS, correlation 19/19)
+and `phase2e/20261108T144511Z` (ENFORCE, build 13, expected gate failure). Raw
+evidence and PCAPs stay out of Git.
 
 On the host:
 
