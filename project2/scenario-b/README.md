@@ -143,8 +143,8 @@ Evidence: `results/scenario-b/phase2d/<RUN_ID>/` — `phase2d.json/.md`,
    reads phases 2A–2D read-only and writes
    `security-event-correlation.json/.md`. It links the controlled SQLi
    request, ZAP Alert 40018, the PCAP hash, Suricata SID 1000001, the Trivy
-   counts and the SBOM by RUN_ID, target, request signature and artifact
-   hashes. It never re-scans or invents data.
+   counts, the SBOM and the Jenkins build tag by RUN_ID, target, request
+   signature and artifact hashes. It never re-scans or invents data.
 2. **`2E - Evidence archive`**: packs `phase2a..phase2e/<RUN_ID>` into
    `scenario-b-evidence.tar.gz` and records its SHA-256.
 3. **`2E - Security Gate`**: a Jenkins policy decision, separate from tool

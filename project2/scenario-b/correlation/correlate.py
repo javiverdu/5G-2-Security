@@ -127,6 +127,12 @@ def main() -> int:
     check(results, "every component reports the current RUN_ID", consistent,
           ", ".join(f"{k}={v}" for k, v in run_ids.items()))
 
+    build_tags = {name: doc.get("build_tag", "") for name, doc in documents.items() if doc}
+    unique_tags = sorted(set(tag for tag in build_tags.values() if tag))
+    check(results, "every component reports the same Jenkins build",
+          bool(unique_tags) and all(build_tags.values()),
+          f"build_tag={', '.join(unique_tags) or 'missing'}")
+
     decisions = {
         "preflight": preflight.get("decision", ""),
         "phase2b": phase2b.get("decision", ""),
@@ -206,6 +212,11 @@ def main() -> int:
         "chain": {
             "target": "http://10.20.10.20:3000",
             "request_signature": sqli_url,
+            "jenkins": {
+                "build_tag": unique_tags[0] if unique_tags else "",
+                "run_id": RUN_ID,
+                "evidence": "component JSON build_tag fields (2A-2D)",
+            },
             "application_observation": {
                 "tool": "OWASP ZAP",
                 "alert": "40018 SQL Injection",
@@ -252,6 +263,8 @@ def main() -> int:
         "",
         "| Layer | Observation | Link |",
         "|---|---|---|",
+        f"| Jenkins | build `{unique_tags[0] if unique_tags else 'missing'}` "
+        f"| RUN_ID `{RUN_ID}` |",
         f"| Application | ZAP Alert 40018 detected={alert_40018} | {sqli_url} |",
         f"| Network | {pcap_2c.get('name', 'PCAP')} sha256 "
         f"`{(pcap_2c.get('sha256') or '')[:16]}…` | Suricata SID {SID} "
