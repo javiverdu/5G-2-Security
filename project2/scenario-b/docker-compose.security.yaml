@@ -43,7 +43,7 @@ services:
     ports:
       - "8080:8080"
     group_add:
-      - "971"                  # host docker group, for /var/run/docker.sock
+      - "${DOCKER_GID:-956}"   # host docker group GID, for /var/run/docker.sock
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - jenkins_home:/var/jenkins_home

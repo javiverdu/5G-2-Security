@@ -106,7 +106,17 @@ docker ps --format 'table {{.Names}}\t{{.Status}}'
 If that is green, the Scenario A gate is satisfied. Start the Scenario B
 containers only if they are not already up, then run the pipeline.
 
-If core, gNB or UE were recreated (for example after `scenario-b/scripts/deploy.sh`),
+The two host helper scripts wrap the manual sequence:
+
+```bash
+./host-up.sh              # Scenario A only (core, N6, RAN, Django/TLS)
+./host-up.sh --with-b     # also start Scenario B and create the Jenkins job
+./host-down.sh            # stop containers, keep networks and volumes
+./host-down.sh --all      # also remove networks and the Jenkins volume
+```
+
+`host-up.sh` still needs `sudo` for `enable-n6.sh` (nsenter). If core, gNB or
+UE were recreated (for example after `scenario-b/scripts/deploy.sh`),
 the N6 attachment and the UE PDU session must be rebuilt in this order:
 
 ```bash
@@ -228,6 +238,10 @@ Later run directories contain raw evidence and PCAPs, so they stay untracked.
   if the images fit.
 - After a host reboot, run `host-up.sh --with-b` (or the restart order above),
   then `verify-phase1.sh` before trusting the pipeline.
+- Jenkins needs the host `docker` group GID to use `/var/run/docker.sock`. The
+  compose file reads `DOCKER_GID` and defaults to `956`:
+  `DOCKER_GID=$(getent group docker | cut -d: -f3) docker compose ...` when the
+  host uses a different GID.
 - `env`, `secrets/tls/`, `*.pcap` and `*.pcapng` are git-ignored and must never
   be committed. The CA private key is mounted into no container.
 - The brief is readable by tools at [`docs/brief-p2.txt`](docs/brief-p2.txt).
