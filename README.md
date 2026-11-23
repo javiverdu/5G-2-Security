@@ -22,6 +22,8 @@ reports, screenshots and PDF were removed from the working tree.
 How the pieces connect and why: [docs/architecture.md](docs/architecture.md).
 Checks, expected output and evidence: [docs/verification.md](docs/verification.md).
 Technical report: [docs/report.md](docs/report.md).
+Independent IDS evaluation on ISCXIDS2012: [docs/ids-benchmark.md](docs/ids-benchmark.md).
+LLM-assisted cross-validation: [docs/llm-cross-validation.md](docs/llm-cross-validation.md).
 
 ## Status
 
@@ -35,6 +37,8 @@ Technical report: [docs/report.md](docs/report.md).
 | B | 2A | Preflight + environment acceptance (Jenkins, Juice Shop, Selenium, capture, Suricata, Trivy/Syft) | ✅ done |
 | B | 2B–2E | ZAP/Selenium/SQLi, PCAP + Suricata, Trivy/Syft, correlation + gate | ✅ done |
 | B | 2C-Advanced | Traffic intelligence analytics (features, clusters, anomaly scores) — supplementary | ✅ done |
+| B | 2C-Eval | Independent IDS evaluation on ISCXIDS2012 (offline, per-scenario metrics) | ✅ done |
+| B | 2E-LLM | Two LLM-assisted cross-validation tasks, verified against the artefacts | ✅ done |
 
 ## Structure
 
@@ -48,12 +52,15 @@ Technical report: [docs/report.md](docs/report.md).
 │   ├── report.md             # technical report: design, results, limits
 │   ├── architecture.md       # diagrams, design decisions, phase map
 │   ├── verification.md       # per-phase checks, expected output, evidence
+│   ├── ids-benchmark.md      # independent IDS evaluation on ISCXIDS2012
+│   ├── llm-cross-validation.md  # the two LLM cross-validation tasks
 │   ├── brief-p2.txt          # Project 2 brief as text, for agents/tools
 │   └── (Project 1 reports removed)
 ├── scenario-b/               # inherited 5G SA base (code + runbook)
 ├── project2/
 │   ├── scenario-a/           # secure application delivery (1A–1E)
 │   └── scenario-b/           # security CI/CD pipeline (2A–2E)
+│       └── ids-eval/         # ISCXIDS2012 extractor and evaluator
 ├── scripts/                  # inherited Project 1 tooling (reference)
 └── results/                  # Project 2 evidence; inherited raw results kept
 ```

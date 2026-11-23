@@ -222,6 +222,34 @@ Raw evidence and PCAPs stay out of Git. The tracked green 2A run in this
 repository is
 [`results/scenario-b/phase2a/20261102T230116Z/`](../results/scenario-b/phase2a/20261102T230116Z/).
 
+## ISCXIDS2012 — independent IDS evaluation (offline)
+
+Not part of the CI gate: the dataset is 3.1 GB, licensed, and it is not
+per-run evidence. It answers a different question — how the detection method
+behaves on traffic the lab did not generate.
+
+```bash
+cd ~/Documentos/VSCODE/5G-2-Security
+D="$HOME/Escritorio/ISCXIDS2012 dataset/labeled_flows_xml"
+R=$(date -u +%Y%m%dT%H%M%SZ)
+/usr/bin/python3 project2/scenario-b/ids-eval/extract.py --dataset-dir "$D" \
+    --out-dir results/ids-eval/$R --cap 60000     # PASS: per-day counts match the published table
+/usr/bin/python3 project2/scenario-b/ids-eval/evaluate.py --run-dir results/ids-eval/$R
+jq '.methods.supervised_lodo.overall' results/ids-eval/$R/eval.json
+```
+
+Expected: `extract.py` prints `[PASS] per-day counts match the published ISCX
+table`; `evaluate.py` writes `eval.json` and `eval.md` with the confusion
+matrices and per-day precision/recall/F1/FPR. Quoted run:
+`results/ids-eval/20261123T170555Z/`. Method, subset and limitations:
+[ids-benchmark.md](ids-benchmark.md).
+
+## LLM-assisted cross-validation
+
+Two documented tasks (SBOM vs Trivy, analytics vs Suricata) with model, date,
+prompt summary, LLM claim, recomputed result and explicit disagreements:
+[llm-cross-validation.md](llm-cross-validation.md). Neither feeds the gate.
+
 ## What analytics adds, and what it must never do
 
 `analytics.py` (2C-Advanced) extracts request and flow features from the same

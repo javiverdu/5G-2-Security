@@ -415,6 +415,57 @@ the build day, and the PCAP size and hash change with every capture. The
 properties that must not change — same `RUN_ID` everywhere, one PCAP hash
 shared by 2B and 2C, both positive controls firing — are checked, not assumed.
 
+### 10.1 Independent IDS evaluation on ISCXIDS2012
+
+The lab PCAP proves that the rule fires on a controlled attack; it cannot say
+how a detector behaves on traffic it did not generate. For that, the brief
+provides ISCXIDS2012 and asks for a documented subset, a detection method and
+per-category metrics. Full detail: [ids-benchmark.md](ids-benchmark.md).
+
+Subset (all flows read and counted, not assumed): 2010-06-12 SSH brute force
+(133,193 flows / 2,086 attacks), 06-13 infiltration (275,528 / 20,358), 06-14
+HTTP DoS (171,380 / 3,776), 06-15 DDoS via IRC botnet (571,698 / 37,460), 06-16
+normal (522,263 / 11). 2.07 M flows read, 603,691 kept after capping normals
+per day (all attacks kept), 70.6 MB of features.
+
+Two methods, same subset: leave-one-day-out logistic regression (no flow of the
+evaluated day is seen in training) and a normal-only modified z-score baseline,
+the same family as 2C-Advanced.
+
+| Day | Scenario | Supervised recall | Supervised FPR | Unsupervised recall |
+|---|---|---|---|---|
+| 06-12 | SSH brute force | 0.301 | 2.15 % | 0.000 |
+| 06-13 | Infiltration | 0.949 | 1.18 % | 0.018 |
+| 06-14 | HTTP DoS | 0.842 | 2.00 % | 0.020 |
+| 06-15 | DDoS (IRC botnet) | 0.998 | 6.07 % | 0.000 |
+| 06-16 | Normal day | 1.000 (11 attacks) | 0.91 % | 0.000 |
+| **All** | — | **0.951** (P 0.793, F1 0.865) | 2.92 % | **0.007** |
+
+What this says, and what it does not: volumetric attacks are found without
+being seen (DDoS 0.998, infiltration 0.949); an unseen credential attack is
+mostly missed (SSH 0.301), which is the sentence to remember from the whole
+exercise — an IDS only detects the families it has been taught. The 96.9 %
+accuracy is an artefact of the 3.33 % attack share: at 2.9 % FPR the same model
+would bury a SOC in alerts, and on the normal day precision drops to 0.007.
+The unsupervised baseline, which is what 2C-Advanced does on the lab PCAP,
+detects almost nothing here (0.7 % recall) — evidence for keeping analytics
+*supplementary* and the deterministic rule in charge of the gate.
+
+### 10.2 LLM-assisted cross-validation
+
+Two tasks, both documented with model, date, prompt, inputs, the LLM's claim
+and the independently recomputed result:
+[llm-cross-validation.md](llm-cross-validation.md).
+
+| Task | LLM claim | Verified result | Disagreement |
+|---|---|---|---|
+| SBOM vs Trivy (build 20) | some HIGH/CRITICAL findings would have no SBOM component, OS libraries especially | **70/70 exact (name, version) matches**; SBOM includes OS packages | claim false for this image |
+| Analytics vs Suricata (build 20) | "98 flags vs 44 alerts → twice as sensitive, same attack" | counts measure requests vs events; **all 37 alerted URIs are flagged**, plus 8 extra; precision not measurable | comparison invalid; narrower claim holds |
+
+Neither analysis feeds a decision: the gate reads `gate.json`, produced by
+`phase2e.py` from the artefacts. If both LLM conclusions had been wrong, the
+build would not have changed.
+
 ## 11. The evidence chain
 
 ```text
@@ -457,6 +508,22 @@ update policy — is documented in [architecture.md](architecture.md) and postpo
 until the evidence is regenerated, because changing a base image invalidates the
 current 1C/2D numbers.
 
+### 12.1 Deviations from the reference implementation
+
+The brief allows alternatives when they meet the same objective and the
+deviation is written down. These are ours.
+
+| Deviation | Why it exists | Why it still satisfies the requirement |
+|---|---|---|
+| Extra stage **2C-Advanced** (traffic intelligence) between 2C and 2D | The brief asks for traffic-intelligence analysis as supplementary evidence, not as a second system | It reads the same PCAP, writes JSON/CSV marked `supplementary: true` / `gate_impact: none`, exits non-zero only on a tool failure, and correlation tolerates its absence. The gate cannot be opened or closed by it |
+| Trivy also scans **our own images** (`telecom-lab-django:0.1`, `telecom-lab-nginx:p2`) | Scanning only the deliberately vulnerable target would leave the images we build unexamined | The brief requires identifying which target is scanned in each command; the four targets are declared, and the two own images carry `gate_impact: "none"` |
+| Correlation image keeps tag **1.0** (the brief's tag) instead of version bumps | The brief names `telecom-lab-correlation:1.0` three times and requires that exact tag in the Release Manifest | What a bump would have protected — knowing which code ran — is checked instead: 2E compares the sha256 of `/app/correlate.py` inside the image with the repository file, rebuilds when they differ, and fails the stage if they still do not match. `correlate.json` records `source_sha256` and `image_id` |
+| Selenium login uses a **`requestSubmit()` fallback** | With an overlay, the synthetic click is swallowed and the form never submits; build 15 failed that way | Same objective (an authenticated browser session with JWT, cookies and screenshot), without depending on a click landing on a moving overlay |
+| Gate reports **`alerts_by_signature` counts**, not the sample length | `phase2c.json` stores at most 20 alerts; counting them said "20" when eve.json had 44 | The positive control is still "SID 1000001 fired"; the number now matches the evidence, and both values are printed when they differ |
+| ISCX evaluation runs **offline on the host**, not as a Jenkins stage | The dataset is 3.1 GB, licensed, and it is not per-run evidence; the gate must stay tied to the live capture | The brief asks for an independent evaluation with a documented subset and metrics; that is what `ids-eval/` produces, with a manifest that pins every source file by SHA-256 |
+| ISCX evaluation is **flow-based**, not a Suricata run over the dataset's PCAPs | The supplied archive contains only the labelled XML flows; the day PCAPs are not part of it | An intrusion-detection method is applied and evaluated per scenario with confusion matrices; the signature IDS is evaluated where it belongs, on the controlled lab capture (2C) |
+| `AGENTS.md` keeps `telecom-lab-correlation:1.0` | It matches the brief; the earlier "1.0 is stale" reading was wrong | No change was needed once the tag was restored |
+
 ## 13. Limitations and scope
 
 Declared, not hidden:
@@ -477,6 +544,29 @@ Declared, not hidden:
 7. **Secrets live in git-ignored files**, not in a secret manager.
 8. **One detection rule** is loaded: the pipeline proves the mechanism, not rule
    coverage.
+
+### 13.1 Gate conditions, classified
+
+The gate is a policy decision over evidence, not a scanner. Its five checks and
+the finding that can block a build are separated by class, because the brief
+asks which conditions are informational, which are required and which can stop
+the build:
+
+| Condition | Class | Effect |
+|---|---|---|
+| `SECURITY_GATE_MODE` is `REPORT_ONLY` or `ENFORCE` | required | An invalid value falls back to `REPORT_ONLY` and the check fails, so a typo cannot silently weaken the gate |
+| Correlation decision is `PASS` (22/22: same `RUN_ID`, same build tag, shared PCAP hash, both controls, one time window) | required | If it is not, the gate returns `FAIL` in both modes: a broken evidence chain is never a security pass |
+| ZAP Alert 40018 detected in the targeted scan | required | Same: no positive control, no decision |
+| Suricata SID 1000001 fired (44 events on 20 stored) | required | Same |
+| Trivy scan completed and reported | required | Same |
+| **HIGH/CRITICAL count above the threshold (`GATE_MAX_HIGH_CRITICAL=0`)** | **blocking in `ENFORCE`, informational in `REPORT_ONLY`** | Build 21: `FAILURE` at this stage only, with every upstream phase `PASS`. Build 20: `PASS` with 70 recorded |
+| Traffic-intelligence flags (98/135) | informational, always | `gate_impact: none`; the model cannot open or close anything |
+| Trivy counts for our own images (Django 51, Nginx 126) | informational, always | `gate_impact: "none"`; scanned to be declared, not to gate |
+| Evidence archive non-empty and readable (56 members) | required, before the gate | A failed archive fails the stage, so a run cannot pass without its own evidence bundle |
+
+Reading the two runs together is the whole demonstration: build 20 and build 21
+have the same evidence and differ only in `SECURITY_GATE_MODE`. Nothing
+upstream changed; the policy did.
 
 ## 14. Glossary
 

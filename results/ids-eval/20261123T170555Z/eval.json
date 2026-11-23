@@ -1,0 +1,422 @@
+{
+  "generated_utc": "2026-11-23T17:08:17+00:00",
+  "dataset": "ISCXIDS2012 (labeled_flows_xml)",
+  "run_dir": "results/ids-eval/20261123T170555Z",
+  "flows_csv": {
+    "path": "results/ids-eval/20261123T170555Z/flows.csv",
+    "bytes": 70608596,
+    "sha256": "230d9654092b3228b73b465b23c18ff6b6a2f7071f11276f3d960aa1df75ebe7",
+    "rows": 603691
+  },
+  "subset": {
+    "2010-06-12": {
+      "files": 1,
+      "flows": 133193,
+      "attacks": 2086,
+      "published": {
+        "flows": 133193,
+        "attacks": 2086
+      },
+      "matches_published": true
+    },
+    "2010-06-13": {
+      "files": 1,
+      "flows": 275528,
+      "attacks": 20358,
+      "published": {
+        "flows": 275528,
+        "attacks": 20358
+      },
+      "matches_published": true
+    },
+    "2010-06-14": {
+      "files": 1,
+      "flows": 171380,
+      "attacks": 3776,
+      "published": {
+        "flows": 171380,
+        "attacks": 3776
+      },
+      "matches_published": true
+    },
+    "2010-06-15": {
+      "files": 3,
+      "flows": 571698,
+      "attacks": 37460,
+      "published": {
+        "flows": 571698,
+        "attacks": 37460
+      },
+      "matches_published": true
+    },
+    "2010-06-16": {
+      "files": 3,
+      "flows": 522263,
+      "attacks": 11,
+      "published": {
+        "flows": 522263,
+        "attacks": 11
+      },
+      "matches_published": true
+    }
+  },
+  "features": 38,
+  "protocol": {
+    "supervised": "leave-one-day-out logistic regression (attacks<=30000, normals<=30000, epochs=8), balanced class weights, threshold 0.5",
+    "unsupervised": "modified z-score on a normal-only baseline (2010-06-16), threshold = 99.5th percentile of baseline scores"
+  },
+  "methods": {
+    "supervised_lodo": {
+      "per_day": {
+        "2010-06-12": {
+          "tp": 629,
+          "fp": 1293,
+          "fn": 1457,
+          "tn": 58707,
+          "precision": 0.3273,
+          "recall": 0.3015,
+          "f1": 0.3139,
+          "false_positive_rate": 0.0215,
+          "accuracy": 0.9557,
+          "attacks": 2086,
+          "normals": 60000
+        },
+        "2010-06-13": {
+          "tp": 19324,
+          "fp": 705,
+          "fn": 1034,
+          "tn": 59295,
+          "precision": 0.9648,
+          "recall": 0.9492,
+          "f1": 0.9569,
+          "false_positive_rate": 0.0118,
+          "accuracy": 0.9784,
+          "attacks": 20358,
+          "normals": 60000
+        },
+        "2010-06-14": {
+          "tp": 3178,
+          "fp": 1202,
+          "fn": 598,
+          "tn": 58798,
+          "precision": 0.7256,
+          "recall": 0.8416,
+          "f1": 0.7793,
+          "false_positive_rate": 0.02,
+          "accuracy": 0.9718,
+          "attacks": 3776,
+          "normals": 60000
+        },
+        "2010-06-15": {
+          "tp": 37401,
+          "fp": 10917,
+          "fn": 59,
+          "tn": 169083,
+          "precision": 0.7741,
+          "recall": 0.9984,
+          "f1": 0.872,
+          "false_positive_rate": 0.0607,
+          "accuracy": 0.9495,
+          "attacks": 37460,
+          "normals": 180000
+        },
+        "2010-06-16": {
+          "tp": 11,
+          "fp": 1644,
+          "fn": 0,
+          "tn": 178356,
+          "precision": 0.0066,
+          "recall": 1.0,
+          "f1": 0.0132,
+          "false_positive_rate": 0.0091,
+          "accuracy": 0.9909,
+          "attacks": 11,
+          "normals": 180000
+        }
+      },
+      "overall": {
+        "tp": 60543,
+        "fp": 15761,
+        "fn": 3148,
+        "tn": 524239,
+        "precision": 0.7934,
+        "recall": 0.9506,
+        "f1": 0.8649,
+        "false_positive_rate": 0.0292,
+        "accuracy": 0.9687,
+        "attacks": 63691,
+        "normals": 540000
+      }
+    },
+    "unsupervised_zscore": {
+      "threshold": 10348230.0193,
+      "per_day": {
+        "2010-06-12": {
+          "tp": 0,
+          "fp": 1098,
+          "fn": 2086,
+          "tn": 58902,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "false_positive_rate": 0.0183,
+          "accuracy": 0.9487,
+          "attacks": 2086,
+          "normals": 60000
+        },
+        "2010-06-13": {
+          "tp": 360,
+          "fp": 1909,
+          "fn": 19998,
+          "tn": 58091,
+          "precision": 0.1587,
+          "recall": 0.0177,
+          "f1": 0.0318,
+          "false_positive_rate": 0.0318,
+          "accuracy": 0.7274,
+          "attacks": 20358,
+          "normals": 60000
+        },
+        "2010-06-14": {
+          "tp": 77,
+          "fp": 1325,
+          "fn": 3699,
+          "tn": 58675,
+          "precision": 0.0549,
+          "recall": 0.0204,
+          "f1": 0.0297,
+          "false_positive_rate": 0.0221,
+          "accuracy": 0.9212,
+          "attacks": 3776,
+          "normals": 60000
+        },
+        "2010-06-15": {
+          "tp": 14,
+          "fp": 4361,
+          "fn": 37446,
+          "tn": 175639,
+          "precision": 0.0032,
+          "recall": 0.0004,
+          "f1": 0.0007,
+          "false_positive_rate": 0.0242,
+          "accuracy": 0.8077,
+          "attacks": 37460,
+          "normals": 180000
+        },
+        "2010-06-16": {
+          "tp": 0,
+          "fp": 1284,
+          "fn": 11,
+          "tn": 178716,
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "false_positive_rate": 0.0071,
+          "accuracy": 0.9928,
+          "attacks": 11,
+          "normals": 180000
+        }
+      },
+      "overall": {
+        "tp": 451,
+        "fp": 9977,
+        "fn": 63240,
+        "tn": 530023,
+        "precision": 0.0432,
+        "recall": 0.0071,
+        "f1": 0.0122,
+        "false_positive_rate": 0.0185,
+        "accuracy": 0.8787,
+        "attacks": 63691,
+        "normals": 540000
+      }
+    }
+  },
+  "scenarios": {
+    "2010-06-12": {
+      "files": 1,
+      "flows": 133193,
+      "attacks": 2086,
+      "published": {
+        "flows": 133193,
+        "attacks": 2086
+      },
+      "matches_published": true,
+      "scenario": "ssh-bruteforce",
+      "supervised": {
+        "tp": 629,
+        "fp": 1293,
+        "fn": 1457,
+        "tn": 58707,
+        "precision": 0.3273,
+        "recall": 0.3015,
+        "f1": 0.3139,
+        "false_positive_rate": 0.0215,
+        "accuracy": 0.9557,
+        "attacks": 2086,
+        "normals": 60000
+      },
+      "unsupervised": {
+        "tp": 0,
+        "fp": 1098,
+        "fn": 2086,
+        "tn": 58902,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "false_positive_rate": 0.0183,
+        "accuracy": 0.9487,
+        "attacks": 2086,
+        "normals": 60000
+      }
+    },
+    "2010-06-13": {
+      "files": 1,
+      "flows": 275528,
+      "attacks": 20358,
+      "published": {
+        "flows": 275528,
+        "attacks": 20358
+      },
+      "matches_published": true,
+      "scenario": "infiltration-inside",
+      "supervised": {
+        "tp": 19324,
+        "fp": 705,
+        "fn": 1034,
+        "tn": 59295,
+        "precision": 0.9648,
+        "recall": 0.9492,
+        "f1": 0.9569,
+        "false_positive_rate": 0.0118,
+        "accuracy": 0.9784,
+        "attacks": 20358,
+        "normals": 60000
+      },
+      "unsupervised": {
+        "tp": 360,
+        "fp": 1909,
+        "fn": 19998,
+        "tn": 58091,
+        "precision": 0.1587,
+        "recall": 0.0177,
+        "f1": 0.0318,
+        "false_positive_rate": 0.0318,
+        "accuracy": 0.7274,
+        "attacks": 20358,
+        "normals": 60000
+      }
+    },
+    "2010-06-14": {
+      "files": 1,
+      "flows": 171380,
+      "attacks": 3776,
+      "published": {
+        "flows": 171380,
+        "attacks": 3776
+      },
+      "matches_published": true,
+      "scenario": "http-dos",
+      "supervised": {
+        "tp": 3178,
+        "fp": 1202,
+        "fn": 598,
+        "tn": 58798,
+        "precision": 0.7256,
+        "recall": 0.8416,
+        "f1": 0.7793,
+        "false_positive_rate": 0.02,
+        "accuracy": 0.9718,
+        "attacks": 3776,
+        "normals": 60000
+      },
+      "unsupervised": {
+        "tp": 77,
+        "fp": 1325,
+        "fn": 3699,
+        "tn": 58675,
+        "precision": 0.0549,
+        "recall": 0.0204,
+        "f1": 0.0297,
+        "false_positive_rate": 0.0221,
+        "accuracy": 0.9212,
+        "attacks": 3776,
+        "normals": 60000
+      }
+    },
+    "2010-06-15": {
+      "files": 3,
+      "flows": 571698,
+      "attacks": 37460,
+      "published": {
+        "flows": 571698,
+        "attacks": 37460
+      },
+      "matches_published": true,
+      "scenario": "ddos-irc-botnet",
+      "supervised": {
+        "tp": 37401,
+        "fp": 10917,
+        "fn": 59,
+        "tn": 169083,
+        "precision": 0.7741,
+        "recall": 0.9984,
+        "f1": 0.872,
+        "false_positive_rate": 0.0607,
+        "accuracy": 0.9495,
+        "attacks": 37460,
+        "normals": 180000
+      },
+      "unsupervised": {
+        "tp": 14,
+        "fp": 4361,
+        "fn": 37446,
+        "tn": 175639,
+        "precision": 0.0032,
+        "recall": 0.0004,
+        "f1": 0.0007,
+        "false_positive_rate": 0.0242,
+        "accuracy": 0.8077,
+        "attacks": 37460,
+        "normals": 180000
+      }
+    },
+    "2010-06-16": {
+      "files": 3,
+      "flows": 522263,
+      "attacks": 11,
+      "published": {
+        "flows": 522263,
+        "attacks": 11
+      },
+      "matches_published": true,
+      "scenario": "normal",
+      "supervised": {
+        "tp": 11,
+        "fp": 1644,
+        "fn": 0,
+        "tn": 178356,
+        "precision": 0.0066,
+        "recall": 1.0,
+        "f1": 0.0132,
+        "false_positive_rate": 0.0091,
+        "accuracy": 0.9909,
+        "attacks": 11,
+        "normals": 180000
+      },
+      "unsupervised": {
+        "tp": 0,
+        "fp": 1284,
+        "fn": 11,
+        "tn": 178716,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "false_positive_rate": 0.0071,
+        "accuracy": 0.9928,
+        "attacks": 11,
+        "normals": 180000
+      }
+    }
+  }
+}

@@ -1,0 +1,194 @@
+{
+  "dataset": "ISCXIDS2012 (labeled_flows_xml)",
+  "source_dir": "/home/x0riso/Escritorio/ISCXIDS2012 dataset/labeled_flows_xml",
+  "generated_utc": "2026-11-23T17:05:55+00:00",
+  "cap_normal_per_day": 60000,
+  "seed": 42,
+  "label_semantics": "binary Normal/Attack; scenario comes from the day",
+  "days": [
+    {
+      "file": "TestbedSatJun12Flows.xml",
+      "sha256": "da03990d3928a440bf28bf1a220c94e2bb5880748edbb7be37111baf37e9f86c",
+      "day": "2010-06-12",
+      "scenario": "ssh-bruteforce",
+      "rows_read": 133193,
+      "attacks": 2086,
+      "normals_kept": 60000,
+      "rows_kept": 62086,
+      "seconds": 2.5
+    },
+    {
+      "file": "TestbedSunJun13Flows.xml",
+      "sha256": "168e69b358766b0d70716d881afa447fe59fad35fbe7d64a2768073c6a4d1864",
+      "day": "2010-06-13",
+      "scenario": "infiltration-inside",
+      "rows_read": 275528,
+      "attacks": 20358,
+      "normals_kept": 60000,
+      "rows_kept": 80358,
+      "seconds": 4.8
+    },
+    {
+      "file": "TestbedMonJun14Flows.xml",
+      "sha256": "4c8fa5c087f78a51263c9cd81ed70cea24ba957174ca55055825fba66ed68548",
+      "day": "2010-06-14",
+      "scenario": "http-dos",
+      "rows_read": 171380,
+      "attacks": 3776,
+      "normals_kept": 60000,
+      "rows_kept": 63776,
+      "seconds": 3.4
+    },
+    {
+      "file": "TestbedTueJun15-1Flows.xml",
+      "sha256": "e77bd0b984a752bdd41b01ca6c67b49c8d30a5b4371e1fadf1f9dbb15fe19312",
+      "day": "2010-06-15",
+      "scenario": "ddos-irc-botnet",
+      "rows_read": 192041,
+      "attacks": 1,
+      "normals_kept": 60000,
+      "rows_kept": 60001,
+      "seconds": 4.5
+    },
+    {
+      "file": "TestbedTueJun15-2Flows.xml",
+      "sha256": "78b258197ce9bc7148a399a384a19cd426442999f6ba2f51f6813fc531b216f2",
+      "day": "2010-06-15",
+      "scenario": "ddos-irc-botnet",
+      "rows_read": 183623,
+      "attacks": 1,
+      "normals_kept": 60000,
+      "rows_kept": 60001,
+      "seconds": 4.2
+    },
+    {
+      "file": "TestbedTueJun15-3Flows.xml",
+      "sha256": "01da3a2d5606fa24454952c35f00891034a8afdd8e4c3d38f91b2d48cfdb516c",
+      "day": "2010-06-15",
+      "scenario": "ddos-irc-botnet",
+      "rows_read": 196034,
+      "attacks": 37458,
+      "normals_kept": 60000,
+      "rows_kept": 97458,
+      "seconds": 6.4
+    },
+    {
+      "file": "TestbedWedJun16-1Flows.xml",
+      "sha256": "72ef3a605a9d4325565d255a563ac46cc0d6e490216f0e36399fb8196567c31a",
+      "day": "2010-06-16",
+      "scenario": "normal",
+      "rows_read": 182968,
+      "attacks": 1,
+      "normals_kept": 60000,
+      "rows_kept": 60001,
+      "seconds": 4.2
+    },
+    {
+      "file": "TestbedWedJun16-2Flows.xml",
+      "sha256": "d6b3e5deb1513f6eae72f76046119d408501c55f7c6b06bc4af8107fcc1d551e",
+      "day": "2010-06-16",
+      "scenario": "normal",
+      "rows_read": 142371,
+      "attacks": 3,
+      "normals_kept": 60000,
+      "rows_kept": 60003,
+      "seconds": 3.4
+    },
+    {
+      "file": "TestbedWedJun16-3Flows.xml",
+      "sha256": "11c64c555ef4bdb2ccde857b1db2fd39672d0bfd7ef46dd352c1b09c5628416b",
+      "day": "2010-06-16",
+      "scenario": "normal",
+      "rows_read": 196924,
+      "attacks": 7,
+      "normals_kept": 60000,
+      "rows_kept": 60007,
+      "seconds": 4.4
+    }
+  ],
+  "totals": {
+    "rows_read": 1674062,
+    "rows_kept": 603691,
+    "attacks_kept": 63691
+  },
+  "scenarios": {
+    "ssh-bruteforce": {
+      "kept": 62086,
+      "attacks": 2086
+    },
+    "infiltration-inside": {
+      "kept": 80358,
+      "attacks": 20358
+    },
+    "http-dos": {
+      "kept": 63776,
+      "attacks": 3776
+    },
+    "ddos-irc-botnet": {
+      "kept": 217460,
+      "attacks": 37460
+    },
+    "normal": {
+      "kept": 180011,
+      "attacks": 11
+    }
+  },
+  "by_day": {
+    "2010-06-12": {
+      "files": 1,
+      "flows": 133193,
+      "attacks": 2086,
+      "published": {
+        "flows": 133193,
+        "attacks": 2086
+      },
+      "matches_published": true
+    },
+    "2010-06-13": {
+      "files": 1,
+      "flows": 275528,
+      "attacks": 20358,
+      "published": {
+        "flows": 275528,
+        "attacks": 20358
+      },
+      "matches_published": true
+    },
+    "2010-06-14": {
+      "files": 1,
+      "flows": 171380,
+      "attacks": 3776,
+      "published": {
+        "flows": 171380,
+        "attacks": 3776
+      },
+      "matches_published": true
+    },
+    "2010-06-15": {
+      "files": 3,
+      "flows": 571698,
+      "attacks": 37460,
+      "published": {
+        "flows": 571698,
+        "attacks": 37460
+      },
+      "matches_published": true
+    },
+    "2010-06-16": {
+      "files": 3,
+      "flows": 522263,
+      "attacks": 11,
+      "published": {
+        "flows": 522263,
+        "attacks": 11
+      },
+      "matches_published": true
+    }
+  },
+  "csv": {
+    "path": "results/ids-eval/20261123T170555Z/flows.csv",
+    "bytes": 70608596,
+    "sha256": "230d9654092b3228b73b465b23c18ff6b6a2f7071f11276f3d960aa1df75ebe7",
+    "rows": 603691
+  }
+}

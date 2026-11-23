@@ -74,3 +74,8 @@ SEGUIMIENTO.md
 # says which run is quoted. The single green 2A run is kept as a reference.
 results/scenario-b/phase2*/[0-9]*/
 !results/scenario-b/phase2a/20261102T230116Z/
+
+# ---------- ISCXIDS2012 evaluation ----------
+# The extracted feature table is 70 MB of build output; the manifest, the JSON
+# and the Markdown that describe it are tracked.
+results/ids-eval/*/flows.csv
