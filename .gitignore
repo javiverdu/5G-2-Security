@@ -63,3 +63,14 @@ docker-compose.override.yml
 env
 secrets/tls/*
 !secrets/tls/.gitkeep
+
+# ---------- Cuaderno de trabajo personal ----------
+# Pasos verificados y notas de estudio; no forma parte de la entrega.
+SEGUIMIENTO.md
+
+# ---------- Scenario B CI runs (reproducible, bulky) ----------
+# Every pipeline run writes a timestamped evidence directory. It is produced
+# by the build, not authored here, so it stays out of Git: docs/verification.md
+# says which run is quoted. The single green 2A run is kept as a reference.
+results/scenario-b/phase2*/[0-9]*/
+!results/scenario-b/phase2a/20261102T230116Z/
