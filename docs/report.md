@@ -232,8 +232,17 @@ The end of a Jenkins run — console of build 11, gate `PASS` in `REPORT_ONLY`,
 
 ![Jenkins console of a Scenario B build ending in SUCCESS](images/jenkins-pipeline.png)
 
-*(The stage graph — 1E → 2A → 2B → 2C → 2C-Advanced → 2D → 2E — is still
-pending as a screenshot: `docs/images/stage-graph.png`.)*
+The build history of the job — green is `SUCCESS`, red is `FAILURE`. Build 20
+is the `REPORT_ONLY` reference; build 21 is the same pipeline in `ENFORCE`,
+failing only at the Security Gate:
+
+![Jenkins build history: build 20 green (REPORT_ONLY), build 21 red (ENFORCE at the gate)](images/build-history.png)
+
+There is no stage-graph screenshot because the delivered Jenkins image does
+not install a stage-view plugin, and the brief forbids presentation plugins
+from becoming hidden dependencies. The stage order is in the `Jenkinsfile` and
+visible stage by stage in the console tail above; the build history is what
+Jenkins itself records without extra software.
 
 ## 7. Guided walkthrough: run it yourself
 
