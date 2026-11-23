@@ -7,7 +7,7 @@ Only **Project 2 documentation** is maintained here. The inherited 5G Standalone
 code, scripts and raw results remain as the working base, but the Project 1
 reports, screenshots and PDF were removed from the working tree.
 
-> **Workflow:** Secure the app path → test it → automate the testing → observe and correlate.
+> **Workflow:** Reuse → Secure → Model → Test → Detect → Automate → Analyze → Defend.
 
 ## Scenarios
 
@@ -17,7 +17,11 @@ reports, screenshots and PDF were removed from the working tree.
   redirection, and a security baseline (login, CSRF, secure cookies, HSTS).
 * **Scenario B — DevSecOps security-testing pipeline.** Jenkins + Selenium +
   OWASP ZAP + Suricata + Trivy/Syft against a Juice Shop target, packet capture,
-  event correlation and a security gate.
+  event correlation, a bounded traffic-intelligence stage and a security gate.
+
+How the pieces connect and why: [docs/architecture.md](docs/architecture.md).
+Checks, expected output and evidence: [docs/verification.md](docs/verification.md).
+Technical report: [docs/report.md](docs/report.md).
 
 ## Status
 
@@ -30,14 +34,20 @@ reports, screenshots and PDF were removed from the working tree.
 | A | 1E | End-to-end acceptance from the UE through the 5G path | ✅ done |
 | B | 2A | Preflight + environment acceptance (Jenkins, Juice Shop, Selenium, capture, Suricata, Trivy/Syft) | ✅ done |
 | B | 2B–2E | ZAP/Selenium/SQLi, PCAP + Suricata, Trivy/Syft, correlation + gate | ✅ done |
+| B | 2C-Advanced | Traffic intelligence analytics (features, clusters, anomaly scores) — supplementary | ✅ done |
 
 ## Structure
 
 ```
 5G-2-Security/
-├── README.md                 # this file: overview, run and verification
+├── README.md                 # this file: what it is, how to run it, how to restart
 ├── AGENTS.md                 # design invariants that survive compaction
+├── host-up.sh                # day-to-day entry point: start the lab in order
+├── host-down.sh              # stop the lab (--all also removes networks/volume)
 ├── docs/
+│   ├── report.md             # technical report: design, results, limits
+│   ├── architecture.md       # diagrams, design decisions, phase map
+│   ├── verification.md       # per-phase checks, expected output, evidence
 │   ├── brief-p2.txt          # Project 2 brief as text, for agents/tools
 │   └── (Project 1 reports removed)
 ├── scenario-b/               # inherited 5G SA base (code + runbook)
@@ -48,51 +58,76 @@ reports, screenshots and PDF were removed from the working tree.
 └── results/                  # Project 2 evidence; inherited raw results kept
 ```
 
-## Run the environment
+## Run — first clone (one time only)
 
 All container work runs natively on the Linux host, from the repository
-checkout. The examples assume the repository is at `~/5G-2-Security`; use the
-actual checkout path (for example
-`~/Documentos/VSCODE/5G-2-Security`) if it differs.
+checkout. The examples assume `~/5G-2-Security`; use your actual path (for
+example `~/Documentos/VSCODE/5G-2-Security`).
+
+Requirements: `docker` (user in the `docker` group), `git`, `curl`, `jq`,
+`tshark`, `openssl`, and `sudo` for the N6 step.
 
 ```bash
 cd ~/5G-2-Security
 
-# ---------------------------------------------------------------- Scenario A
-# First time only: create the git-ignored inputs.
-cd scenario-b && cp -n env.example .env && cd ..
+# 1. Git-ignored inputs. The secrets are yours: edit them before starting.
+cp -n scenario-b/env.example scenario-b/.env
+cp -n project2/scenario-a/env.example project2/scenario-a/env       # DJANGO_SECRET_KEY, LAB_ADMIN_PASSWORD
+cp -n project2/scenario-b/env.example project2/scenario-b/env       # JENKINS_ADMIN_PASSWORD
 
-# 1. Base 5G core, gNB, UE and subscriber
-cd scenario-b
-./scripts/fetch-upstream.sh                  # first clone only
-./scripts/deploy.sh
-sudo ./scripts/enable-n6.sh                  # N6 + no NAT; asks for sudo
-cd ..
+# 2. Base 5G: pinned Open5GS + UERANSIM clone, prebuilt images, upstream/.env.
+#    Run it after step 1: it copies scenario-b/.env over upstream/.env.
+./scenario-b/scripts/fetch-upstream.sh
 
-# 2. Project 2 RAN and application layer
-./project2/scenario-a/scripts/build.sh       # first clone only
-./project2/scenario-a/scripts/upgrade-ran.sh # UERANSIM v3.3.0 + narrow route
-cp -n project2/scenario-a/env.example project2/scenario-a/env
-# edit project2/scenario-a/env: DJANGO_SECRET_KEY, LAB_ADMIN_PASSWORD
-./project2/scenario-a/scripts/gen-pki.sh     # once; creates secrets/tls/
-./project2/scenario-a/scripts/up.sh          # Django + TLS gateway
+# 3. Project 2 images and lab PKI (creates secrets/tls/, once only).
+./project2/scenario-a/scripts/build.sh        # telecom-lab-ueransim:3.3.0-p2
+./project2/scenario-a/scripts/gen-pki.sh      # Root CA + server cert (SAN 10.20.6.20)
 
-# ---------------------------------------------------------------- Scenario B
-cp -n project2/scenario-b/env.example project2/scenario-b/env
-# edit project2/scenario-b/env: JENKINS_ADMIN_PASSWORD
-./project2/scenario-b/scripts/up.sh          # build, start, create the job
+# 4. Scenario B images, built once. `host-up.sh --with-b` starts them with
+#    --no-build, so they must exist before the first run.
+./project2/scenario-b/scripts/up.sh
+
+# 5. Everything up, in the required order, and the 1E gate at the end.
+./host-up.sh --with-b
 ```
 
-`upgrade-ran.sh` is required after every `deploy.sh`: the inherited deploy uses
-the Project 1 UERANSIM image and a default route; Project 2 replaces it with
-UERANSIM v3.3.0 and the narrow `10.20.6.0/24 dev uesimtun0` route.
+If you change `scenario-b/.env` later, re-run `fetch-upstream.sh`: it is the
+step that copies your values into `upstream/.env`.
 
-`scenario-a/up.sh` removes the inherited N6 test container `sb-nginx` because
-it also uses `10.20.6.20`. If you re-run `enable-n6.sh`, it recreates
-`sb-nginx`; run `scenario-a/up.sh` again afterwards so the two gateways do not
-conflict.
+## Run — normal use (day to day)
 
-### Restart after a host reboot
+```bash
+cd ~/5G-2-Security
+
+./host-up.sh              # Scenario A: core, N6, RAN, Django/TLS + verify
+./host-up.sh --with-b     # same, plus Scenario B and the Jenkins job
+./host-down.sh            # stop everything, keep networks and volumes
+./host-down.sh --all      # also remove networks and the Jenkins volume
+```
+
+`host-up.sh` is a thin wrapper around the phase scripts, in the order the
+architecture requires: `deploy.sh` → `enable-n6.sh` (sudo) →
+`upgrade-ran.sh` → `up.sh` → `verify-phase1.sh`, plus, with `--with-b`,
+`docker compose up -d --no-build` and `jenkins-bootstrap.sh`.
+
+It does **not** build images, generate the PKI or create the `env` files: that
+is first-clone work, and the wrapper stops with the exact command to run if any
+of it is missing. `host-down.sh` never touches `results/` or `secrets/tls/`.
+
+| Script | What it does | When |
+|---|---|---|
+| `host-up.sh [--with-b]` | Start the stack in order, then the 1E gate | Every start |
+| `host-down.sh [--all]` | Stop Scenario B, Scenario A and the 5G core; `--all` also removes networks and the Jenkins volume | Every stop |
+| `scenario-b/scripts/fetch-upstream.sh` | Pinned Open5GS/UERANSIM clone + prebuilt image tags | First clone |
+| `scenario-b/scripts/deploy.sh` | Core, gNB, UE and the subscriber | Every start (called by the wrapper) |
+| `scenario-b/scripts/enable-n6.sh` | Recreates the UPF with `dn-net`, no NAT; recreates `sb-nginx` | Every start, with `sudo` |
+| `project2/scenario-a/scripts/build.sh` | Builds `telecom-lab-ueransim:3.3.0-p2` | First clone / RAN image change |
+| `project2/scenario-a/scripts/gen-pki.sh` | Root CA + server certificate (`--force` to replace) | Once, or after rotating the PKI |
+| `project2/scenario-a/scripts/up.sh` | Django + Nginx TLS gateway; removes `sb-nginx` (same IP) | Every start |
+| `project2/scenario-b/scripts/up.sh` | Builds and starts Juice Shop, Selenium, Jenkins; creates the job | First clone / Scenario B image change |
+| `project2/scenario-b/scripts/run-pipeline.sh` | Triggers the Jenkins pipeline and follows the build | Every test run |
+
+## Restart after a host reboot
 
 Containers use `restart: unless-stopped`, so normally they come back by
 themselves. Check first; do not redeploy if the gate is already green:
@@ -103,21 +138,8 @@ docker ps --format 'table {{.Names}}\t{{.Status}}'
 ./project2/scenario-a/scripts/verify-phase1.sh
 ```
 
-If that is green, the Scenario A gate is satisfied. Start the Scenario B
-containers only if they are not already up, then run the pipeline.
-
-The two host helper scripts wrap the manual sequence:
-
-```bash
-./host-up.sh              # Scenario A only (core, N6, RAN, Django/TLS)
-./host-up.sh --with-b     # also start Scenario B and create the Jenkins job
-./host-down.sh            # stop containers, keep networks and volumes
-./host-down.sh --all      # also remove networks and the Jenkins volume
-```
-
-`host-up.sh` still needs `sudo` for `enable-n6.sh` (nsenter). If core, gNB or
-UE were recreated (for example after `scenario-b/scripts/deploy.sh`),
-the N6 attachment and the UE PDU session must be rebuilt in this order:
+If the core containers show `Exited`, or the gate fails, rebuild in this order
+(this is exactly what `./host-up.sh` does, including freeing `10.20.6.20`):
 
 ```bash
 cd ~/5G-2-Security
@@ -134,110 +156,22 @@ cd ..
 ./project2/scenario-a/scripts/verify-phase1.sh
 ```
 
-Order matters: `deploy.sh` starts the UPF without the `dn-net` override and
-starts the UE before N6 exists. `enable-n6.sh` recreates the UPF, so the UE
-must register afterwards (`upgrade-ran.sh`). Running `enable-n6.sh` after the
-UE is up leaves a dead PDU session; symptom is `UE cannot reach 10.20.6.20`
-or `gateway access log has no request from 10.45.0.x`.
+Order matters: `enable-n6.sh` recreates the UPF, so the UE must register
+afterwards. Doing it the other way leaves a dead PDU session; the symptoms are
+`UE cannot reach 10.20.6.20` or `gateway access log has no request from
+10.45.0.x`.
 
-## Verify the steps
-
-### Scenario A — end-to-end gate (1E)
-
-```bash
-cd ~/5G-2-Security
-./project2/scenario-a/scripts/verify-phase1.sh
-echo $?                    # must be 0
-```
-
-Expected: every line is `[ OK ]`, no `[FAIL]`, and the summary reports
-`0 check(s) failed`. The script drives real requests from the UE network
-namespace: `uesimtun0`, `10.20.6.20` via `uesimtun0`, TLS with `--cacert`
-(never `-k`), HTTP 301 → HTTPS 200, login, CSRF 200/403, cookies, headers and
-the real `10.45.0.x` address in the gateway log.
-
-Quick intermediate checks:
-
-```bash
-docker exec nr_ue ip -4 addr show uesimtun0       # 10.45.0.x/16
-docker exec nr_ue ip route get 10.20.6.20         # dev uesimtun0
-docker ps --format '{{.Names}} {{.Status}}'       # nr_gnb, nr_ue, scenario-b-nginx, scenario-b-django
-```
-
-### Scenario B — full pipeline (2A through 2E)
-
-```bash
-cd ~/5G-2-Security
-SECURITY_GATE_MODE=REPORT_ONLY ./project2/scenario-b/scripts/run-pipeline.sh
-echo $?                    # must be 0
-```
-
-`SECURITY_GATE_MODE` defaults to `REPORT_ONLY`. To demonstrate the gate
-policy, run with `ENFORCE`: the build then fails at the last stage when the
-Juice Shop image has HIGH/CRITICAL findings.
-
-Expected at the end:
-
-```text
-[run] build N result: SUCCESS
-[preflight] PASS — 0 failed of 35
-[2B] summary: PASS — 0 failed of 23
-[2C] phase2c: PASS — 0 failed of 12
-[2D] phase2d: PASS — 0 failed of 10
-[2E] correlation: PASS — 0 failed of 19
-[2E] gate: PASS (REPORT_ONLY) — ...
-```
-
-Artifacts are written by the Jenkins build per run and phase:
-
-| Phase | Directory | Key files |
-|---|---|---|
-| 2A | `results/scenario-b/phase2a/<RUN_ID>/` | `baseline-1e.txt`, `preflight.json/.md`, proof PCAP |
-| 2B | `results/scenario-b/phase2b/<RUN_ID>/` | ZAP baseline HTML/MD/JSON, Selenium JSON + screenshot, `plan.yaml`, targeted `zap-sqli.json` |
-| 2C | `results/scenario-b/phase2c/<RUN_ID>/` | fresh `juice-shop-ci-sqli.pcapng`, `eve.json`, `fast.log`, `stats.log`, `phase2c.json/.md` |
-| 2D | `results/scenario-b/phase2d/<RUN_ID>/` | `trivy-juice-shop.json`, `trivy-config.json`, `sbom.cdx.json`, `phase2d.json/.md` |
-| 2E | `results/scenario-b/phase2e/<RUN_ID>/` | `security-event-correlation.json/.md`, `scenario-b-evidence.tar.gz`, `gate.json/.md` |
-
-The latest locally verified runs are
-`phase2b/20261108T144011Z` (REPORT_ONLY, build 11 SUCCESS, correlation 19/19)
-and `phase2e/20261108T144511Z` (ENFORCE, build 13, expected gate failure). Raw
-evidence and PCAPs stay out of Git.
-
-On the host:
-
-```bash
-R=$(ls -d ~/5G-2-Security/results/scenario-b/phase2a/*/ | tail -1)
-jq -r '.decision, (.checks | length)' "$R/preflight.json"
-grep -c '\[FAIL\]' "$R/baseline-1e.txt" || true
-```
-
-Jenkins UI: <http://127.0.0.1:8080/job/scenario-b-security/>. Log in as
-`securityadmin` with the password from `project2/scenario-b/env`.
-
-The tracked green 2A run in this repository is
-[`results/scenario-b/phase2a/20261102T230116Z/`](results/scenario-b/phase2a/20261102T230116Z/).
-Later run directories contain raw evidence and PCAPs, so they stay untracked.
-
-## Working specification
-
-| Item | Value |
-|---|---|
-| UE PDU pool | `10.45.0.0/16` (`uesimtun0`) |
-| N6 / data network | `dn-net` `10.20.6.0/24`; `scenario-b-nginx` at `10.20.6.20` |
-| Private application network | `app-net` `10.20.8.0/24` (internal); `scenario-b-django` at `10.20.8.20:8000`; Nginx `10.20.8.10` |
-| Security test network | `security-net` `10.20.10.0/24`; Juice Shop `.20:3000`, Selenium `.30:4444`, Jenkins `.40:8080` |
-| Lab PKI | local root CA; server cert with `SAN = IP:10.20.6.20` |
-| TLS policy | TLS 1.2/1.3, `HTTP:80 → 301 → HTTPS:443` |
-| UE image (Project 2) | `telecom-lab-ueransim:3.3.0-p2` |
+Scenario B is independent of that order: start it only if it is not already up
+(`docker compose -f project2/scenario-b/docker-compose.security.yaml up -d
+--no-build`), then run the pipeline.
 
 ## Environment notes
 
-- The lab now runs natively on Linux (no VirtualBox VM). The full Project 2
-  image set needs several GB; the inherited observability stack (`metrics`,
-  `grafana`) is still disabled by default. Set `ENABLE_OBSERVABILITY=1` only
-  if the images fit.
-- After a host reboot, run `host-up.sh --with-b` (or the restart order above),
-  then `verify-phase1.sh` before trusting the pipeline.
+- The lab runs natively on Linux (no VirtualBox VM). The full Project 2 image
+  set needs several GB; the inherited observability stack (`metrics`, `grafana`)
+  is disabled by default. Set `ENABLE_OBSERVABILITY=1` only if the images fit.
+- After a host reboot, run `host-up.sh --with-b` (or the order above), then
+  `verify-phase1.sh` before trusting the pipeline.
 - Jenkins needs the host `docker` group GID to use `/var/run/docker.sock`. The
   compose file reads `DOCKER_GID` and defaults to `956`:
   `DOCKER_GID=$(getent group docker | cut -d: -f3) docker compose ...` when the
@@ -246,22 +180,13 @@ Later run directories contain raw evidence and PCAPs, so they stay untracked.
   be committed. The CA private key is mounted into no container.
 - The brief is readable by tools at [`docs/brief-p2.txt`](docs/brief-p2.txt).
 
-## Repository
-
-Project 2: [`javiverdu/5G-2-Security`](https://github.com/javiverdu/5G-2-Security).
-Forked from [`javiverdu/5G-project-RTU`](https://github.com/javiverdu/5G-project-RTU)
-(Project 1 history retained).
-
-```bash
-git clone https://github.com/javiverdu/5G-2-Security.git ~/5G-2-Security
-```
-
-Clone to a **native Linux path**, never to a VirtualBox shared folder: vboxsf
-breaks container mounts and permissions.
 
 ## For AI agents / new sessions
 
 - [`AGENTS.md`](AGENTS.md) — architecture, frozen values, phase gates, evidence rules.
+- [`docs/report.md`](docs/report.md) — technical report: design, results, limitations.
+- [`docs/architecture.md`](docs/architecture.md) — diagrams, design decisions, phase map.
+- [`docs/verification.md`](docs/verification.md) — per-phase checks and evidence.
 - [`scenario-b/AGENTS.md`](scenario-b/AGENTS.md) — inherited 5G invariants and gotchas.
 - [`project2/scenario-a/AGENTS.md`](project2/scenario-a/AGENTS.md) — exact Scenario A contract.
 - [`project2/scenario-b/AGENTS.md`](project2/scenario-b/AGENTS.md) — exact Scenario B contract.
