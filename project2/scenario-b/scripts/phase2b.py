@@ -466,22 +466,62 @@ def selenium_runtime() -> int:
             print("[2B] dismissed the cookie banner")
             time.sleep(1)
 
-        driver.clear(email)
-        driver.send_keys(email, JUICE_USER)
-        driver.clear(password)
-        driver.send_keys(password, JUICE_PASSWORD)
-        login = driver.wait_find("button#loginButton", timeout=30)
-        driver.click(login)
-        check(results, "login form submitted", True, JUICE_USER)
+        def fill(element: str, value: str) -> None:
+            driver.clear(element)
+            driver.send_keys(element, value)
+            seen = str(driver.execute(
+                "const e = arguments[0]; return e ? e.value : '';",
+                [{"element-6066-11e4-a52e-4f735466cecf": element}]) or "")
+            if seen != value:
+                # Angular can re-render between clear() and send_keys: the DOM
+                # ends up empty while the model keeps nothing. Setting the value
+                # and firing input/change updates both.
+                print("[2B] input did not keep the typed value; setting it via JS")
+                driver.execute(
+                    "const [e, v] = arguments;"
+                    "e.value = v;"
+                    "e.dispatchEvent(new Event('input', {bubbles: true}));"
+                    "e.dispatchEvent(new Event('change', {bubbles: true}));"
+                    "return e.value;",
+                    [{"element-6066-11e4-a52e-4f735466cecf": element}, value])
 
-        deadline = time.time() + 90
-        token = ""
-        while time.time() < deadline:
-            token = str(driver.execute(
+        def token_now() -> str:
+            return str(driver.execute(
                 "return window.localStorage.getItem('token') || '';") or "")
-            if token:
-                break
-            time.sleep(1)
+
+        def wait_token(seconds: int) -> str:
+            deadline = time.time() + seconds
+            while time.time() < deadline:
+                value = token_now()
+                if value:
+                    return value
+                time.sleep(1)
+            return ""
+
+        fill(email, JUICE_USER)
+        fill(password, JUICE_PASSWORD)
+        login = driver.wait_find("button#loginButton", timeout=30)
+        submitted = False
+        try:
+            driver.click(login)
+            submitted = True
+        except WebDriverError as exc:
+            print(f"[2B] login click failed: {str(exc)[:200]}")
+        check(results, "login form submitted", submitted, JUICE_USER)
+
+        token = wait_token(25)
+        if not token:
+            # A synthetic click can be swallowed (overlay, re-render, Angular
+            # ignoring an untrusted event). requestSubmit() runs the same
+            # ngSubmit handler, without needing a second trusted click.
+            print("[2B] no token after the click; submitting the form directly")
+            driver.execute(
+                "const f = document.querySelector('form');"
+                "if (!f) return false;"
+                "if (f.requestSubmit) { f.requestSubmit(); return true; }"
+                "f.dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));"
+                "return true;")
+            token = wait_token(60)
 
         payload = jwt_payload(token)
         email_in_token = str(
