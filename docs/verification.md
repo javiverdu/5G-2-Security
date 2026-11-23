@@ -88,18 +88,30 @@ Preflight only makes sense **inside the Jenkins container**: it reads
 container` instead of reporting every plugin as missing, and the version
 comparison refuses to pass on an empty plugin set.
 
-Expected console output:
+Expected console output (build 14, run `20261123T111153Z`):
 
 ```text
-[run] build N result: SUCCESS
+[run] build 14 result: SUCCESS
 [preflight] PASS — 0 failed of 35
 [2B] summary: PASS — 0 failed of 23
 [2C] phase2c: PASS — 0 failed of 12
 [2C-Advanced] analytics: PASS — 0 failed of 10; controlled request FLAGGED
-[2D] phase2d: PASS — 0 failed of 10
-[2E] correlation: PASS — 0 failed of 22
-[2E] gate: PASS (REPORT_ONLY) — ...
+[2D] phase2d: PASS — 0 failed of 14
+[2E] correlate: PASS — 0 failed of 6
+[2E] archive: PASS — 0 failed of 7
+[2E] gate: PASS (REPORT_ONLY) — REPORT_ONLY: HIGH/CRITICAL=70 recorded; threshold 0 not enforced
 ```
+
+Two different counts describe 2E and they do not contradict each other. The six
+`correlate` checks are the host-side **wrapper**: image built, image available,
+container exit 0, JSON readable, decision PASS, JSON belongs to this `RUN_ID`.
+The correlation itself runs inside `telecom-lab-correlation:1.1` and reports its
+own `0 failed of 22` — that number appears as the detail of the "container
+completed" check and in `security-event-correlation.json`, never as a separate
+stage summary. A count is only meaningful together with the level it describes.
+
+The 2D count went from 10 to 14 when the two images built by this project were
+added as explicit scan targets (`own_images`, `gate_impact: "none"`).
 
 ### Artifacts per phase
 
@@ -111,6 +123,31 @@ Expected console output:
 | 2C-Advanced | `results/scenario-b/phase2c/<RUN_ID>/` | `traffic-features.csv`, `traffic-flows.csv`, `traffic-anomaly.json`, `traffic-classification.json`, `analytics.json/.md` |
 | 2D | `results/scenario-b/phase2d/<RUN_ID>/` | `trivy-juice-shop.json`, `trivy-config.json`, `trivy-telecom-lab-django.json`, `trivy-telecom-lab-nginx.json`, `sbom.cdx.json`, `phase2d.json/.md` |
 | 2E | `results/scenario-b/phase2e/<RUN_ID>/` | `security-event-correlation.json/.md`, `scenario-b-evidence.tar.gz`, `gate.json/.md` |
+
+### What each stage actually checks
+
+Counts are those printed by build 14; every check name, status and observed
+value is stored in the phase JSON, so nothing in this table is asserted without
+a machine-readable counterpart.
+
+| Stage | Checks | Named examples | File |
+|---|---|---|---|
+| 1E acceptance | 38 (+ completion line) | PDU session, route via `uesimtun0`, TLS 1.2/1.3 with `--cacert`, 301→200, login, CSRF 200/403, `Secure`/`HttpOnly` cookies, real `10.45.0.x` in the gateway log | `baseline-1e.txt` |
+| 2A preflight | 35 | fresh evidence dir, 62 pinned plugins match the manifest, `security-net`/`dn-net`, target is the controlled Juice Shop, Selenium Grid ready, ZAP/Suricata/Trivy/Syft versions, SID 1000001 loaded (`suricata -T`), required scripts present (including `analytics.py`) | `preflight.json` |
+| 2B ZAP baseline | 5 | target reachable, scan completed, report parses, alert records written | `zap-baseline-report.json` |
+| 2B Selenium | 9 | login accepted, JWT present (717 chars) and identifies the lab account, 3 cookies, token in browser storage, authenticated route 200, screenshot | `selenium.json` |
+| 2B capture + SQLi | 9 | capture running before the request, request in window, PCAP hash matches, alert 40018 detected by targeted scan | `capture.json` |
+| 2C Suricata | 12 | PCAP belongs to this run (hash + creation time), tshark parses it, controlled payload present, offline run exit 0, `eve.json`/`fast.log`/`stats.log`, SID 1000001 alert | `phase2c.json` |
+| 2C-Advanced analytics | 10 | ≥3 features with variance, 3 non-empty clusters, baseline learned, 4 artifacts written, marked `supplementary` | `analytics.json` |
+| 2D Trivy + SBOM | 14 | image scan exit 0 and parses, severity counts, filesystem misconfig scan, both own images scanned, SBOM is CycloneDX with components | `phase2d.json` |
+| 2E correlate (wrapper) | 6 | image built/available, container exit 0, JSON readable, decision PASS, JSON carries this `RUN_ID` | `correlate.json` |
+| 2E correlation (inside) | 22 | every component reports the same `RUN_ID` and build tag, 2B and 2C share one PCAP hash, both positive controls fire, timestamps form one 164 s window | `security-event-correlation.json` |
+| 2E archive | 7 | five phase directories archived, tarball non-empty (1,553,808 bytes), readable and matching its 56 members | `archive.json` |
+| 2E gate | 5 | mode valid, correlation complete, ZAP 40018 fired, SID 1000001 fired, Trivy reported; then policy decides | `gate.json` |
+
+A green stage means those checks passed. It does not mean the check list is
+exhaustive: what each stage does **not** prove is in
+[report.md §8](report.md#8-what-each-phase-proves--and-what-it-does-not).
 
 ### What 2D scans (four explicit targets)
 
@@ -147,13 +184,19 @@ Jenkins UI: <http://127.0.0.1:8080/job/scenario-b-security/>. Log in as
 
 ## Latest verified runs
 
+- `20261123T111153Z` — `REPORT_ONLY`, build 14, Jenkins `SUCCESS`. Includes the
+  2C-Advanced stage with correlation image `1.1`: correlation 22/22 inside the
+  container, 6/6 wrapper checks, archive 56 members / 1,553,808 bytes, gate
+  `PASS` with `HIGH/CRITICAL=70` recorded. This is the run the tables above and
+  [report.md §10](report.md#10-results-what-was-measured) quote.
 - `phase2b/20261108T144011Z` — `REPORT_ONLY`, build 11, Jenkins `SUCCESS`,
-  correlation 19/19 at the time.
+  correlation 19/19 at the time (the stage did not exist yet).
 - `phase2e/20261108T144511Z` — `ENFORCE`, build 13, expected gate failure
   (`HIGH/CRITICAL=70 exceeds threshold 0`); all upstream phases `PASS`.
-- The 2C-Advanced stage was added after those builds. Replaying the build-11
-  evidence with the current scripts gives correlation 22/22 and the same gate
-  decisions in both modes.
+- The 2C-Advanced stage was added after builds 11 and 13. Replaying their
+  evidence with the current scripts gave correlation 22/22 and the same gate
+  decisions in both modes, which is why build 14 was run: to replace a replay
+  with a real build.
 
 Raw evidence and PCAPs stay out of Git. The tracked green 2A run in this
 repository is

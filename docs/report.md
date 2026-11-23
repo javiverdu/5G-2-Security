@@ -13,11 +13,11 @@ Companion documents: [architecture](architecture.md) (design reference),
 (day-to-day commands).
 
 > **Where the numbers come from.** Every figure was produced by a real execution,
-> reproducible with the command next to it. Most were measured on 2026-11-16/19
-> by running the phase scripts inside the Jenkins container against the live
-> lab, plus a replay of the 2026-11-08 build evidence for the correlation stage.
-> The authoritative end-to-end run is the Jenkins build from §7; when it is
-> regenerated, the tables in §10 are the ones to update.
+> reproducible with the command next to it. The authoritative end-to-end
+> reference is Jenkins build 14 (2026-11-23, run `20261123T111153Z`,
+> `REPORT_ONLY`, `SUCCESS`), which includes the 2C-Advanced stage; §10 is the
+> table to update when a later build replaces it. Earlier builds are kept in
+> [verification.md](verification.md) as history, not as current figures.
 
 ---
 
@@ -58,7 +58,7 @@ green build therefore means *"the checks ran, the detectors fired, the evidence
 belongs to this run, and policy allowed it"* — not *"this application is safe"*.
 Confusing those two statements is the most common way a security pipeline lies.
 
-## 2. The cast of components
+## 2. Index of components
 
 | Piece | In plain words | In this lab |
 |---|---|---|
@@ -99,7 +99,7 @@ flowchart LR
     NGX -->|"app-net 10.20.8.0/24 · HTTP"| DJG["scenario-b-django<br/>10.20.8.20:8000"]
 ```
 
-Read it left to right: the phone talks to the base station; the base station
+The phone talks to the base station; the base station
 sends user traffic through an encrypted tunnel (**GTP-U**) to the **UPF**; the
 UPF hands it to the data network; the doorman (Nginx) decrypts it and only then
 speaks to the application. Django is **not** attached to the data network: it can
@@ -265,7 +265,7 @@ with exit code 0.
 SECURITY_GATE_MODE=REPORT_ONLY ./project2/scenario-b/scripts/run-pipeline.sh
 ```
 
-Expected tail:
+Expected tail (build 14, run `20261123T111153Z`):
 
 ```text
 [preflight] PASS — 0 failed of 35
@@ -273,9 +273,14 @@ Expected tail:
 [2C] phase2c: PASS — 0 failed of 12
 [2C-Advanced] analytics: PASS — 0 failed of 10; controlled request FLAGGED
 [2D] phase2d: PASS — 0 failed of 14
-[2E] correlation: PASS — 0 failed of 22
-[2E] gate: PASS (REPORT_ONLY) — ...
+[2E] correlate: PASS — 0 failed of 6
+[2E] archive: PASS — 0 failed of 7
+[2E] gate: PASS (REPORT_ONLY) — HIGH/CRITICAL=70 recorded; threshold 0 not enforced
 ```
+
+The six `correlate` checks are the wrapper around the image; the correlation
+itself runs inside it and reports `0 failed of 22` in
+`security-event-correlation.json`.
 
 ### Step 4 — look at the evidence
 
@@ -288,7 +293,7 @@ jq '.chain, .decisions' "$R/security-event-correlation.json"
 jq '.mode, .security_finding, .decision' "$R/gate.json"
 ```
 
-Open the human-readable reports in a browser:
+Open the reports in a browser:
 
 - `results/scenario-b/phase2b/<RUN_ID>/zap-baseline-report.html`
 - `results/scenario-b/phase2b/<RUN_ID>/selenium-authenticated.png`
@@ -334,6 +339,30 @@ findings and decisions separate.
 | 2D | What components exist and what CVEs are known | Whether those CVEs are exploitable here |
 | 2E | The observations describe the same event, and policy decides | That the target is secure |
 
+### 8.1 The verifications behind each row
+
+The table above says what each phase proves; this one says how. Counts are those
+of build 14 (`20261123T111153Z`) and every check name, status and observed value
+is stored in the phase JSON — the report does not restate a number that cannot
+be traced to a file. The full per-check list is in
+[verification.md § What each stage actually checks](verification.md#what-each-stage-actually-checks).
+
+| Phase | Checks | The verifications, in one line | Evidence |
+|---|---|---|---|
+| 1E | 38 | PDU session and route via `uesimtun0`, TLS 1.2/1.3 validated against the lab CA, 301→200, login, CSRF accepted/rejected, cookie flags, real `10.45.0.x` in the gateway log | `baseline-1e.txt` |
+| 2A | 35 | Fresh run directory, 62 pinned plugins against the manifest, networks, controlled target, Selenium/ZAP/Suricata/Trivy/Syft ready, SID 1000001 loaded, required scripts present | `preflight.json` |
+| 2B | 23 | ZAP baseline (5): target reachable, report parses, 11 alert records. Selenium (9): login, JWT 717 chars, 3 cookies, token in storage, authenticated 200. Capture (9): capture running first, request inside the window, hash match, alert 40018 | `phase2b.json`, `capture.json`, `selenium.json` |
+| 2C | 12 | PCAP of this run only (hash and creation time), tshark parse, controlled payload, Suricata exit 0, `eve.json`/`fast.log`/`stats.log`, SID 1000001 fired (44 events) | `phase2c.json` |
+| 2C-Advanced | 10 | Feature variance, 3 non-empty clusters, learned baseline, 4 artifacts, marked supplementary | `analytics.json` |
+| 2D | 14 | Trivy image scan parses and counts severities, filesystem misconfig scan, both own images scanned, CycloneDX SBOM with components | `phase2d.json` |
+| 2E | 6 + 22 + 7 + 5 | Wrapper (6) around the correlation image, correlation (22) of identity/hash/window across all phases, archive (7) of 56 members, gate (5) of mode and controls | `correlate.json`, `security-event-correlation.json`, `archive.json`, `gate.json` |
+
+Three properties are worth naming because they are what makes the numbers mean
+something: every component has to report the same `RUN_ID` **and** the same
+Jenkins build tag; 2B and 2C have to reference the same PCAP SHA-256; and the
+positive controls (ZAP 40018, Suricata SID 1000001) have to fire, so a detector
+that silently broke cannot look like a clean run.
+
 ## 9. Controls, and the attack each one addresses
 
 | Control | Attack it addresses | Where it is proven |
@@ -349,20 +378,31 @@ findings and decisions separate.
 
 ## 10. Results: what was measured
 
+Quoted from the real Jenkins build 14 (`20261123T111153Z`), `REPORT_ONLY`,
+`SUCCESS`.
+
 | Measurement | Value | Where it comes from |
 |---|---|---|
-| Scenario A acceptance (1E) | all checks OK, exit 0 | `verify-phase1.sh` |
+| Checks executed | 172 in total: 38 in 1E, 112 printed by stages 2A–2E, 22 inside the correlation container — 0 failed | phase JSONs, `baseline-1e.txt` |
 | Preflight | 35/35 checks, 62 Jenkins plugins pinned | `preflight.json` |
 | ZAP baseline | 5/5 checks, 11 alert records | `phase2b.json` |
-| Selenium | 9/9 checks, JWT 717 chars, 3 cookies, screenshot 193 KB | `selenium.json` |
-| Capture + SQL injection | 9/9 checks, alert 40018 detected, PCAP 2,166,529 bytes, window 28.92 s | `capture.json` |
-| PCAP | 877 packets, SHA-256 `0dc0c5ac…` | `phase2c.json` |
-| Suricata | 44 alerts for rule 1000001 | `eve.json` |
-| Traffic intelligence | 135 requests, baseline 38, 98 flagged, controlled request flagged (score 16.0) | `traffic-anomaly.json` |
-| Trivy | Juice Shop 70 HIGH/CRITICAL (12 CRITICAL + 58 HIGH); Django image 49; Nginx image 124 | `phase2d.json` |
+| Selenium | 9/9 checks, JWT 717 chars, 3 cookies, screenshot 193,698 bytes | `selenium.json` |
+| Capture + SQL injection | 9/9 checks, alert 40018 detected, PCAP 2,165,961 bytes, window 31.38 s | `capture.json` |
+| PCAP | 862 packets, SHA-256 `441cd4ca…` | `phase2c.json` |
+| Suricata | 44 events for rule 1000001 (the JSON keeps a 20-event sample; `alert_count` is the total) | `eve.json`, `phase2c.json` |
+| Traffic intelligence | 135 requests, 66 flows, baseline 38, 98 flagged, controlled request flagged (score 16.0) | `traffic-anomaly.json` |
+| Trivy | Juice Shop 70 HIGH/CRITICAL (12 CRITICAL + 58 HIGH); Django image 51; Nginx image 126 | `phase2d.json` |
 | SBOM | 2,677 components, CycloneDX 1.7 | `sbom.cdx.json` |
-| Correlation | 22/22 checks | `security-event-correlation.json` |
+| Correlation | 22/22 checks inside the container, 6/6 wrapper checks | `security-event-correlation.json`, `correlate.json` |
+| Archive | 56 members, 1,553,808 bytes (gzip) | `archive.json` |
 | Gate | `REPORT_ONLY` passes with 70 recorded; `ENFORCE` fails on the threshold | `gate.json` |
+
+Counts that depend on the environment move between runs and the report says so
+instead of freezing them: the Trivy totals follow the vulnerability database of
+the build day (the previous run saw 49 and 124 for the two own images), and the
+PCAP size and hash change with every capture. The properties that must not
+change — same `RUN_ID` everywhere, one PCAP hash shared by 2B and 2C, both
+positive controls firing — are checked, not assumed.
 
 ## 11. The evidence chain
 

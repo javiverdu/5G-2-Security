@@ -26,6 +26,9 @@ source/GitHub → Jenkins → Preflight → ZAP baseline → Selenium runtime
 
 Verified on the native host:
 
+- REPORT_ONLY, build 14: RUN_ID `20261123T111153Z`, Jenkins `SUCCESS` with the
+  2C-Advanced stage and correlation image 1.1 — correlation 22/22 inside the
+  container, 6/6 wrapper checks, gate `PASS` with HIGH/CRITICAL=70 recorded.
 - REPORT_ONLY, build 11: RUN_ID `20261108T144011Z`, Jenkins `SUCCESS`,
   correlation 19/19, gate `PASS` with HIGH/CRITICAL=70 recorded.
 - ENFORCE, build 13: RUN_ID `20261108T144511Z`, Jenkins `FAILURE` at the gate
