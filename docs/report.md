@@ -14,9 +14,9 @@ Companion documents: [architecture](architecture.md) (design reference),
 
 > **Where the numbers come from.** Every figure was produced by a real execution,
 > reproducible with the command next to it. The authoritative end-to-end
-> reference is Jenkins build 14 (2026-11-23, run `20261123T111153Z`,
-> `REPORT_ONLY`, `SUCCESS`), which includes the 2C-Advanced stage; §10 is the
-> table to update when a later build replaces it. Earlier builds are kept in
+> reference is Jenkins build 17 (2026-11-23, run `20261123T114855Z`,
+> `REPORT_ONLY`, `SUCCESS`), which includes the 2C-Advanced stage; §10 also
+> quotes build 16, the same pipeline in `ENFORCE`. Earlier builds are kept in
 > [verification.md](verification.md) as history, not as current figures.
 
 ---
@@ -196,8 +196,11 @@ The same application after logging in (this is what phase 1D proves: the page
 only renders for an authenticated session, and it shows the identity the server
 accepted):
 
-*Screenshot pending: `docs/images/django-profile.png` — `/profile/` after login,
-showing `Username: securityadmin` and `Authenticated: True`.*
+![Django profile after login: Username securityadmin, Authenticated True](images/django-profile.png)
+
+The browser warns "Not secure" because the lab CA was never installed in it; the
+certificate chain is validated where it counts, with `curl --cacert` in 1C and
+1E, not by a browser icon.
 
 The shop used as the attack target in Scenario B — deliberately vulnerable and
 isolated from the application above:
@@ -224,10 +227,13 @@ The browser session driven by Selenium, authenticated inside Juice Shop:
 
 ![Selenium authenticated session in Juice Shop](images/selenium-authenticated.png)
 
-The Jenkins pipeline after a run:
+The end of a Jenkins run — console of build 11, gate `PASS` in `REPORT_ONLY`,
+`Finished: SUCCESS`:
 
-*Screenshot pending: `docs/images/jenkins-pipeline.png` — the stage graph
-(1E → 2A → 2B → 2C → 2C-Advanced → 2D → 2E) with the stages green.*
+![Jenkins console of a Scenario B build ending in SUCCESS](images/jenkins-pipeline.png)
+
+*(The stage graph — 1E → 2A → 2B → 2C → 2C-Advanced → 2D → 2E — is still
+pending as a screenshot: `docs/images/stage-graph.png`.)*
 
 ## 7. Guided walkthrough: run it yourself
 
@@ -256,8 +262,7 @@ Expected: every line starts with `[ OK ]`, and the last one is
 `[ OK ] Phase 1E complete: the 5G user-plane path serves the secured application.`
 with exit code 0.
 
-*Screenshot pending: `docs/images/verify-1e.png` — the tail of
-`verify-phase1.sh` with the final `[ OK ] Phase 1E complete` line.*
+![Tail of verify-phase1.sh with every check OK and the 1E completion line](images/verify-1e.png)
 
 ### Step 3 — run the security pipeline
 
@@ -265,7 +270,7 @@ with exit code 0.
 SECURITY_GATE_MODE=REPORT_ONLY ./project2/scenario-b/scripts/run-pipeline.sh
 ```
 
-Expected tail (build 14, run `20261123T111153Z`):
+Expected tail (build 17, run `20261123T114855Z`):
 
 ```text
 [preflight] PASS — 0 failed of 35
@@ -273,14 +278,14 @@ Expected tail (build 14, run `20261123T111153Z`):
 [2C] phase2c: PASS — 0 failed of 12
 [2C-Advanced] analytics: PASS — 0 failed of 10; controlled request FLAGGED
 [2D] phase2d: PASS — 0 failed of 14
-[2E] correlate: PASS — 0 failed of 6
+[2E] correlate: PASS — 0 failed of 5
 [2E] archive: PASS — 0 failed of 7
 [2E] gate: PASS (REPORT_ONLY) — HIGH/CRITICAL=70 recorded; threshold 0 not enforced
 ```
 
-The six `correlate` checks are the wrapper around the image; the correlation
-itself runs inside it and reports `0 failed of 22` in
-`security-event-correlation.json`.
+The `correlate` checks (5, or 6 when the image still has to be built) are the
+wrapper around the image; the correlation itself runs inside it and reports
+`0 failed of 22` in `security-event-correlation.json`.
 
 ### Step 4 — look at the evidence
 
@@ -301,8 +306,15 @@ Open the reports in a browser:
 
 The ZAP report header, with its alert count:
 
-*Screenshot pending: `docs/images/zap-report.png` — the header of
-`zap-baseline-report.html` with its alert count.*
+![ZAP report header: 0 high, 2 medium, 5 low, 4 informational](images/zap-report.png)
+
+The header is a **summary**. Each alert below it carries `instances[]` with
+`uri`, `param`, `attack` and `evidence`, and that is where the proof lives: the
+targeted scan records Alert 40018 with `uri=/rest/user/login`, `param=email`,
+`attack='` and `evidence="HTTP/1.1 500 Internal Server Error"`. The baseline is
+passive by design, so its instances have an empty `attack` — it observes, it
+does not attack; the active payload comes from `security/zap/plan.yaml`, which
+is why 2B runs both.
 
 ### Step 5 — see the policy work
 
@@ -310,10 +322,10 @@ The ZAP report header, with its alert count:
 SECURITY_GATE_MODE=ENFORCE ./project2/scenario-b/scripts/run-pipeline.sh
 ```
 
-The build now **fails at the last stage**, on purpose:
-`ENFORCE: HIGH/CRITICAL=70 exceeds threshold 0`. Nothing upstream changed — the
-same evidence, a different policy. That difference is the whole point of keeping
-findings and decisions separate.
+The build now **fails at the last stage**, on purpose (build 16 in this
+repository): `ENFORCE: HIGH/CRITICAL=70 exceeds threshold 0`. Nothing upstream
+changed — the same evidence, a different policy. That difference is the whole
+point of keeping findings and decisions separate.
 
 ### If something goes wrong
 
@@ -342,7 +354,7 @@ findings and decisions separate.
 ### 8.1 The verifications behind each row
 
 The table above says what each phase proves; this one says how. Counts are those
-of build 14 (`20261123T111153Z`) and every check name, status and observed value
+of build 17 (`20261123T114855Z`) and every check name, status and observed value
 is stored in the phase JSON — the report does not restate a number that cannot
 be traced to a file. The full per-check list is in
 [verification.md § What each stage actually checks](verification.md#what-each-stage-actually-checks).
@@ -352,10 +364,10 @@ be traced to a file. The full per-check list is in
 | 1E | 38 | PDU session and route via `uesimtun0`, TLS 1.2/1.3 validated against the lab CA, 301→200, login, CSRF accepted/rejected, cookie flags, real `10.45.0.x` in the gateway log | `baseline-1e.txt` |
 | 2A | 35 | Fresh run directory, 62 pinned plugins against the manifest, networks, controlled target, Selenium/ZAP/Suricata/Trivy/Syft ready, SID 1000001 loaded, required scripts present | `preflight.json` |
 | 2B | 23 | ZAP baseline (5): target reachable, report parses, 11 alert records. Selenium (9): login, JWT 717 chars, 3 cookies, token in storage, authenticated 200. Capture (9): capture running first, request inside the window, hash match, alert 40018 | `phase2b.json`, `capture.json`, `selenium.json` |
-| 2C | 12 | PCAP of this run only (hash and creation time), tshark parse, controlled payload, Suricata exit 0, `eve.json`/`fast.log`/`stats.log`, SID 1000001 fired (44 events) | `phase2c.json` |
+| 2C | 12 | PCAP of this run only (hash and creation time), tshark parse, controlled payload, Suricata exit 0, `eve.json`/`fast.log`/`stats.log`, SID 1000001 fired (44 events, 20 stored) | `phase2c.json` |
 | 2C-Advanced | 10 | Feature variance, 3 non-empty clusters, learned baseline, 4 artifacts, marked supplementary | `analytics.json` |
 | 2D | 14 | Trivy image scan parses and counts severities, filesystem misconfig scan, both own images scanned, CycloneDX SBOM with components | `phase2d.json` |
-| 2E | 6 + 22 + 7 + 5 | Wrapper (6) around the correlation image, correlation (22) of identity/hash/window across all phases, archive (7) of 56 members, gate (5) of mode and controls | `correlate.json`, `security-event-correlation.json`, `archive.json`, `gate.json` |
+| 2E | 5 + 22 + 7 + 5 | Wrapper (5, or 6 when it builds the image) around the correlation image, correlation (22) of identity/hash/window across all phases, archive (7) of 56 members, gate (5) of mode and controls | `correlate.json`, `security-event-correlation.json`, `archive.json`, `gate.json` |
 
 Three properties are worth naming because they are what makes the numbers mean
 something: every component has to report the same `RUN_ID` **and** the same
@@ -378,31 +390,30 @@ that silently broke cannot look like a clean run.
 
 ## 10. Results: what was measured
 
-Quoted from the real Jenkins build 14 (`20261123T111153Z`), `REPORT_ONLY`,
-`SUCCESS`.
+Quoted from the real Jenkins build 17 (`20261123T114855Z`, `REPORT_ONLY`,
+`SUCCESS`); the policy row adds build 16, the same pipeline in `ENFORCE`.
 
 | Measurement | Value | Where it comes from |
 |---|---|---|
-| Checks executed | 172 in total: 38 in 1E, 112 printed by stages 2A–2E, 22 inside the correlation container — 0 failed | phase JSONs, `baseline-1e.txt` |
+| Checks executed | 171 in total: 38 in 1E, 111 printed by stages 2A–2E, 22 inside the correlation container — 0 failed | phase JSONs, `baseline-1e.txt` |
 | Preflight | 35/35 checks, 62 Jenkins plugins pinned | `preflight.json` |
 | ZAP baseline | 5/5 checks, 11 alert records | `phase2b.json` |
-| Selenium | 9/9 checks, JWT 717 chars, 3 cookies, screenshot 193,698 bytes | `selenium.json` |
-| Capture + SQL injection | 9/9 checks, alert 40018 detected, PCAP 2,165,961 bytes, window 31.38 s | `capture.json` |
-| PCAP | 862 packets, SHA-256 `441cd4ca…` | `phase2c.json` |
-| Suricata | 44 events for rule 1000001 (the JSON keeps a 20-event sample; `alert_count` is the total) | `eve.json`, `phase2c.json` |
-| Traffic intelligence | 135 requests, 66 flows, baseline 38, 98 flagged, controlled request flagged (score 16.0) | `traffic-anomaly.json` |
+| Selenium | 9/9 checks, JWT 717 chars, 3 cookies, screenshot 307,226 bytes | `selenium.json` |
+| Capture + SQL injection | 9/9 checks, alert 40018 detected, PCAP 2,163,712 bytes, window 29.23 s | `capture.json` |
+| PCAP | 835 packets, SHA-256 `ab210712…` | `phase2c.json` |
+| Suricata | 44 events for rule 1000001 (`alerts_by_signature`); the JSON stores a 20-event sample and the gate prints both numbers | `eve.json`, `phase2c.json` |
+| Traffic intelligence | 135 requests, 64 flows, baseline 38, 98 flagged, controlled request flagged | `traffic-anomaly.json` |
 | Trivy | Juice Shop 70 HIGH/CRITICAL (12 CRITICAL + 58 HIGH); Django image 51; Nginx image 126 | `phase2d.json` |
 | SBOM | 2,677 components, CycloneDX 1.7 | `sbom.cdx.json` |
-| Correlation | 22/22 checks inside the container, 6/6 wrapper checks | `security-event-correlation.json`, `correlate.json` |
-| Archive | 56 members, 1,553,808 bytes (gzip) | `archive.json` |
-| Gate | `REPORT_ONLY` passes with 70 recorded; `ENFORCE` fails on the threshold | `gate.json` |
+| Correlation | 22/22 checks inside the container, 5/5 wrapper checks | `security-event-correlation.json`, `correlate.json` |
+| Archive | 56 members, 1,671,670 bytes (gzip) | `archive.json` |
+| Gate | `REPORT_ONLY` passes with 70 recorded (build 17); `ENFORCE` fails on the threshold (build 16, `FAILURE` at this stage only) | `gate.json` |
 
 Counts that depend on the environment move between runs and the report says so
 instead of freezing them: the Trivy totals follow the vulnerability database of
-the build day (the previous run saw 49 and 124 for the two own images), and the
-PCAP size and hash change with every capture. The properties that must not
-change — same `RUN_ID` everywhere, one PCAP hash shared by 2B and 2C, both
-positive controls firing — are checked, not assumed.
+the build day, and the PCAP size and hash change with every capture. The
+properties that must not change — same `RUN_ID` everywhere, one PCAP hash
+shared by 2B and 2C, both positive controls firing — are checked, not assumed.
 
 ## 11. The evidence chain
 
