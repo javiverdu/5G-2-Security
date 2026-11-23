@@ -24,6 +24,7 @@ Checks, expected output and evidence: [docs/verification.md](docs/verification.m
 Technical report: [docs/report.md](docs/report.md).
 Independent IDS evaluation on ISCXIDS2012: [docs/ids-benchmark.md](docs/ids-benchmark.md).
 LLM-assisted cross-validation: [docs/llm-cross-validation.md](docs/llm-cross-validation.md).
+Presentation script and Q&A: [docs/presentation-guide.md](docs/presentation-guide.md).
 
 ## Status
 
@@ -54,6 +55,7 @@ LLM-assisted cross-validation: [docs/llm-cross-validation.md](docs/llm-cross-val
 │   ├── verification.md       # per-phase checks, expected output, evidence
 │   ├── ids-benchmark.md      # independent IDS evaluation on ISCXIDS2012
 │   ├── llm-cross-validation.md  # the two LLM cross-validation tasks
+│   ├── presentation-guide.md # 12-minute script, numbers, Q&A
 │   ├── brief-p2.txt          # Project 2 brief as text, for agents/tools
 │   └── (Project 1 reports removed)
 ├── scenario-b/               # inherited 5G SA base (code + runbook)
