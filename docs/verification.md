@@ -244,6 +244,11 @@ matrices and per-day precision/recall/F1/FPR. Quoted run:
 `results/ids-eval/20261123T170555Z/`. Method, subset and limitations:
 [ids-benchmark.md](ids-benchmark.md).
 
+Packet-level check on the 14 June capture (Suricata 8.0.8 + ET Open, 25,771
+alerts, 0 for the flood): commands in
+[ids-benchmark.md §9](ids-benchmark.md#9-reproduce), summary in
+`results/ids-eval/20261123T174056Z-pcap/`.
+
 ## LLM-assisted cross-validation
 
 Two documented tasks (SBOM vs Trivy, analytics vs Suricata) with model, date,

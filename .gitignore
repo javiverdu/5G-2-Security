@@ -79,3 +79,7 @@ results/scenario-b/phase2*/[0-9]*/
 # The extracted feature table is 70 MB of build output; the manifest, the JSON
 # and the Markdown that describe it are tracked.
 results/ids-eval/*/flows.csv
+
+# Suricata output for the ISCX packet-level check (600 MB per day)
+results/ids-eval/**/eve.json
+results/ids-eval/**/fast.log

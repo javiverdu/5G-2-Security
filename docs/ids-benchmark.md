@@ -162,7 +162,50 @@ gate is decided by deterministic evidence (ZAP alert 40018, Suricata SID
 `supplementary` with `gate_impact: none`, and this evaluation is reported as a
 bounded benchmark of the *method*, not as a claim about the 5G core.
 
-## 7. Reproduce
+## 8. Packet-level check: Suricata with ET Open on the 14 June capture
+
+The XML flows answer the flow-level question. The separate `testbed-14jun.pcap`
+(6.9 GB, 24 h, 9,648,653 packets) allows the other half: what a **signature
+IDS** does with the packets of the same day, using a public rule set it was not
+tuned for.
+
+Method: Suricata 8.0.8 in a container, `--runmode single -k none`, with
+**ET Open** fetched by `suricata-update` (69,570 rules loaded, 53,593 enabled,
+snapshot 2026-11-23), `eve.json` and `fast.log` written next to the run. The XML
+of the day is used only as ground truth for the attack sources and the window.
+The capture clock is UTC; the XML timestamps are UTC−3, so the labelled window
+`17:19–18:18` local is `20:19–21:18` UTC. The flood is visible in the capture as
+per-minute flow peaks to `192.168.5.122:80` (825 flows at 20:37, 1,002 at 21:15,
+763 at 21:27 UTC) from `192.168.2.106`, `192.168.3.115`, `192.168.1.101` and
+`192.168.2.113`.
+
+| Measurement | Value |
+|---|---|
+| Packets / bytes processed | 9,648,653 / 7.21 GB |
+| Alerts in 24 h | 25,771 |
+| Of those, one generic signature (`HTTP Response excessive header repetition`) | 21,917 (85 %) |
+| DoS/flood/brute/scan-flavoured alerts | **9**, all `ET SCAN Potential SSH Scan`, another time of day |
+| Alerts inside the flood window (20:30–21:35 UTC) | 641 |
+| DoS-flavoured alerts inside the flood window | **0** |
+| Labelled attack sources that received a DoS-flavoured alert | **0 of 10** |
+
+Conclusion, stated plainly: **a signature IDS with a general rule set detected
+none of the injected HTTP DoS.** It did produce 25,771 alerts on ordinary
+traffic, which is the alert-fatigue problem in one number. The same day's flows,
+scored by the supervised model of §3, gave recall 0.842 and precision 0.726.
+Neither result is "the detector works": the rule set knows payload signatures,
+the model knows volume shapes, and the day contains a volume attack with
+ordinary HTTP payloads. That is exactly the gap the project's layered design
+covers — deterministic rules for what they can see, flow intelligence marked
+`supplementary`, and a policy gate that decides on evidence, not on alerts.
+
+Limitations of this check: one day only (the only capture supplied), a single
+thread, no rule tuning (which is the point), an ET snapshot that is 16 years
+younger than the traffic, and `eve.json` of 612 MB left out of Git. The
+`summary.json` / `summary.md` of the run are in
+`results/ids-eval/20261123T174056Z-pcap/`; the command is in §9.
+
+## 9. Reproduce
 
 ```bash
 cd ~/Documentos/VSCODE/5G-2-Security
@@ -177,3 +220,30 @@ jq '.scenarios | to_entries[] | {day: .key, scenario: .value.scenario,
 
 The dataset is not in Git (3.1 GB, academic licence). `manifest.json` pins each
 source file by SHA-256, so a different copy cannot pass unnoticed.
+
+Packet-level check (the 14 June capture, Suricata + ET Open):
+
+```bash
+# rules: ET Open snapshot, fetched once
+mkdir -p /tmp/suri-rules
+docker run --rm -v /tmp/suri-rules:/var/lib/suricata jasonish/suricata:8.0 suricata-update
+docker run --rm -v /tmp/suri-rules:/var/lib/suricata --entrypoint chown \
+    jasonish/suricata:8.0 -R "$(id -u):$(id -g)" /var/lib/suricata
+
+# offline run over the 6.9 GB capture (~3 min, 9.6 M packets)
+docker run --rm --name iscx-suri \
+    -v /tmp/suri-rules:/var/lib/suricata:ro \
+    -v "$HOME/Descargas/testbed-14jun-DOS-PCAP:/pcap:ro" \
+    -v "$PWD/results/ids-eval/$R-pcap:/out" \
+    jasonish/suricata:8.0 -r /pcap/testbed-14jun.pcap \
+    -S /var/lib/suricata/rules/suricata.rules -l /out --runmode single -k none
+
+/usr/bin/python3 project2/scenario-b/ids-eval/pcap_eval.py \
+    --eve results/ids-eval/$R-pcap/eve.json \
+    --xml "$D/TestbedMonJun14Flows.xml" \
+    --out-dir results/ids-eval/$R-pcap \
+    --window-start 2010-06-14T20:30 --window-end 2010-06-14T21:35
+```
+
+(Fetch `eve.json` out of the container directory before analysing: the run
+writes it next to the command above; only `summary.json`/`summary.md` are kept.)

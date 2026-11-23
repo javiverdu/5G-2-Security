@@ -460,6 +460,13 @@ The unsupervised baseline, which is what 2C-Advanced does on the lab PCAP,
 detects almost nothing here (0.7 % recall) — evidence for keeping analytics
 *supplementary* and the deterministic rule in charge of the gate.
 
+The 14 June capture allows the other half of the comparison. Suricata 8.0.8
+with an untuned ET Open snapshot (69,570 rules) over 9.6 M packets produced
+25,771 alerts, 85 % of them a single generic protocol signature, and **zero**
+DoS-flavoured alerts inside the flood window: the signature IDS missed the
+injected HTTP DoS entirely. Rules know payloads; the flood carried ordinary
+ones. Detail in [ids-benchmark.md §8](ids-benchmark.md).
+
 ### 10.2 LLM-assisted cross-validation
 
 Two tasks, both documented with model, date, prompt, inputs, the LLM's claim
