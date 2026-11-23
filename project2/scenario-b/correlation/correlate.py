@@ -177,8 +177,13 @@ def main() -> int:
     suricata = phase2c.get("suricata", {}) or {}
     alerts = suricata.get("alerts", []) or []
     sid_hits = [a for a in alerts if str(a.get("signature_id")) == str(SID)]
-    check(results, f"Suricata reported SID {SID}", bool(sid_hits),
-          f"{len(sid_hits)} alert(s)")
+    # `alerts` is a capped sample; the honest count is alerts_by_signature.
+    sid_total = max(int((suricata.get("alerts_by_signature", {}) or {}).get(str(SID), 0)),
+                    len(sid_hits))
+    sid_detail = f"{sid_total} event(s)"
+    if len(sid_hits) < sid_total:
+        sid_detail += f" ({len(sid_hits)} in the stored sample)"
+    check(results, f"Suricata reported SID {SID}", bool(sid_hits), sid_detail)
 
     # -- the PCAP is the same artifact in 2B and 2C -------------------------
     pcap_2b = (capture.get("pcap", {}) or {})
@@ -252,7 +257,7 @@ def main() -> int:
                 "pcap_sha256": pcap_2c.get("sha256", ""),
                 "pcap_size": pcap_2c.get("size", 0),
                 "sid": SID,
-                "sid_alert_count": len(sid_hits),
+                "sid_alert_count": sid_total,
                 "report": "phase2c/eve.json",
             },
             "software_artifacts": {

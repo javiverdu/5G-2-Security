@@ -318,7 +318,14 @@ def main() -> int:
             }
             for a in alerts[:20]
         ],
+        # The list above is a sample; these two counts cover every alert. The
+        # gate and the correlation must read the counts, never the sample size.
         "alert_count": len(alerts),
+        "alerts_by_signature": {
+            key: sum(1 for a in alerts
+                     if str(a.get("alert", {}).get("signature_id")) == key)
+            for key in sorted({str(a.get("alert", {}).get("signature_id")) for a in alerts})
+        },
     })
 
     return finish("phase2c", started, results, evidence)

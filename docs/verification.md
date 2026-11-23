@@ -105,7 +105,7 @@ Expected console output (build 14, run `20261123T111153Z`):
 Two different counts describe 2E and they do not contradict each other. The six
 `correlate` checks are the host-side **wrapper**: image built, image available,
 container exit 0, JSON readable, decision PASS, JSON belongs to this `RUN_ID`.
-The correlation itself runs inside `telecom-lab-correlation:1.1` and reports its
+The correlation itself runs inside `telecom-lab-correlation:1.2` and reports its
 own `0 failed of 22` — that number appears as the detail of the "container
 completed" check and in `security-event-correlation.json`, never as a separate
 stage summary. A count is only meaningful together with the level it describes.

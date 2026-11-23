@@ -3,7 +3,7 @@
 
 Subcommands (the Jenkinsfile calls them in this order):
 
-  correlate   run telecom-lab-correlation:1.0 over the current evidence set
+  correlate   run telecom-lab-correlation:1.2 over the current evidence set
   archive     pack phase2a..phase2e/<RUN_ID> into a single tar.gz with hash
   gate        apply REPORT_ONLY or ENFORCE and write gate.json/.md
 
@@ -31,7 +31,7 @@ import tarfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-CORRELATION_IMAGE = "telecom-lab-correlation:1.1"
+CORRELATION_IMAGE = "telecom-lab-correlation:1.2"
 
 EVIDENCE_DIR = Path(os.environ.get("EVIDENCE_DIR", ".")).resolve()
 EVIDENCE_HOST_DIR = os.environ.get("EVIDENCE_HOST_DIR", str(EVIDENCE_DIR))
@@ -274,10 +274,17 @@ def gate() -> int:
     check(results, "ZAP Alert 40018 positive control is PASS",
           bool(targeted.get("alert_40018_detected")),
           f"plugin ids={targeted.get('plugin_ids', [])}")
-    sid_hits = [a for a in (phase2c.get("suricata", {}) or {}).get("alerts", [])
+    suricata = phase2c.get("suricata", {}) or {}
+    sid_hits = [a for a in (suricata.get("alerts", []) or [])
                 if str(a.get("signature_id")) == "1000001"]
+    # phase2c.json keeps a 20-alert sample; the real total is in the counts.
+    sid_total = max(int((suricata.get("alerts_by_signature", {}) or {}).get("1000001", 0)),
+                    len(sid_hits))
+    sid_detail = f"{sid_total} event(s) for SID 1000001"
+    if len(sid_hits) < sid_total:
+        sid_detail += f" ({len(sid_hits)} in the stored sample)"
     check(results, "Suricata SID 1000001 positive control is PASS",
-          bool(sid_hits), f"{len(sid_hits)} alert(s)")
+          bool(sid_hits), sid_detail)
     check(results, "Trivy scan completed and reported",
           phase2d.get("decision") == "PASS",
           f"decision={phase2d.get('decision', 'missing')}")

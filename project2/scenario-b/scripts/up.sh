@@ -23,7 +23,7 @@ echo "[up] building the capture job image (no compose service)"
 docker build -t telecom-lab-capture:1.0 "$HERE/capture"
 
 echo "[up] building the correlation job image (no compose service)"
-docker build -t telecom-lab-correlation:1.1 "$HERE/correlation"
+docker build -t telecom-lab-correlation:1.2 "$HERE/correlation"
 
 echo "[up] starting juice-shop, selenium and jenkins"
 docker compose -f "$COMPOSE" up -d
