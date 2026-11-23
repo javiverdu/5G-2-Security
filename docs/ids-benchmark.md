@@ -39,8 +39,8 @@ costs.
 Sampling: every attack flow of the selected days is kept (63,691) and normal
 flows are reservoir-sampled to 60,000 per day (seed 42), giving **603,691
 flows, 70.6 MB** (`flows.csv`, sha256 `230d9654092b3228…`). 10.55 % of the
-subset is attack traffic; in the raw 2.07 M flows of the five days it is
-3.33 %, and on the normal day it is 11/522,263 (0.002 %).
+subset is attack traffic; in the 1.67 M flows read for these five days it is
+3.80 %, and on the normal day it is 11/522,263 (0.002 %).
 
 Features (23 + one-hot app): duration, bytes and packets per direction,
 bytes/packets ratio, mean packet size per direction, source and destination
@@ -118,10 +118,10 @@ directory.
 
 ## 5. Class imbalance and dataset limitations
 
-- Attacks are 3.33 % of the raw subset (10.55 % after capping normals). At the
-  normal day it is 0.002 %. Precision, not accuracy, is the number that matters
-  at that ratio, and a single global threshold cannot serve both a 37,460-attack
-  day and an 11-attack day.
+- Attacks are 3.80 % of the flows read for these days (10.55 % after capping
+  normals). At the normal day it is 0.002 %. Precision, not accuracy, is the
+  number that matters at that ratio, and a single global threshold cannot serve
+  both a 37,460-attack day and an 11-attack day.
 - **Labels are binary.** The release does not say which flow is DDoS and which
   is scan; scenarios are day-level, so "per-category" here means per-day, and a
   day can contain more than one attack type (06-13 mixes scanning, reverse

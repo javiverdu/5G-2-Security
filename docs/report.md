@@ -425,7 +425,7 @@ per-category metrics. Full detail: [ids-benchmark.md](ids-benchmark.md).
 Subset (all flows read and counted, not assumed): 2010-06-12 SSH brute force
 (133,193 flows / 2,086 attacks), 06-13 infiltration (275,528 / 20,358), 06-14
 HTTP DoS (171,380 / 3,776), 06-15 DDoS via IRC botnet (571,698 / 37,460), 06-16
-normal (522,263 / 11). 2.07 M flows read, 603,691 kept after capping normals
+normal (522,263 / 11). 1.67 M flows read, 603,691 kept after capping normals
 per day (all attacks kept), 70.6 MB of features.
 
 Two methods, same subset: leave-one-day-out logistic regression (no flow of the
@@ -445,7 +445,7 @@ What this says, and what it does not: volumetric attacks are found without
 being seen (DDoS 0.998, infiltration 0.949); an unseen credential attack is
 mostly missed (SSH 0.301), which is the sentence to remember from the whole
 exercise — an IDS only detects the families it has been taught. The 96.9 %
-accuracy is an artefact of the 3.33 % attack share: at 2.9 % FPR the same model
+accuracy is an artefact of the 3.80 % attack share: at 2.9 % FPR the same model
 would bury a SOC in alerts, and on the normal day precision drops to 0.007.
 The unsupervised baseline, which is what 2C-Advanced does on the lab PCAP,
 detects almost nothing here (0.7 % recall) — evidence for keeping analytics
