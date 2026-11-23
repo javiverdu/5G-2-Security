@@ -5,8 +5,10 @@ Runs inside the Jenkins container (Docker-outside-of-Docker). Trivy and Syft
 are ephemeral jobs; findings are observations, never the gate decision (2E).
 
 Targets (recorded with every result):
-  * image  bkimminich/juice-shop:v20.2.0  -> vulnerabilities
+  * image  bkimminich/juice-shop:v20.2.0  -> vulnerabilities (positive control)
   * files  project2/scenario-b             -> misconfiguration (IaC)
+  * images telecom-lab-django:0.1, telecom-lab-nginx:p2 -> vulnerabilities
+    (our own artefacts; observations only, never part of the gate threshold)
 
 Environment:
   EVIDENCE_DIR        container path of the 2D run directory (required)
@@ -30,6 +32,7 @@ from pathlib import Path
 TRIVY_IMAGE = "aquasec/trivy:0.75.0"
 SYFT_IMAGE = "anchore/syft:v1.52.0"
 TARGET_IMAGE = "bkimminich/juice-shop:v20.2.0"
+OWN_IMAGES = ["telecom-lab-django:0.1", "telecom-lab-nginx:p2"]
 TRIVY_CACHE = "scenario-b-trivy-cache"
 
 EVIDENCE_DIR = Path(os.environ.get("EVIDENCE_DIR", ".")).resolve()
@@ -168,7 +171,8 @@ def main() -> int:
     results: list[dict] = []
     evidence: dict = {
         "targets": {"image": TARGET_IMAGE,
-                    "filesystem": "project2/scenario-b"},
+                    "filesystem": "project2/scenario-b",
+                    "own_images": OWN_IMAGES},
         "trivy": {"image": TRIVY_IMAGE, "version": ""},
         "syft": {"image": SYFT_IMAGE},
         "vulnerabilities": {},
@@ -260,7 +264,60 @@ def main() -> int:
         "report": config_json.name,
     }
 
-    # -- 3. Syft CycloneDX SBOM --------------------------------------------
+    # -- 3. Trivy scan of our own images ------------------------------------
+    # Coverage of the artefacts this project builds, not just the controlled
+    # target. Findings are observations: the gate threshold in 2E keeps reading
+    # `vulnerabilities.high_or_critical`, which is Juice Shop's count.
+    own_images: dict = {}
+    for image in OWN_IMAGES:
+        slug = image.split(":")[0].replace("/", "-")
+        report = EVIDENCE_DIR / f"trivy-{slug}.json"
+        log = EVIDENCE_DIR / f"trivy-{slug}.log"
+        report.unlink(missing_ok=True)
+        cmd = [
+            "docker", "run", "--rm", "--name", f"scenario-b-trivy-{slug}",
+            "-v", f"{TRIVY_CACHE}:/root/.cache/trivy",
+            "-v", "/var/run/docker.sock:/var/run/docker.sock",
+            "-v", f"{EVIDENCE_HOST_DIR}:/out",
+            TRIVY_IMAGE, "image",
+            "--image-src", "docker",
+            "--scanners", "vuln",
+            "--severity", ",".join(SEVERITIES),
+            "--format", "json",
+            "--output", f"/out/{report.name}",
+            image,
+        ]
+        own_rc, own_out = run(cmd, timeout=1800)
+        log.write_text(f"command: {' '.join(cmd)}\nexit_code: {own_rc}\n"
+                       f"output:\n{own_out}\n")
+        check(results, f"Trivy scanned own image {image}", own_rc == 0,
+              f"exit={own_rc}; {tail(log, 2)}")
+
+        own_doc: dict = {}
+        own_parsed = False
+        if report.is_file():
+            try:
+                own_doc = json.loads(report.read_text())
+                own_parsed = True
+            except (json.JSONDecodeError, OSError) as exc:
+                print(f"[2D] Trivy JSON parse error for {image}: {exc}")
+        check(results, f"Trivy report for {image} parses", own_parsed,
+              f"{report.name} ({report.stat().st_size if report.is_file() else 0} bytes)")
+
+        own_counts = count_severities(own_doc)
+        own_images[image] = {
+            "report": report.name,
+            "sha256": sha256(report) if report.is_file() else "",
+            "exit_code": own_rc,
+            "total": sum(own_counts.values()),
+            "by_severity": own_counts,
+            "high_or_critical": own_counts.get("HIGH", 0) + own_counts.get("CRITICAL", 0),
+            "scanned": own_parsed,
+            "gate_impact": "none",
+        }
+    evidence["own_images"] = own_images
+
+    # -- 4. Syft CycloneDX SBOM --------------------------------------------
     cmd = [
         "docker", "run", "--rm", "--name", "scenario-b-syft",
         "-v", "/var/run/docker.sock:/var/run/docker.sock",

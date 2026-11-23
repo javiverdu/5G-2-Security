@@ -152,6 +152,19 @@ pipeline {
             }
         }
 
+        stage('2C-Advanced - traffic intelligence analytics') {
+            options { timeout(time: 10, unit: 'MINUTES') }
+            steps {
+                // Supplementary evidence: the script exits 1 only on a tool
+                // failure, never because the model liked or disliked the
+                // traffic. It must not change the Security Gate outcome.
+                withEnv(["EVIDENCE_DIR=${env.P2C_DIR}",
+                         "EVIDENCE_HOST_DIR=${env.P2C_HOST_DIR}"]) {
+                    sh 'python3 project2/scenario-b/scripts/analytics.py'
+                }
+            }
+        }
+
         stage('2D - Trivy scan and Syft CycloneDX SBOM') {
             options { timeout(time: 40, unit: 'MINUTES') }
             steps {

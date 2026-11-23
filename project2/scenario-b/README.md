@@ -19,7 +19,8 @@ source/GitHub → Jenkins → Preflight → ZAP baseline → Selenium runtime
 |---|---|---|
 | 2A | Preflight + environment acceptance (Jenkins, Juice Shop, Selenium, capture, Suricata, ZAP, Trivy/Syft, tools) | ✅ done |
 | 2B | ZAP baseline, Selenium runtime, capture window, controlled SQLi, targeted ZAP | ✅ done |
-| 2C | Fresh PCAP validation, Suricata offline detection, traffic intelligence | ✅ done |
+| 2C | Fresh PCAP validation, Suricata offline detection | ✅ done |
+| 2C-Advanced | Traffic intelligence analytics (features, clusters, anomaly scores) — supplementary | ✅ done |
 | 2D | Trivy scan + Syft CycloneDX SBOM | ✅ done |
 | 2E | Evidence correlation, archive, Security Gate (REPORT_ONLY / ENFORCE) | ✅ done |
 
@@ -36,13 +37,13 @@ Verified on the native host:
 ```
 project2/scenario-b/
 ├── AGENTS.md                   # exact contract, rules, evidence layout
-├── Jenkinsfile                 # pipeline 1E → 2A → 2B → 2C → 2D → 2E
+├── Jenkinsfile                 # pipeline 1E → 2A → 2B → 2C → 2C-Advanced → 2D → 2E
 ├── RELEASE-MANIFEST.json       # pinned images, tools and plugin versions
 ├── docker-compose.security.yaml# security-net + juice-shop + selenium + jenkins
 ├── jenkins/                    # image, plugins.txt, init script, job.xml
 ├── selenium/Dockerfile         # telecom-lab-selenium:1.0
 ├── capture/                    # telecom-lab-capture:1.0 (tcpdump job)
-├── correlation/                # telecom-lab-correlation:1.0 (2E)
+├── correlation/                # telecom-lab-correlation:1.1 (2E)
 ├── security/
 │   ├── zap/plan.yaml           # targeted SQLi plan (Alert 40018)
 │   └── ids/                    # Suricata config + rule SID 1000001
@@ -52,7 +53,8 @@ project2/scenario-b/
     ├── run-pipeline.sh         # trigger and follow a build
     ├── preflight.py            # phase 2A checks -> preflight.json/.md
     ├── phase2b.py              # ZAP baseline, Selenium, capture + SQLi + targeted ZAP
-    ├── phase2c.py              # fresh PCAP, offline Suricata, traffic intelligence
+    ├── phase2c.py              # fresh PCAP, offline Suricata, capture summary
+    ├── analytics.py            # phase 2C-Advanced: features, clusters, anomalies
     ├── phase2d.py              # Trivy scan + Syft CycloneDX SBOM
     └── phase2e.py              # correlation, evidence archive, Security Gate
 ```
@@ -60,7 +62,8 @@ project2/scenario-b/
 ## Run (phase 2A)
 
 Prerequisite: Scenario A is up and its 1E gate is green (see the
-[root README](../../README.md#run-the-environment)). After a host reboot, run
+[root README](../../README.md) and [docs/verification.md](../../docs/verification.md)).
+After a host reboot, run
 `verify-phase1.sh` first. If it reports `UE cannot reach 10.20.6.20`, replay
 the restart order from the root README: `enable-n6.sh`, then `upgrade-ran.sh`,
 then `scenario-a/up.sh`.
@@ -121,30 +124,51 @@ Evidence: `results/scenario-b/phase2b/<RUN_ID>/` and the fresh PCAP under
 Evidence: `results/scenario-b/phase2c/<RUN_ID>/` — `phase2c.json/.md`,
 `eve.json`, `fast.log`, `stats.log`, `suricata-command.log`.
 
+2. **`2C-Advanced - traffic intelligence analytics`** runs
+   `scripts/analytics.py` on the same PCAP. Pure Python standard library plus
+   `tshark`, k-means `k=3` with a fixed seed and a modified z-score against a
+   learned baseline; the baseline is the cluster that matches plain content
+   retrieval (no query string, no body). It writes `traffic-features.csv`
+   (per request), `traffic-flows.csv` (per TCP stream), `traffic-anomaly.json`,
+   `traffic-classification.json`, `analytics.json/.md`.
+
+   Analytics is **supplementary by contract**: both JSON artifacts carry
+   `supplementary: true` and `gate_impact: "none"`, and 2E only records the
+   outcome in its chain. The stage exits non-zero only on a tool failure, so a
+   detector that flags nothing is an observation, never a build failure. The
+   rates in the report describe one controlled capture and are not detection
+   accuracy.
+
 ## Phase 2D stages
 
-1. **`2D - Trivy scan and Syft CycloneDX SBOM`** scans two explicit targets:
+1. **`2D - Trivy scan and Syft CycloneDX SBOM`** scans four explicit targets:
    - `aquasec/trivy:0.75.0 image` against
      `bkimminich/juice-shop:v20.2.0` (vulnerabilities), report
-     `trivy-juice-shop.json`;
+     `trivy-juice-shop.json`; **this is the only count the gate reads**;
    - `aquasec/trivy:0.75.0 fs --scanners misconfig` against
      `project2/scenario-b` (IaC), report `trivy-config.json`;
-   - `anchore/syft:v1.52.0` produces `sbom.cdx.json` (CycloneDX) for the same
-     Juice Shop image.
+   - `aquasec/trivy:0.75.0 image --image-src docker` against this project's own
+     images, `telecom-lab-django:0.1` and `telecom-lab-nginx:p2`, reports
+     `trivy-telecom-lab-django.json` and `trivy-telecom-lab-nginx.json`
+     (observations, `gate_impact: none`);
+   - `anchore/syft:v1.52.0` produces `sbom.cdx.json` (CycloneDX) for the Juice
+     Shop image.
    Trivy findings are observations. The stage fails only when a tool does not
-   run or its report cannot be parsed.
+   run or its report cannot be parsed. DAST against Django is out of scope: ZAP
+   targets Juice Shop by design.
 
 Evidence: `results/scenario-b/phase2d/<RUN_ID>/` — `phase2d.json/.md`,
 `trivy-juice-shop.json`, `trivy-config.json`, `sbom.cdx.json`, logs.
 
 ## Phase 2E stages
 
-1. **`2E - Security evidence correlation`**: `telecom-lab-correlation:1.0`
+1. **`2E - Security evidence correlation`**: `telecom-lab-correlation:1.1`
    reads phases 2A–2D read-only and writes
    `security-event-correlation.json/.md`. It links the controlled SQLi
    request, ZAP Alert 40018, the PCAP hash, Suricata SID 1000001, the Trivy
-   counts, the SBOM and the Jenkins build tag by RUN_ID, target, request
-   signature and artifact hashes. It never re-scans or invents data.
+   counts, the SBOM, the traffic-intelligence summary and the Jenkins build tag
+   by RUN_ID, target, request signature and artifact hashes. It never re-scans
+   or invents data.
 2. **`2E - Evidence archive`**: packs `phase2a..phase2e/<RUN_ID>` into
    `scenario-b-evidence.tar.gz` and records its SHA-256.
 3. **`2E - Security Gate`**: a Jenkins policy decision, separate from tool
@@ -174,5 +198,11 @@ evidence archive and `gate.json/.md`.
 - The evidence archive is created before the Security Gate, matching the
   required order, so `gate.json/.md` are delivered next to it rather than
   inside the tar.
-- Traffic intelligence is limited to the bounded TShark feature summary in
-  `phase2c.json`; no ML model is claimed.
+- Traffic intelligence is a bounded demonstration: features come from one
+  controlled capture, the baseline is learned from that same capture and the
+  reported rates are descriptive, not detection accuracy. It is supplementary
+  evidence and never changes the Security Gate.
+- The base images are **tag-pinned, not digest-pinned** (`nginx:latest`,
+  `python:3.12-slim`). Reproducibility debt tracked in
+  `docs/architecture.md`; scheduled after every phase is verified, because
+  changing a base image invalidates the current 1C/2D evidence.

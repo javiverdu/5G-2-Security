@@ -109,6 +109,8 @@ def main() -> int:
     selenium = read_json(phase_dirs["phase2b"] / "selenium.json")
     phase2c = read_json(phase_dirs["phase2c"] / "phase2c.json")
     phase2d = read_json(phase_dirs["phase2d"] / "phase2d.json")
+    traffic_anomaly = read_json(phase_dirs["phase2c"] / "traffic-anomaly.json")
+    traffic_classification = read_json(phase_dirs["phase2c"] / "traffic-classification.json")
 
     documents = {
         "preflight": preflight,
@@ -121,6 +123,26 @@ def main() -> int:
     for name, document in documents.items():
         check(results, f"{name} JSON present and readable", bool(document),
               f"run_id={document.get('run_id', '')}" if document else "empty")
+
+    # Analytics is supplementary by contract: it is validated when present and
+    # reported as absent when the optional stage did not run, but it never
+    # contributes a failure that could close the gate.
+    analytics_present = bool(traffic_anomaly) and bool(traffic_classification)
+    check(results, "traffic intelligence artifacts handled without gating",
+          True,
+          "present" if analytics_present else "optional stage not run")
+    if analytics_present:
+        check(results, "traffic intelligence describes the current run",
+              traffic_anomaly.get("run_id") == RUN_ID
+              and traffic_classification.get("run_id") == RUN_ID,
+              f"anomaly={traffic_anomaly.get('run_id', '')}, "
+              f"classification={traffic_classification.get('run_id', '')}")
+        check(results, "traffic intelligence is marked supplementary",
+              traffic_anomaly.get("supplementary") is True
+              and traffic_classification.get("supplementary") is True
+              and traffic_anomaly.get("gate_impact") == "none",
+              f"supplementary=true, gate_impact="
+              f"{traffic_anomaly.get('gate_impact', '')}")
 
     run_ids = {name: doc.get("run_id", "") for name, doc in documents.items() if doc}
     consistent = bool(run_ids) and all(value == RUN_ID for value in run_ids.values())
@@ -238,6 +260,25 @@ def main() -> int:
                 "sbom_components": sbom.get("components", 0),
                 "sbom_format": sbom.get("bom_format", ""),
             },
+            "traffic_intelligence": {
+                "present": analytics_present,
+                "supplementary": True,
+                "gate_impact": "none",
+                "model": (traffic_anomaly.get("model", {}) or {}).get("name", ""),
+                "baseline_requests": (traffic_anomaly.get("model", {}) or {}).get(
+                    "baseline_requests", 0),
+                "requests": (traffic_anomaly.get("population", {}) or {}).get("requests", 0),
+                "flagged": (traffic_anomaly.get("result", {}) or {}).get("flagged", 0),
+                "controlled_request_flagged": ((traffic_anomaly.get("result", {}) or {})
+                                               .get("controlled_request", {}) or {}
+                                               ).get("flagged"),
+                "clusters": [
+                    {"label": cluster.get("label", ""),
+                     "members": cluster.get("members", 0)}
+                    for cluster in traffic_classification.get("clusters", [])
+                ],
+                "report": "phase2c/traffic-anomaly.json",
+            },
         },
         "windows": {
             "start_epoch": round(start_epoch, 3),
@@ -272,6 +313,10 @@ def main() -> int:
         f"| Software | Trivy HIGH/CRITICAL="
         f"{vulnerabilities.get('high_or_critical', 0)} | CycloneDX components="
         f"{sbom.get('components', 0)} |",
+        f"| Traffic intelligence | "
+        f"{((traffic_anomaly.get('population', {}) or {}).get('requests', 0))} request(s), "
+        f"{((traffic_anomaly.get('result', {}) or {}).get('flagged', 0))} flagged | "
+        f"supplementary, gate impact none |",
         "",
         "## Checks",
         "",

@@ -13,7 +13,7 @@ Root [`../../AGENTS.md`](../../AGENTS.md) and
 ```text
 source/GitHub → Jenkins → Preflight → ZAP baseline → Selenium runtime
   → start fresh PCAP → controlled SQLi → targeted ZAP → stop PCAP
-  → Suricata offline → traffic intelligence (optional) → Trivy → Syft
+  → Suricata offline → traffic intelligence analytics → Trivy → Syft
   → evidence correlation → archive → Security Gate → final result
 ```
 
@@ -56,13 +56,20 @@ isolated from the Scenario A Django/Nginx path (never on `dn-net`).
 8. **Secrets stay out of Git:** `project2/scenario-b/env` and
    `project2/scenario-a/env`, `secrets/tls/`.
 9. **Nothing runs from the VirtualBox shared folder.**
+10. **2C-Advanced analytics never gates.** It exits 0 whenever it produced its
+    artifacts (non-zero only on tool failure), reports `DEGRADED` instead of
+    `FAIL`, and carries `supplementary: true` / `gate_impact: none`. A model
+    verdict must not be able to open or close the Security Gate.
 
 ## Evidence layout
 
 ```text
 results/scenario-b/phase2a/<RUN_ID>/   preflight.json, preflight.md
 results/scenario-b/phase2b/<RUN_ID>/   ZAP, Selenium, plan, screenshot
-results/scenario-b/phase2c/<RUN_ID>/   PCAP, eve.json, fast.log, stats.log
+results/scenario-b/phase2c/<RUN_ID>/   PCAP, eve.json, fast.log, stats.log,
+                                       traffic-features.csv, traffic-flows.csv,
+                                       traffic-anomaly.json,
+                                       traffic-classification.json, analytics.json/.md
 results/scenario-b/phase2d/<RUN_ID>/   trivy, sbom.cdx.json
 results/scenario-b/phase2e/<RUN_ID>/   correlation.json/.md, archive, gate
 ```

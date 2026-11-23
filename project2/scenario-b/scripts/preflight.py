@@ -5,6 +5,10 @@ Runs inside the Jenkins container (Docker-outside-of-Docker). Produces
 ``preflight.json`` and ``preflight.md`` in the current run's evidence directory
 and exits non-zero when any hard check fails.
 
+The plugin checks read ``/var/jenkins_home/plugins``. Outside the Jenkins
+container that directory does not exist, so they fail by design with an explicit
+message instead of reporting a vacuous pass.
+
 Nothing here starts the security tests: it only proves the environment can run
 them and that the Scenario A 1E baseline is still green.
 
@@ -95,11 +99,17 @@ def ensure_image(ref: str, timeout: int = 900) -> bool:
     return rc == 0
 
 
-def plugin_versions() -> dict[str, str]:
+def plugin_versions() -> tuple[dict[str, str], bool]:
+    """Installed Jenkins plugins and whether the plugin directory exists.
+
+    The directory only exists inside the Jenkins container. Returning the flag
+    lets the caller fail honestly instead of reporting every plugin as missing
+    (or, worse, comparing an empty set and passing vacuously).
+    """
     base = Path("/var/jenkins_home/plugins")
     found: dict[str, str] = {}
     if not base.is_dir():
-        return found
+        return found, False
     for entry in base.iterdir():
         if not entry.is_dir():
             continue
@@ -113,7 +123,7 @@ def plugin_versions() -> dict[str, str]:
         version = re.search(r"^Implementation-Version:\s*(.+)$", text, re.M)
         if short and version:
             found[short.group(1).strip()] = version.group(1).strip()
-    return found
+    return found, True
 
 
 def main() -> int:
@@ -142,7 +152,7 @@ def main() -> int:
         print(exc)
     record("evidence directory writable", writable, str(EVIDENCE_DIR))
 
-    plugins = plugin_versions()
+    plugins, plugin_dir_present = plugin_versions()
     versions["jenkins_plugins"] = plugins
     manifest_path = REPO / "project2/scenario-b/RELEASE-MANIFEST.json"
     manifest = json.loads(manifest_path.read_text()) if manifest_path.is_file() else {}
@@ -153,10 +163,30 @@ def main() -> int:
         for p in expected_plugins
         if p in plugins and plugins[p] != expected_plugins[p]
     ]
+    # Fail honestly when the check could not look at the real plugin set: an
+    # empty comparison must never report a pass.
+    if not plugin_dir_present:
+        plugins_detail = ("/var/jenkins_home/plugins not found — Preflight must "
+                          "run inside the Jenkins container")
+    elif not expected_plugins:
+        plugins_detail = "RELEASE-MANIFEST.json lists no jenkins_plugins"
+    elif missing:
+        shown = ", ".join(missing[:10])
+        plugins_detail = f"missing: {shown}" + (" …" if len(missing) > 10 else "")
+    else:
+        plugins_detail = f"{len(plugins)} plugins present"
     record("required Jenkins plugins installed",
-           not missing, ", ".join(missing) or f"{len(plugins)} plugins present")
+           plugin_dir_present and bool(expected_plugins) and not missing,
+           plugins_detail)
+    if mismatched:
+        versions_detail = "; ".join(mismatched)
+    elif plugins and expected_plugins:
+        versions_detail = "all pinned versions match"
+    else:
+        versions_detail = "no plugin could be compared"
     record("plugin versions match the Release Manifest",
-           not mismatched, "; ".join(mismatched) or "all pinned versions match")
+           bool(plugins) and bool(expected_plugins) and not mismatched,
+           versions_detail)
 
     # -- 3. container runtime ------------------------------------------------
     rc, out = run(["docker", "version", "--format", "{{.Server.Version}}"])
@@ -305,6 +335,7 @@ def main() -> int:
         REPO / "project2/scenario-a/scripts/verify-phase1.sh",
         REPO / "project2/scenario-b/scripts/preflight.py",
         REPO / "project2/scenario-b/scripts/phase2b.py",
+        REPO / "project2/scenario-b/scripts/analytics.py",
     ]
     record("required scripts present and executable",
            all(p.is_file() and os.access(p, os.X_OK) for p in scripts),

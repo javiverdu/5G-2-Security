@@ -21,8 +21,9 @@ file in the same change.
   **on top of** it, never as a second network. Observability is optional and
   disabled by default on the 32 GB VM.
 - Documentation in `docs/` is Project 2 only: the readable brief is
-  `docs/brief-p2.txt`. The operational base runbook is
-  `scenario-b/README.md`.
+  `docs/brief-p2.txt`, the architecture and phase map are
+  `docs/architecture.md`, and the checks/evidence are `docs/verification.md`.
+  The operational base runbook is `scenario-b/README.md`.
 - Requirements source of truth: `Project 2_Telecommunication Security,
   DevSecOps, and Traffic Intelligence.pdf` (repo root).
 
@@ -82,7 +83,7 @@ The CA private key stays on the host and is mounted into **no** container.
 1A reuse+verify → 1B Django → 1C Nginx+TLS → 1D Django baseline → 1E acceptance
    → 2A Preflight → 2B-1 ZAP baseline → 2B-2 Selenium → 2B-3 arm PCAP
    → 2B-4 controlled SQLi → 2B-5 targeted ZAP (40018) → 2C stop/validate PCAP
-   → 2C Suricata (SID 1000001) → 2C-Advanced analytics (optional)
+   → 2C Suricata (SID 1000001) → 2C-Advanced analytics (supplementary)
    → 2D Trivy → 2D Syft → 2E correlation → Evidence archive → Security Gate
 ```
 
@@ -91,6 +92,10 @@ The CA private key stays on the host and is mounted into **no** container.
 - 1E is **not** new code: it is the verified baseline that unlocks B.
 - Report **tool result → finding → gate decision** separately. A passing
   pipeline never means "the app has no vulnerabilities".
+- 2C-Advanced analytics is **supplementary evidence**: correlated in 2E,
+  marked `gate_impact: none`, `DEGRADED` instead of `FAIL` when the model is
+  weak. A detector miss is an observation, never a build failure. Suricata
+  stays the deterministic IDS.
 
 ## 5. Conventions
 
@@ -173,6 +178,13 @@ exit criterion. Prefer machine-checkable assertions over prose.
 4. **Django version.** `Django==6.0.8` exists on PyPI (verified). Pin it exactly.
 5. **UE route.** Only `10.20.6.0/24 dev uesimtun0`. The Project 1
    `default dev uesimtun0` is deliberately not installed.
+6. **Scan scope in 2D.** Trivy also scans this project's own images
+   (`telecom-lab-django:0.1`, `telecom-lab-nginx:p2`) with `--image-src docker`.
+   Their findings are observations (`own_images`, `gate_impact: none`) and never
+   reach the gate threshold, which keeps reading Juice Shop's
+   `vulnerabilities.high_or_critical`. DAST against Django stays **out of
+   scope**: ZAP targets Juice Shop by design, and scanning the secure app over
+   the 5G path would change the scenario. Recorded as a limitation, not skipped.
 
 ## 9. Definition of done (per phase)
 

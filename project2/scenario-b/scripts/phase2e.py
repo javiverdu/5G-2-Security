@@ -31,7 +31,7 @@ import tarfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-CORRELATION_IMAGE = "telecom-lab-correlation:1.0"
+CORRELATION_IMAGE = "telecom-lab-correlation:1.1"
 
 EVIDENCE_DIR = Path(os.environ.get("EVIDENCE_DIR", ".")).resolve()
 EVIDENCE_HOST_DIR = os.environ.get("EVIDENCE_HOST_DIR", str(EVIDENCE_DIR))
