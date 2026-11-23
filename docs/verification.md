@@ -88,25 +88,26 @@ Preflight only makes sense **inside the Jenkins container**: it reads
 container` instead of reporting every plugin as missing, and the version
 comparison refuses to pass on an empty plugin set.
 
-Expected console output (build 17, run `20261123T114855Z`):
+Expected console output (build 20, run `20261123T163741Z`):
 
 ```text
-[run] build 17 result: SUCCESS
+[run] build 20 result: SUCCESS
 [preflight] PASS — 0 failed of 35
 [2B] summary: PASS — 0 failed of 23
 [2C] phase2c: PASS — 0 failed of 12
 [2C-Advanced] analytics: PASS — 0 failed of 10; controlled request FLAGGED
 [2D] phase2d: PASS — 0 failed of 14
-[2E] correlate: PASS — 0 failed of 5
+[2E] correlate: PASS — 0 failed of 6
 [2E] archive: PASS — 0 failed of 7
 [2E] gate: PASS (REPORT_ONLY) — REPORT_ONLY: HIGH/CRITICAL=70 recorded; threshold 0 not enforced
 ```
 
 Three counts need reading with their level in mind:
 
-- **2E correlate: 5 or 6.** The six checks are the host-side wrapper; the first
-  one ("correlation image built") only runs when the image is missing, so a
-  build after the image exists prints 5. The correlation itself runs inside
+- **2E correlate: 6 or 7.** The wrapper checks the image exists, holds the
+  current `correlate.py`, runs, and validates its output. "correlation image
+  built" only runs when the image is missing or stale, so 6 on a normal build
+  and 7 when it had to rebuild. The correlation itself runs inside
   `telecom-lab-correlation:1.0` and reports its own `0 failed of 22` — that
   appears as the detail of "container completed" and in
   `security-event-correlation.json`, never as a separate stage summary.
@@ -115,6 +116,12 @@ Three counts need reading with their level in mind:
 - **SID 1000001: 44 events, 20 stored.** `phase2c.json` keeps a 20-alert
   sample plus `alerts_by_signature` counts; the gate and the correlation read
   the counts and print both when they differ.
+
+The correlation image keeps the tag the brief fixes (`telecom-lab-correlation:1.0`).
+Which code it contains is not assumed: 2E hashes `/app/correlate.py` inside the
+image, compares it with the repository file, rebuilds if they differ, and fails
+the stage if the hash still does not match. `correlate.json` records both the
+`source_sha256` and the `image_id`.
 
 ### Artifacts per phase
 
@@ -129,7 +136,7 @@ Three counts need reading with their level in mind:
 
 ### What each stage actually checks
 
-Counts are those printed by build 17; every check name, status and observed
+Counts are those printed by build 20; every check name, status and observed
 value is stored in the phase JSON, so nothing in this table is asserted without
 a machine-readable counterpart.
 
@@ -143,9 +150,9 @@ a machine-readable counterpart.
 | 2C Suricata | 12 | PCAP belongs to this run (hash + creation time), tshark parses it, controlled payload present, offline run exit 0, `eve.json`/`fast.log`/`stats.log`, SID 1000001 alert (44 events, 20 stored) | `phase2c.json` |
 | 2C-Advanced analytics | 10 | ≥3 features with variance, 3 non-empty clusters, baseline learned, 4 artifacts written, marked `supplementary` | `analytics.json` |
 | 2D Trivy + SBOM | 14 | image scan exit 0 and parses, severity counts, filesystem misconfig scan, both own images scanned, SBOM is CycloneDX with components | `phase2d.json` |
-| 2E correlate (wrapper) | 5–6 | image built (only if missing) / available, container exit 0, JSON readable, decision PASS, JSON carries this `RUN_ID` | `correlate.json` |
-| 2E correlation (inside) | 22 | every component reports the same `RUN_ID` and build tag, 2B and 2C share one PCAP hash, both positive controls fire, timestamps form one 158 s window | `security-event-correlation.json` |
-| 2E archive | 7 | five phase directories archived, tarball non-empty (1,671,670 bytes), readable and matching its 56 members | `archive.json` |
+| 2E correlate (wrapper) | 6–7 | image available, image holds the current `correlate.py` (sha256), built only if missing or stale, container exit 0, JSON readable, decision PASS, JSON carries this `RUN_ID` | `correlate.json` |
+| 2E correlation (inside) | 22 | every component reports the same `RUN_ID` and build tag, 2B and 2C share one PCAP hash, both positive controls fire, timestamps form one 133 s window | `security-event-correlation.json` |
+| 2E archive | 7 | five phase directories archived, tarball non-empty (1,674,670 bytes), readable and matching its 56 members | `archive.json` |
 | 2E gate | 5 | mode valid, correlation complete, ZAP 40018 fired, SID 1000001 fired, Trivy reported; then policy decides | `gate.json` |
 
 A green stage means those checks passed. It does not mean the check list is
@@ -187,24 +194,25 @@ Jenkins UI: <http://127.0.0.1:8080/job/scenario-b-security/>. Log in as
 
 ## Latest verified runs
 
-- `20261123T114855Z` — `REPORT_ONLY`, build 17, Jenkins `SUCCESS`. Current
-  reference: full 2A–2E with 2C-Advanced, correlation 22/22 inside the
-  container, 5 wrapper checks, archive 56 members / 1,671,670 bytes, gate
-  `PASS` with `HIGH/CRITICAL=70` recorded and SID 1000001 reported as
-  44 events. The tables above and [report.md §10](report.md#10-results-what-was-measured)
-  quote this run.
-- `20261123T114506Z` — `ENFORCE`, build 16, Jenkins `FAILURE` **at the gate**
-  as expected (`ENFORCE: HIGH/CRITICAL=70 exceeds threshold 0`). Every
-  upstream phase `PASS`, correlation 22/22, and the accounting is the same as
-  in build 17: the policy, not the evidence, changed.
-- `20261123T111153Z` — `REPORT_ONLY`, build 14, Jenkins `SUCCESS`, first run
-  with 2C-Advanced; superseded by build 17 because it predates the
-  `alerts_by_signature` field (its gate line said "20 alert(s)").
-- `20261123T113911Z` — build 15, Jenkins `FAILURE` in 2B: the Selenium click
-  was swallowed by an overlay and the stage printed "login form submitted"
-  anyway. Fix in `phase2b.py`: verify the typed values, wait for the token and
-  fall back to `requestSubmit()`. Kept here because a flaky stage that fails
-  loudly is better documented than hidden.
+- `20261123T163741Z` — `REPORT_ONLY`, build 20, Jenkins `SUCCESS`. Current
+  reference: 2A–2E with 2C-Advanced, correlation 22/22 inside the container,
+  6 wrapper checks, archive 56 members / 1,674,670 bytes, gate `PASS` with
+  `HIGH/CRITICAL=70` recorded and SID 1000001 at 44 events. Correlation image
+  `telecom-lab-correlation:1.0`, `correlate.py` sha256 `b44a1205…`. The tables
+  above and [report.md §10](report.md#10-results-what-was-measured) quote it.
+- `20261123T164016Z` — `ENFORCE`, build 21, Jenkins `FAILURE` **at the gate**
+  as expected (`ENFORCE: HIGH/CRITICAL=70 exceeds threshold 0`), same upstream
+  evidence and same 22/22 correlation: the policy, not the evidence, changed.
+- `20261123T114855Z` / `20261123T114506Z` — builds 17 and 16, older reference
+  and `ENFORCE` runs made before the correlation tag returned to the brief's
+  `1.0` and before the image-content check existed.
+- `20261123T111153Z` — build 14, first run with 2C-Advanced; superseded twice
+  (it predates `alerts_by_signature`).
+- `20261123T113911Z` — build 15, `FAILURE` in 2B: the Selenium click was
+  swallowed by an overlay and the stage printed "login form submitted" anyway.
+  Fix in `phase2b.py`: verify the typed values, wait for the token and fall
+  back to `requestSubmit()`. Kept here because a flaky stage that fails loudly
+  is better documented than hidden.
 - `phase2b/20261108T144011Z` — `REPORT_ONLY`, build 11, Jenkins `SUCCESS`,
   correlation 19/19 at the time (the 2C-Advanced stage did not exist yet).
 - `phase2e/20261108T144511Z` — `ENFORCE`, build 13, expected gate failure
