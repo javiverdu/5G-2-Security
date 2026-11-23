@@ -3,7 +3,7 @@
 
 Subcommands (the Jenkinsfile calls them in this order):
 
-  correlate   run telecom-lab-correlation:1.2 over the current evidence set
+  correlate   run telecom-lab-correlation:1.0 over the current evidence set
   archive     pack phase2a..phase2e/<RUN_ID> into a single tar.gz with hash
   gate        apply REPORT_ONLY or ENFORCE and write gate.json/.md
 
@@ -31,7 +31,7 @@ import tarfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-CORRELATION_IMAGE = "telecom-lab-correlation:1.2"
+CORRELATION_IMAGE = "telecom-lab-correlation:1.0"
 
 EVIDENCE_DIR = Path(os.environ.get("EVIDENCE_DIR", ".")).resolve()
 EVIDENCE_HOST_DIR = os.environ.get("EVIDENCE_HOST_DIR", str(EVIDENCE_DIR))
@@ -143,6 +143,21 @@ def image_present(name: str) -> bool:
     return rc == 0
 
 
+def image_source_sha(name: str) -> str:
+    """sha256 of /app/correlate.py inside the image ('' when unreadable)."""
+    if not image_present(name):
+        return ""
+    rc, out = run(["docker", "run", "--rm", "--entrypoint", "sha256sum", name,
+                   "/app/correlate.py"], timeout=120)
+    fields = out.split()
+    return fields[0] if rc == 0 and fields else ""
+
+
+def image_id(name: str) -> str:
+    rc, out = run(["docker", "image", "inspect", "-f", "{{.Id}}", name], timeout=60)
+    return out.strip() if rc == 0 else ""
+
+
 def correlate() -> int:
     started = utc_now()
     EVIDENCE_DIR.mkdir(parents=True, exist_ok=True)
@@ -150,14 +165,30 @@ def correlate() -> int:
     results: list[dict] = []
     evidence: dict = {"image": CORRELATION_IMAGE}
 
-    if not image_present(CORRELATION_IMAGE):
+    # The tag is fixed by the brief (telecom-lab-correlation:1.0), so a tag
+    # cannot prove which code ran: the hash of correlate.py inside the image
+    # can. Rebuild when the image was built from a different file, not only
+    # when it is missing, or a stale image would silently produce old evidence.
+    source_path = REPO / "project2/scenario-b/correlation/correlate.py"
+    source_sha = sha256(source_path) if source_path.is_file() else ""
+    image_sha = image_source_sha(CORRELATION_IMAGE)
+    stale = bool(image_sha and source_sha and image_sha != source_sha)
+
+    if not image_present(CORRELATION_IMAGE) or stale:
         build_dir = REPO / "project2/scenario-b/correlation"
+        if stale:
+            print(f"[2E] {CORRELATION_IMAGE} holds correlate.py {image_sha[:12]}, "
+                  f"repository has {source_sha[:12]}: rebuilding")
         rc, out = run(["docker", "build", "-t", CORRELATION_IMAGE,
                        str(build_dir)], timeout=900)
         check(results, "correlation image built", rc == 0,
               out.splitlines()[-1] if out else "")
+        image_sha = image_source_sha(CORRELATION_IMAGE)
     check(results, "correlation image available", image_present(CORRELATION_IMAGE),
           CORRELATION_IMAGE)
+    check(results, "correlation image contains the current correlate.py",
+          bool(image_sha) and image_sha == source_sha,
+          f"image={image_sha[:12] or 'unreadable'} source={source_sha[:12] or 'missing'}")
 
     cmd = [
         "docker", "run", "--rm", "--name", "scenario-b-correlation",
@@ -171,7 +202,9 @@ def correlate() -> int:
     rc, out = run(cmd, timeout=900)
     log = EVIDENCE_DIR / "correlation.log"
     log.write_text(f"command: {' '.join(cmd)}\nexit_code: {rc}\noutput:\n{out}\n")
-    evidence.update({"command": cmd, "exit_code": rc, "log": log.name})
+    evidence.update({"command": cmd, "exit_code": rc, "log": log.name,
+                     "source_sha256": source_sha,
+                     "image_id": image_id(CORRELATION_IMAGE)})
     check(results, "correlation container completed", rc == 0,
           f"exit={rc}; {out.splitlines()[-1] if out else ''}")
 

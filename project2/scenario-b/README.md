@@ -52,7 +52,7 @@ project2/scenario-b/
 ├── jenkins/                    # image, plugins.txt, init script, job.xml
 ├── selenium/Dockerfile         # telecom-lab-selenium:1.0
 ├── capture/                    # telecom-lab-capture:1.0 (tcpdump job)
-├── correlation/                # telecom-lab-correlation:1.2 (2E)
+├── correlation/                # telecom-lab-correlation:1.0 (2E)
 ├── security/
 │   ├── zap/plan.yaml           # targeted SQLi plan (Alert 40018)
 │   └── ids/                    # Suricata config + rule SID 1000001
@@ -171,7 +171,7 @@ Evidence: `results/scenario-b/phase2d/<RUN_ID>/` — `phase2d.json/.md`,
 
 ## Phase 2E stages
 
-1. **`2E - Security evidence correlation`**: `telecom-lab-correlation:1.2`
+1. **`2E - Security evidence correlation`**: `telecom-lab-correlation:1.0`
    reads phases 2A–2D read-only and writes
    `security-event-correlation.json/.md`. It links the controlled SQLi
    request, ZAP Alert 40018, the PCAP hash, Suricata SID 1000001, the Trivy

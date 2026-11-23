@@ -107,7 +107,7 @@ Three counts need reading with their level in mind:
 - **2E correlate: 5 or 6.** The six checks are the host-side wrapper; the first
   one ("correlation image built") only runs when the image is missing, so a
   build after the image exists prints 5. The correlation itself runs inside
-  `telecom-lab-correlation:1.2` and reports its own `0 failed of 22` — that
+  `telecom-lab-correlation:1.0` and reports its own `0 failed of 22` — that
   appears as the detail of "container completed" and in
   `security-event-correlation.json`, never as a separate stage summary.
 - **2D went from 10 to 14** when the two images built by this project were

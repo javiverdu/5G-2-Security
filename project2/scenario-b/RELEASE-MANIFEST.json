@@ -13,7 +13,7 @@
     "suricata": "jasonish/suricata:8.0",
     "trivy": "aquasec/trivy:0.75.0",
     "syft": "anchore/syft:v1.52.0",
-    "correlation": "telecom-lab-correlation:1.2"
+    "correlation": "telecom-lab-correlation:1.0"
   },
   "tools": {
     "docker_cli": "from Debian docker.io",
