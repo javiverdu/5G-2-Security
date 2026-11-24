@@ -25,6 +25,7 @@ Technical report: [docs/report.md](docs/report.md).
 Independent IDS evaluation on ISCXIDS2012: [docs/ids-benchmark.md](docs/ids-benchmark.md).
 LLM-assisted cross-validation: [docs/llm-cross-validation.md](docs/llm-cross-validation.md).
 Presentation script and Q&A: [docs/presentation-guide.md](docs/presentation-guide.md).
+Deck (10 slides, self-contained, open in a browser): [docs/presentation.html](docs/presentation.html).
 
 ## Status
 
