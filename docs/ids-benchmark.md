@@ -4,9 +4,10 @@ The brief asks for an IDS evaluation on a dataset that is **independent of the
 live lab**: a documented subset with normal traffic and at least two intrusion
 scenarios, volume and labels identified, a detection method applied to it, and
 precision / recall / F1 / false-positive rate reported per attack category —
-not a single accuracy number. This document is that evaluation. The scripts
-are `project2/scenario-b/ids-eval/{extract,evaluate}.py`; the evidence of the
-run quoted here is `results/ids-eval/20261123T170555Z/`.
+not a single accuracy number. (This evaluation comes from the course's
+additional Scenario B hints, not from `brief-p2.txt`, which is the original
+brief.) The scripts are `project2/scenario-b/ids-eval/{extract,evaluate}.py`;
+the evidence of the run quoted here is `results/ids-eval/20261123T170555Z/`.
 
 ## 1. Dataset and subset
 

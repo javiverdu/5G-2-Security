@@ -3,8 +3,10 @@
 The brief requires at least two LLM-assisted cross-validation tasks, each one
 documented with model/provider, date, prompt, input evidence, the LLM
 conclusion, an independently verified conclusion, and any disagreement between
-the two. It also requires that the LLM is never the authoritative detector, the
-correlation engine or the gate.
+the two. (Like the ISCX evaluation, this requirement comes from the course's
+additional Scenario B hints, not from `brief-p2.txt`.) It also requires that
+the LLM is never the authoritative detector, the correlation engine or the
+gate.
 
 This document records two tasks against the artefacts of Jenkins **build 20**
 (`20261123T163741Z`, `REPORT_ONLY`, `SUCCESS`). In both, the LLM produced a
